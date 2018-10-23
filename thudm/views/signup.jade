@@ -1,0 +1,22 @@
+extends layout
+
+block content
+    .row
+      .col-md-6.col-md-offset-3
+        h1.display-4.m-b-2 Sign Up
+     form(method="post",action='/signup')
+        div.input
+            span.id Username:&nbsp 
+            input(type="text",name="username")
+        
+        div.input
+            span.password PassWord:&nbsp&nbsp
+            input(type="password",name="password")
+        div.input
+            span.password Confirm:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+            input(type="password",name="confirm")
+        input.btn(type='submit',value="Sign Up") 
+       
+       
+     
+            
