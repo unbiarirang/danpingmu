@@ -4,8 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var mongodb = require('./mongodb');
+var config = require('./config.json');
 var indexRouter = require('./routes/index');
-var mongodb = require('./db');
+var utils = require('./common/utils');
 
 var app = express();
 // view engine setup
@@ -17,6 +19,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// WeChat signature authentication
+app.use('/wx', utils.sign(config));
 
 // Init index router
 require('./routes/index').init(app);
@@ -39,7 +44,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-var server = app.listen(8000, function(){
-  console.log("Express server has started on port 3000")
-  });
+
 module.exports = app;
