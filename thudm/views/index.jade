@@ -1,5 +1,141 @@
-extends layout
-
-block content
-  h1= title
-  p Welcome to #{title}
+doctype html
+html(xmlns='http://www.w3.org/1999/xhtml')
+  head
+    meta(http-equiv='Content-Type', content='text/html; charset=utf-8')
+    title danpingmu
+    link(rel='stylesheet', href='style.css', type='text/css', media='screen')
+    // Nivo Slider
+    link(rel='stylesheet', href='js/slide/default.css', type='text/css', media='screen')
+    link(rel='stylesheet', href='js/slide/nivo-slider.css', type='text/css', media='screen')
+    // Nivo Slider
+    // FANCY BOX
+    script(type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js')
+    script.
+      !window.jQuery && document.write('<script src="js/jquery-1.4.3.min.js"><\\/script>');
+    script(type='text/javascript', src='js/fancybox/jquery.fancybox-1.3.4.pack.js')
+    link(rel='stylesheet', type='text/css', href='js/fancybox/jquery.fancybox-1.3.4.css', media='screen')
+    script(type='text/javascript').
+      $(document).ready(function() {
+      $("a#fancybox").fancybox();
+      });
+    style.
+      .fancy a img {
+      border: 1px solid #BBB;
+      padding: 2px;
+      margin: 10px 20px 10px 0;
+      vertical-align: top;
+      }
+      .fancy a img.last {
+      margin-right: 0;
+      }
+    // FANCY BOX
+  body
+    .header
+      #logo
+        a(href='http://www.makimyers.co.uk/')
+          img(alt='logo', src='images/logo.png')
+        // <span>Free HTML5 Template</span>
+      .nav
+        // start navigation				
+        ul
+          li.login
+            a 您还未登陆  
+            a(href='u/login',style='color:blue') 登陆
+        ul
+          li.title
+            a(href='#') About
+          li
+            a(href='#') our company
+          li
+            a(href='#') pricing
+          li
+            a(href='#') testimonials
+        ul
+          li.title
+            a(href='#') Portfolio
+          li
+            a(href='#') our clients
+          li
+            a(href='#') user experience
+          li
+            a(href='#') current projects
+    
+    #body-wrapper.clearfix
+      // start body-wrapper
+      .slider-wrapper.theme-default(style='padding-top:100px;')
+        #slider.nivoSlider
+          img(src='images/slide1.png', title='this is a caption!', alt='slider image 1')
+          img(src='images/slide2.png', alt='slider image 2')
+      .box
+        h1 弹屏目拥有丰富多样的功能！
+      
+      .one_fourth
+        // start top half content
+        .fancy
+          a#fancybox(href='images/210-150-1.png')
+            img(alt='fancybox', src='images/210-150-1.png')
+      .one_fourth
+        .fancy
+          a#fancybox(href='images/210-150-2.png')
+            img(alt='fancybox', src='images/210-150-2.png')
+      .one_fourth
+        .fancy
+          a#fancybox(href='images/210-150-3.png')
+            img(alt='fancybox', src='images/210-150-3.png')
+      .one_fourth.column-last
+        .fancy
+          a#fancybox(href='images/210-150-4.png')
+            img(alt='fancybox', src='images/210-150-4.png')
+      // end top half content
+      .clear
+      .one_fourth
+        h3 红包
+        p
+          | 可以发送红包	
+      .one_fourth
+        h3 投票
+        p
+          | 可以投票
+      .one_fourth
+        h3 抽奖
+        p
+          | 可以抽奖
+      .one_fourth.column-last
+        h3 弹幕
+        p
+          | 可以发弹幕
+    
+      .clear
+      #footer-main
+        // start footer-main
+        .one_fourth
+          h3 Footer 1
+          p
+            | Suspendisse ante ligula, del adipiscing porta aliquam et, rutrum nec lectus. Nulla erat risus, molestie non dapibus.
+        .one_fourth
+          h3 Footer 2
+          p
+            | Suspendisse ante ligula, del adipiscing porta aliquam et, rutrum nec lectus. Nulla erat risus, molestie non dapibus.
+        .one_fourth
+          h3 Footer 3
+          p
+            | Suspendisse ante ligula, del adipiscing porta aliquam et, rutrum nec lectus. Nulla erat risus, molestie non dapibus.
+        .one_fourth.column-last
+          h3 Footer 4
+          p
+            | Suspendisse ante ligula, del adipiscing porta aliquam et, rutrum nec lectus. Nulla erat risus, molestie non dapibus.
+      // end footer-main
+      #footer
+        p#footer-text
+          | © Copyright 2011 
+          a(href='http://www.makimyers.co.uk/') trinity
+          |  by
+          a(href='http://www.makimyers.co.uk') Maki Myers
+    // end-body wrapper
+    // Nivo Slider
+    script(type='text/javascript', src='js/slide/jquery.nivo.slider.pack.js')
+    script(type='text/javascript').
+      $(window).load(function() {
+      $('#slider').nivoSlider();
+      });
+    // Nivo Slider

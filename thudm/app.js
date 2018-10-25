@@ -39,5 +39,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
+var server = app.listen(8000, function(){
+  console.log("Express server has started on port 3000")
+  });
 module.exports = app;

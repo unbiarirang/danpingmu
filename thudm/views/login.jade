@@ -1,0 +1,23 @@
+html
+  head
+    link#bootstrap-css(href='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css', rel='stylesheet')
+    script(src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js')
+    link(rel='stylesheet', href='style.css', type='text/css', media='screen')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+    // ---- Include the above in your HEAD tag --------
+  body#LoginForm
+    .container
+      .login-form
+        .main-div
+          .panel
+            a(href='/') 弹屏目
+          form#Login
+            .form-group
+              input#inputEmail.form-control(type='id', placeholder='账户')
+            .form-group
+              input#inputPassword.form-control(type='password', placeholder='密码')
+            .forgot
+              a 没有账号?
+              a(href='signup') 注册
+            button.btn.btn-primary(type='submit') 登陆
+
