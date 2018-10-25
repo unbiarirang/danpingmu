@@ -4,18 +4,17 @@ const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
+var crypto = require('crypto');
 
 router.get('/login', (req, res, next) => {
-    res.send('/auth/login => render login page');
+    res.render('login');
 });
 
-//TEST
-//router.get('/login/:input_id/:input_pw', (req, res, next) => {
-//    var input_id = req.params.input_id;
-//    var input_pw = req.params.input_pw;
 router.post('/login', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
+    console.log(input_id);
+    console.log(input_pw);
 
     return User.find({id: input_id, password: input_pw})
         .then(user => {
@@ -35,17 +34,13 @@ router.post('/login', (req, res, next) => {
 });
 
 router.get('/signup', (req, res, next) => {
-    res.send('/auth/signup => render signup page');
+    res.render('signup');
 });
 
-//TEST
-//router.get('/signup/:input_id/:input_pw/:input_email', (req, res, next) => {
-//    var input_id = req.params.input_id;
-//    var input_pw = req.params.input_pw;
-//    var input_email = req.params.input_email;
 router.post('/signup', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
+    var input_confirm = req.body.input_confirm;
     var input_email = req.body.input_email;
 
     return User.find({id: input_id})

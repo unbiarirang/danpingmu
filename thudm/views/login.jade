@@ -11,11 +11,11 @@ html
         .main-div
           .panel
             a(href='/') 弹屏目
-          form#Login
+          form(method="post",action='login')
             .form-group
-              input#inputEmail.form-control(type='id', placeholder='账户')
+              input#inputEmail.form-control(type='text', placeholder='账户',name = 'input_id')
             .form-group
-              input#inputPassword.form-control(type='password', placeholder='密码')
+              input#inputPassword.form-control(type='password', placeholder='密码',name = 'input_pw')
             .forgot
               a 没有账号?
               a(href='signup') 注册

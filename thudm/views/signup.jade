@@ -11,13 +11,16 @@ html
         .main-div
           .panel
             a(href='/') 弹屏目
-          form#Login
+          p1(style='color:red') #{warning}
+          form(method="post",action='signup')
             .form-group
-              input#inputEmail.form-control(type='id', placeholder='账户')
+              input#inputEmail.form-control(type='text', placeholder='账户',name = 'input_id')
             .form-group
-              input#inputPassword.form-control(type='password', placeholder='密码')
+              input#inputEmail.form-control(type='text', placeholder='邮箱',name = 'input_email')
             .form-group
-              input#inputPassword.form-control(type='confirm_password', placeholder='确认密码')
+              input#inputPassword.form-control(type='password', placeholder='密码',name = 'input_pw')
+            .form-group
+              input#inputPassword.form-control(type='password', placeholder='确认密码',name = 'input_confirm')
             .forgot
             button.btn.btn-primary(type='submit') 注册
 
