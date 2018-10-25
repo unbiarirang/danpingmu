@@ -1,7 +1,10 @@
 doctype html
 html
   head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
+    link(rel='stylesheet', href='./style.css', type='text/css', media='screen')
+  body 
+   .header
+      #logo
+        a(href='http://www.makimyers.co.uk/')
+          img(alt='logo', src='images/logo.png')
     block content
