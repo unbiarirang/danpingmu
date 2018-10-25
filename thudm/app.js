@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
+var mongodb = require('./db');
 
 var app = express();
 // view engine setup
@@ -19,6 +20,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Init index router
 require('./routes/index').init(app);
+
+// Connect to Mongodb
+mongodb.init();
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
