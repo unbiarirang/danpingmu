@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+const assert = require('assert');
+const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
 var crypto = require('crypto');
@@ -14,10 +16,21 @@ router.post('/login', (req, res, next) => {
     console.log(input_id);
     console.log(input_pw);
 
-    User.find({id: input_id, password: input_pw}, (err, user) => {
-        if (err) return res.render('login',{warning: 'Wrong id or password'});
-        return res.render('../');
-    });
+    return User.find({id: input_id, password: input_pw})
+        .then(user => {
+            if (user.length === 0)
+                throw new errors.NotExistError('Wrong id or password');
+
+            return res.json({result: 1});
+        })
+        .catch(err => {
+            console.error(err);
+            return res.json({
+                result: 0,
+                code: err.code,
+                message: err.message
+            });
+        });
 });
 
 router.get('/signup', (req, res, next) => {
@@ -30,20 +43,30 @@ router.post('/signup', (req, res, next) => {
     var salt = req.body.salt;
     var input_email = req.body.input_email;
         
-    User.find({id: input_id}, (err, user) => {
-        if (err) return res.render('signup',{warning: 'Id already exists'});
 
-        user = new User();
-        user.id = input_id;
-        user.salt = salt;//要保存salt值，登录时才能比较密码
-        user.password = input_pw;
-        user.email = input_email;
-        user.save((err) => {
-            if (err) return res.render('signup',{warning: 'Signup failed'});
+    return User.find({id: input_id})
+        .then(user => {
+            if (user.length !== 0)
+                throw new errors.DuplicatedError('The id already exists');
 
-            return res.render('../');
+            user = new User();
+            user.id = input_id;
+            user.salt = salt;//要保存salt值，登录时才能比较密码
+            user.password = input_pw;
+            user.email = input_email;
+            return user.save();
+        })
+        .then(() => {
+            return res.json({result: 1});
+        })
+        .catch(err => {
+            console.error(err);
+            return res.json({
+                result: 0,
+                code: err.code,
+                message: err.message
+            });
         });
-    });
 });
 
 router.get('/find', (req, res, next) => {
