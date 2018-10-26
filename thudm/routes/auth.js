@@ -4,7 +4,6 @@ const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
-var crypto = require('crypto');
 
 router.get('/login', (req, res, next) => {
     res.render('login');
@@ -13,8 +12,6 @@ router.get('/login', (req, res, next) => {
 router.post('/login', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
-    console.log(input_id);
-    console.log(input_pw);
 
     return User.find({id: input_id, password: input_pw})
         .then(user => {
@@ -40,10 +37,8 @@ router.get('/signup', (req, res, next) => {
 router.post('/signup', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
-    var salt = req.body.salt;
     var input_email = req.body.input_email;
         
-
     return User.find({id: input_id})
         .then(user => {
             if (user.length !== 0)
@@ -51,7 +46,6 @@ router.post('/signup', (req, res, next) => {
 
             user = new User();
             user.id = input_id;
-            user.salt = salt;//要保存salt值，登录时才能比较密码
             user.password = input_pw;
             user.email = input_email;
             return user.save();
