@@ -13,8 +13,6 @@ router.get('/login', (req, res, next) => {
 router.post('/login', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
-    console.log(input_id);
-    console.log(input_pw);
 
     return User.find({id: input_id, password: input_pw})
         .then(user => {
@@ -40,7 +38,6 @@ router.get('/signup', (req, res, next) => {
 router.post('/signup', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
-    var input_confirm = req.body.input_confirm;
     var input_email = req.body.input_email;
 
     return User.find({id: input_id})
