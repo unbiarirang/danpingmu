@@ -167,14 +167,14 @@ div.nav {
 
 
 div.nav ul {
-	margin: 40px 0 0 44px;
+	margin: 40px 0 0 94px;
 	float: left;
 	list-style:none;
 	text-decoration:none;
 }
 
 div.nav ul:first-child {
-	margin-left: 66px;
+	margin-left: -60px;
 }
 
 div.nav ul li { margin: -2px 0 0;

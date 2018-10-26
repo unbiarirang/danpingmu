@@ -4,20 +4,34 @@ html
     script(src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js')
     link(rel='stylesheet', href='style.css', type='text/css', media='screen')
     script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-    // ---- Include the above in your HEAD tag --------
+    script(type = 'text/javascript').
+      function loginClick() {
+        var id = document.login.input_id.value;
+        var pw = document.login.input_pw.value;
+        
+        if(id==null || id.length==0){
+          alert("ID can not be empty");
+          return;
+        }
+        if(pw==null || pw.length==0){
+          alert("Password can not be empty!");
+          return;
+        }
+          document.login.submit();
+      }
   body#LoginForm
     .container
       .login-form
         .main-div
           .panel
             a(href='/') 弹屏目
-          form(method="post",action='login')
+          form(method = "post",action = 'login',name = 'login')
             .form-group
-              input#inputEmail.form-control(type='text', placeholder='账户',name = 'input_id')
+              input#inputEmail.form-control(type = 'text', placeholder ='账户',name = 'input_id')
             .form-group
-              input#inputPassword.form-control(type='password', placeholder='密码',name = 'input_pw')
+              input#inputPassword.form-control(type = 'password', placeholder='密码',name = 'input_pw')
             .forgot
               a 没有账号?
               a(href='signup') 注册
-            button.btn.btn-primary(type='submit') 登陆
+            button.btn.btn-primary(onClick = 'loginClick()') 登陆
 
