@@ -10,7 +10,13 @@ router.use(xmlparser());
 
 router.post('/', (req, res, next) => {
     console.log(req.query, req.params, req.body);
-    socketApi.sendNotification(req.body.xml.content[0]);
+    socketApi.sendNotification(JSON.stringify({
+        "msg_type": req.body.xml.msgtype[0],
+        "content": req.body.xml.content[0]
+    }));
+
+    // Empty response
+    res.send("");
 });
 
 router.use('/', utils.sign(config));

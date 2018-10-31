@@ -1,1 +1,25 @@
-include screen.html
+script(type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js')
+script.
+  !window.jQuery && document.write('<script src="js/jquery-1.4.3.min.js"><\\/script>');
+
+body
+    div
+        p#messages
+
+    div
+        table#danmu(width="400")
+            tr aa
+
+// socket.io
+script(src='/socket.io/socket.io.js')
+script.
+  $(function() {
+    var socket = io();
+    socket.on('danmu', function(data) {
+      msg_obj = JSON.parse(data.msg);
+      $("#messages").append($('<li>').text(msg_obj.content));
+      $("#danmu").find("tbody").append($("<tr>"))
+                 .append($("<td>").text(msg_obj.content))
+                 .append($("<td>").text(msg_obj.msg_type));
+    });
+  });
