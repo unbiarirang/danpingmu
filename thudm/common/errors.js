@@ -12,6 +12,13 @@ class BaseError extends Error {
     }
 }
 
+class UnknownError extends BaseError {
+    constructor(message) {
+        super(0, message || 'Unknown Error.', 520);
+    }
+}
+exports.UnknownError = UnknownError;
+
 class NotExistError extends BaseError {
     constructor(message) {
         super(1, message || 'Data not exist.', 404);
@@ -25,3 +32,10 @@ class DuplicatedError extends BaseError {
     }
 }
 exports.DuplicatedError = DuplicatedError;
+
+class WeChatResError extends BaseError {
+    constructor(message) {
+        super(3, message || 'Response error from WeChat.', 500);
+    }
+}
+exports.WeChatResError = WeChatResError;

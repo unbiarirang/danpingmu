@@ -13,7 +13,7 @@ router.post('/login', (req, res, next) => {
     var input_id = req.body.input_id;
     var input_pw = req.body.input_pw;
 
-    return User.find({id: input_id, password: input_pw})
+    User.find({id: input_id, password: input_pw})
         .then(user => {
             if (user.length === 0)
                 throw new errors.NotExistError('Wrong id or password');
@@ -22,11 +22,7 @@ router.post('/login', (req, res, next) => {
         })
         .catch(err => {
             console.error(err);
-            return res.json({
-                result: 0,
-                code: err.code,
-                message: err.message
-            });
+            next(err);
         });
 });
 
@@ -39,7 +35,7 @@ router.post('/signup', (req, res, next) => {
     var input_pw = req.body.input_pw;
     var input_email = req.body.input_email;
         
-    return User.find({id: input_id})
+    User.find({id: input_id})
         .then(user => {
             if (user.length !== 0)
                 throw new errors.DuplicatedError('The id already exists');
@@ -55,11 +51,7 @@ router.post('/signup', (req, res, next) => {
         })
         .catch(err => {
             console.error(err);
-            return res.json({
-                result: 0,
-                code: err.code,
-                message: err.message
-            });
+            next(err);
         });
 });
 

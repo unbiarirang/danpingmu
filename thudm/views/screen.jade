@@ -13,7 +13,7 @@ html(lang="zh-CN")
     // --------------CSS STYLE----------------
     style(type="text/css").
       body{
-      background-image: url('images/background.png');
+      background-image: url('../images/background.png');
       background-repeat: no-repeat;
       }
       #boxDom {
@@ -32,7 +32,7 @@ html(lang="zh-CN")
       margin: 0 auto;
       color:rgb(0, 0, 0);
       font-size: 30px;
-      background-image: url('images/message.png');
+      background-image: url('../images/message.png');
       background-repeat: no-repeat;
       }
       .foot {
@@ -67,18 +67,25 @@ html(lang="zh-CN")
 
 script(src='/socket.io/socket.io.js')
 script.
+  var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
+
   $(function() {
     var socket = io();
-    var index = 0;
+
+    console.log('screen.jade room_id' , room_id);
+    var data = {'room_id': room_id};
+    socket.emit('joinRoom', data);
+
     socket.on('danmu', function(data) {
       var msg_obj = JSON.parse(data.msg);
       var content = msg_obj.content;
       var message = $("<div class = 'foot string'></div>");
       message.text(content);
       $('#boxDom').append(message);
-      setInterval(() => { 
-        message.animate({"bottom": "+=80px"}, 1000); }, 3000);
-      });
+      $('.string').animate({"bottom": "+=80px"}, 1000); }, 3000);
+      //setInterval(() => { 
+      //  message.animate({"bottom": "+=80px"}, 1000); }, 3000);
+      //});
     });
 //script.
 //  $(document).ready(function(){

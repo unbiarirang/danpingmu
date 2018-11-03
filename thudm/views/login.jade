@@ -25,7 +25,7 @@ html
         .main-div
           .panel
             a(href='/') 弹屏目
-          form(method = "post",action = 'login',name = 'login')
+          form(method = "post",action = '/../screen',name = 'login')
             .form-group
               input#inputEmail.form-control(type = 'text', placeholder ='账户',name = 'input_id')
             .form-group
@@ -33,5 +33,5 @@ html
             .forgot
               a 没有账号?
               a(href='signup') 注册
-            button.btn.btn-primary(onClick = 'loginClick()') 登陆
+            button.btn.btn-primary(submit) 登陆
 
