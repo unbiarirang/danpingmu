@@ -7,9 +7,11 @@ exports.init = (config) => {
         useNewUrlParser: true,
         connectTimeoutMS: 10000,
         reconnectInterval: 500
-    }).then(() => {
+    })
+    .then(() => {
         console.log('Mongodb connected!');
-    }).catch(err => {
+    })
+    .catch(err => {
         console.error(err);
     });
 

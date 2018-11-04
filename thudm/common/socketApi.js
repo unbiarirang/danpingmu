@@ -19,6 +19,7 @@ io.on('connection', (socket) => {
 });
 
 socketApi.sendNotification = (room_id, msg) => {
+    console.log('msg: ', msg);
     io.sockets.in(room_id).emit('danmu', {msg: msg});
 }
 

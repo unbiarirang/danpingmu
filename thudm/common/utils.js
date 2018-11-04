@@ -1,8 +1,9 @@
 const crypto = require('crypto');
-const config = require('../config.json');
 const rp = require('request-promise');
+const config = require('../config.json');
+const errors = require('./errors');
 
-let sign = function() {
+let sign = () => {
     return (req, res, next) => {
         let token = config.WECHAT_TOKEN;
 
@@ -30,7 +31,8 @@ let sign = function() {
 }
 exports.sign = sign;
 
-let get_access_token = function(req) {
+let get_access_token = (req) => {
+    console.log("===IN!");
     // access_token is valid
     if (req.app.get('access_token_expire') &&
         Date.now() / 1000 < req.app.get('access_token_expire')) {
@@ -41,7 +43,7 @@ let get_access_token = function(req) {
 
     console.log('Get new access token');
     // Request a new access_token
-    var options = {
+    let options = {
         uri: 'https://api.weixin.qq.com/cgi-bin/token',
         qs: { 
             grant_type: 'client_credential',
@@ -58,8 +60,30 @@ let get_access_token = function(req) {
             req.app.set('access_token_expire',
                 Date.now() / 1000 + res.expires_in
             );
-            console.log('====');
             return res.access_token;
         });
 };
 exports.get_access_token = get_access_token;
+
+let get_user_info = (req, openid) => {
+    return get_access_token(req)
+        .then((access_token) => {
+            let options = {
+                uri: 'https://api.weixin.qq.com/cgi-bin/user/info',
+                qs: { 
+                    access_token: access_token,
+                    openid: openid
+                },
+                json: true
+            };
+            return rp(options);
+        })
+        .then((res) => {
+            // Error from wechat
+            if (res.errcode)
+                throw new errors.WeChatResError(res.errmsg);
+
+            return res;
+        });
+};
+exports.get_user_info = get_user_info;

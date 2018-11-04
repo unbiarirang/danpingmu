@@ -4,14 +4,37 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var mongodb = require('./mongodb');
 var config = require('./config.json');
+var mongodb = require('./mongodb');
 var indexRouter = require('./routes/index');
+
+// Redis session
+var redis = require('redis');
+var session = require('express-session');
+var redisStore = require('connect-redis')(session);
+var redisClient = redis.createClient({
+    port: config.REDIS_PORT,
+    host: config.REDIS_HOST,
+    password: config.REDIS_SECRET
+});
+redisClient.on('connect', () => { console.log('redis connected'); })
+           .on('error', (err) => { console.log(err); });
 
 var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+var redisOptions = {
+    client: redisClient,
+    ttl: 260
+};
+app.use(session({
+    store: new redisStore(redisOptions),
+    saveUninitialized: false,
+    resave: false,
+    secret: config.SESSION_SECRET
+}));
 
 app.use(logger('dev'));
 app.use(express.json());

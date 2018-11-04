@@ -78,9 +78,15 @@ script.
 
     socket.on('danmu', function(data) {
       var msg_obj = JSON.parse(data.msg);
+      var type = msg_obj.msg_type;
       var content = msg_obj.content;
-      var message = $("<div class = 'foot string'></div>");
-      message.text(content);
+      var message;
+      if (type === 'text') {
+        message = $("<span class='foot string'></span>");
+        message.text(content);
+      } else if (type === 'image') { // FIXME
+        message = $("<img />", {src: content});
+      }
       $('#boxDom').append(message);
       $('.string').animate({"bottom": "+=80px"}, 1000); }, 3000);
       //setInterval(() => { 

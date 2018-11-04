@@ -51,11 +51,11 @@ router.get('/ticket/:room_id', (req, res, next) => {
                 body: sendData,
                 json: true
             };
-            return options;
-        })
-        .then((options) => {
             return rp(options);
         })
+        //.then((options) => {
+        //    return rp(options);
+        //})
         .then((body) => {
             // POST succeeded
             // Error from wechat
@@ -73,6 +73,7 @@ router.get('/ticket/:room_id', (req, res, next) => {
 });
 
 router.get('/', (req, res, next) => {
+    console.log(req.session.id);
     res.render('index');
 });
 
