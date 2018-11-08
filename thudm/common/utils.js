@@ -32,13 +32,14 @@ let sign = () => {
 exports.sign = sign;
 
 let get_access_token = (req) => {
-    console.log("===IN!");
+    console.log('get_access_token');
     // access_token is valid
     if (req.app.get('access_token_expire') &&
         Date.now() / 1000 < req.app.get('access_token_expire')) {
-        return new Promise((resolve, reject) => {
-            resolve(req.app.get('access_token'));
-        });
+        return Promise.resolve(req.app.get('access_token'));
+        //return new Promise((resolve, reject) => {
+        //    resolve(req.app.get('access_token'));
+        //});
     }
 
     console.log('Get new access token');

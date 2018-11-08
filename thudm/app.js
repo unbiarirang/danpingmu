@@ -27,13 +27,13 @@ app.set('view engine', 'jade');
 
 var redisOptions = {
     client: redisClient,
-    ttl: 260
 };
 app.use(session({
     store: new redisStore(redisOptions),
-    saveUninitialized: false,
+    saveUninitialized: true,
     resave: false,
-    secret: config.SESSION_SECRET
+    secret: config.SESSION_SECRET,
+    cookie: { maxAge: 24*60*60*1000 } // Expires in 1 day
 }));
 
 app.use(logger('dev'));

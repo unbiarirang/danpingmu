@@ -53,9 +53,6 @@ router.get('/ticket/:room_id', (req, res, next) => {
             };
             return rp(options);
         })
-        //.then((options) => {
-        //    return rp(options);
-        //})
         .then((body) => {
             // POST succeeded
             // Error from wechat

@@ -11,13 +11,13 @@ router.post('/', (req, res, next) => {
     console.log(req.query, req.params, req.body);
     console.log('SID: ', req.session.id);
     console.log('session: ', req.session);
+    console.log('maxAge: ', req.session.cookie.maxAge);
     let body = req.body.xml;
 
     let room_id;
     switch (body.msgtype[0]) {
         // User sent a text message
         case 'text':
-            console.log('session:', req.session);
             room_id = req.session.room_id;
             console.log('Send to room', room_id);
             socketApi.sendNotification(room_id, JSON.stringify({
@@ -53,8 +53,6 @@ router.post('/', (req, res, next) => {
                     req.session.head_img_url = user_info.headimgurl;
                     req.session.open_id = user_info.openid;
                     req.session.save();
-                    console.log('SID: ', req.session.id);
-                    console.log('session: ', req.session);
                 })
                 .catch((err) => {
                     console.log(err);
