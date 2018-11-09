@@ -9,20 +9,17 @@ router.use(xmlparser());
 
 router.post('/', (req, res, next) => {
     console.log(req.query, req.params, req.body);
-    console.log('post req.wsessionID: ', req.wsessionID);
-    console.log('post req.session: ', req.session);
-    console.log('post maxAge: ', req.session.cookie.maxAge);
 
-    let msg_type = utils.get_input(req, 'msgtype');
+    let msg_type = utils.get_wechat_input(req, 'msgtype');
     switch (msg_type) {
         // User sent a text message
         case 'text':
-            utils.get_sess_info(req)
-                .then((sess_info) => {
-                    let room_id = sess_info.room_id;
-                    let nickname = sess_info.nickname;
-                    let head_img_url = sess_info.head_img_url;
-                    let content = utils.get_input(req, 'content');
+            utils.get_user_info(req)
+                .then((user_info) => {
+                    let room_id = user_info.room_id;
+                    let nickname = user_info.nickname;
+                    let head_img_url = user_info.head_img_url;
+                    let content = utils.get_wechat_input(req, 'content');
                     console.log('Send to room', room_id);
                     socketApi.sendNotification(room_id, JSON.stringify({
                         "msg_type": 'text',
@@ -38,12 +35,12 @@ router.post('/', (req, res, next) => {
 
         // User sent an image
         case 'image':
-            utils.get_sess_info(req)
-                .then((sess_info) => {
-                    let room_id = sess_info.room_id;
-                    let nickname = sess_info.nickname;
-                    let head_img_url = sess_info.head_img_url;
-                    let content = utils.get_input(req, 'picurl');
+            utils.get_user_info(req)
+                .then((user_info) => {
+                    let room_id = user_info.room_id;
+                    let nickname = user_info.nickname;
+                    let head_img_url = user_info.head_img_url;
+                    let content = utils.get_wechat_input(req, 'picurl');
                     console.log('Send to room', room_id);
                     socketApi.sendNotification(room_id, JSON.stringify({
                         "msg_type": 'image',
@@ -59,14 +56,16 @@ router.post('/', (req, res, next) => {
 
         // User entered a specific room
         case 'event':
-            let event = utils.get_input(req, 'event');
-            let event_key = utils.get_input(req, 'eventkey');
-            if (event === 'SCAN')
-                room_id = eventkey;
-            else if (event === 'subscribe')
-                room_id = eventkey.split('_')[1];
+            let event = utils.get_wechat_input(req, 'event');
+            let event_key = utils.get_wechat_input(req, 'eventkey');
+            let room_id;
 
-            req.session.room_id = room_id;
+            if (event === 'SCAN')
+                room_id = event_key;
+            else if (event === 'subscribe')
+                room_id = event_key.split('_')[1];
+
+            utils.update_user_info(req, { room_id: room_id });
             console.log('Entered room', room_id);
 
             utils.request_user_info(req)

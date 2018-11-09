@@ -37,9 +37,6 @@ let get_access_token = (req) => {
     if (req.app.get('access_token_expire') &&
         Date.now() / 1000 < req.app.get('access_token_expire')) {
         return Promise.resolve(req.app.get('access_token'));
-        //return new Promise((resolve, reject) => {
-        //    resolve(req.app.get('access_token'));
-        //});
     }
 
     console.log('Get new access token');
@@ -56,7 +53,6 @@ let get_access_token = (req) => {
 
     return rp(options)
         .then((res) => {
-            console.log('0 get_access_token:', res.access_token);
             req.app.set('access_token', res.access_token);
             req.app.set('access_token_expire',
                 Date.now() / 1000 + res.expires_in
@@ -66,16 +62,22 @@ let get_access_token = (req) => {
 };
 exports.get_access_token = get_access_token;
 
+let get_session = (req) => {
+    let open_id = req.query.openid;
+    return req.app.get('cache').get(open_id) || {};
+};
+
 // Request and store a user's information
 let request_user_info = (req) => {
-    let openid = req.body.xml.fromusername[0];
+    //let openid = req.body.xml.fromusername[0];
+    let open_id = req.query.openid;
     return get_access_token(req)
         .then((access_token) => {
             let options = {
                 uri: 'https://api.weixin.qq.com/cgi-bin/user/info',
                 qs: { 
                     access_token: access_token,
-                    openid: openid
+                    openid: open_id
                 },
                 json: true
             };
@@ -87,28 +89,37 @@ let request_user_info = (req) => {
                 throw new errors.WeChatResError(res.errmsg);
 
             console.log('User info: ', res);
-            req.session.nickname = res.nickname;
-            req.session.head_img_url = res.headimgurl;
-            req.session.open_id = res.openid;
-            req.session.save();
+            update_user_info(req, {
+                nickname: res.nickname,
+                head_img_url: res.headimgurl,
+                open_id: res.openid
+            });
             return req;
         });
 };
 exports.request_user_info = request_user_info;
 
-let get_sess_info = (req) => {
-    if (req.session.nickname === undefined || req.session.head_img_url === undefined)
-        return request_user_info(req).then(get_sess_info);
+let get_user_info = (req) => {
+    let session = get_session(req);
+    console.log('wechat session: ', session);
+    if (session.nickname === undefined || session.head_img_url === undefined)
+        return request_user_info(req).then(get_user_info);
 
-    return Promise.resolve({
-        room_id: req.session.room_id,
-        nickname: req.session.nickname,
-        head_img_url: req.session.head_img_url
-    });
+    return Promise.resolve(session);
 }
-exports.get_sess_info = get_sess_info;
+exports.get_user_info = get_user_info;
 
-let get_input = (req, key) => {
+let update_user_info = (req, options) => {
+    let session = get_session(req);
+    let open_id = req.query.openid;
+
+    for (let key in options)
+        session[key] = options[key];
+    req.app.set('cache').set(open_id, session);
+}
+exports.update_user_info = update_user_info;
+
+let get_wechat_input = (req, key) => {
     return req.body.xml[key][0];
 }
-exports.get_input = get_input;
+exports.get_wechat_input = get_wechat_input;
