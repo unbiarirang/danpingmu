@@ -1,0 +1,158 @@
+<script type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js'>
+  !window.jQuery && document.write('<script src="js/jquery-1.4.3.min.js"><\\/script>');
+  // socket.io
+  script(src='/socket.io/socket.io.js')
+  script.
+    $(function() {
+      
+      var socket = io();
+      socket.on('danmu', function(msg) {
+        console.log('msg: ', msg);
+      });
+    });
+</script>
+<body>
+<button> next </button>
+<div class = 'noimage'>
+</div>
+<div class = 'withimage'>
+  </div>
+</body>
+<script> 
+  var id = 1;
+  var id2 = 1;
+  var del = 1;
+  var dm_list = new Array();
+  function sleep(numberMillis) { 
+    var now = new Date(); 
+    var exitTime = now.getTime() + numberMillis; 
+    while (true) { 
+    now = new Date(); 
+    if (now.getTime() > exitTime) 
+    return; 
+    } 
+  }
+  $(document).ready(function(){
+    function delete_DM(){      
+      if (id > 7){
+        $("#"+del).remove();
+        $("#img"+del).remove();
+        $("#name"+del).remove();
+        
+        $("#imgwith"+del).remove();
+        $("#namewith"+del).remove();
+        $("#with"+del).remove();
+        del++;
+      }
+    }
+    function show(){
+      $('div.noimage').append('<img class = "noimage" id = "img'+ id + '"src="http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132"/>');
+      $('div.noimage').append('<div class = "name" id = name' + id +'>'+'최은비'+'</div>'); 
+      $('div.noimage').append('<div class = "DM" id = ' + id +'>'+'大家好我是理想昂和'+'</div>'); 
+
+      $('div.withimage').append('<img class = "withimage" id = "imgwith'+ id + '"src="http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132"/>');
+      $('div.withimage').append('<div class = "namewithimg" id = namewith' + id +'>'+'최은비'+'</div>'); 
+      $('div.withimage').append('<div class = "DM2" id = with' + id +'>'+'大家好我是理想昂和'+'</div>'); 
+
+      $('div.DM').animate({"bottom": "+=200px"},500);
+      $('div.DM2').animate({"bottom": "+=400px"},500);
+      $('img.noimage').animate({"bottom": "+=200px"},500);
+      $('img.withimage').animate({"bottom": "+=400px"},500);
+      $('div.name').animate({"bottom": "+=200px"},500);
+      $('div.namewithimg').animate({"bottom": "+=400px"},500);
+      id = id + 1;
+   }
+     setInterval(show,1800);
+     setInterval(delete_DM,1800);
+  });
+  //1920:904
+</script>
+
+<style>
+  ::-webkit-scrollbar{
+    display:none;
+  }
+  button{
+    position: absolute;
+  }
+
+  div.DM {
+    background: rgba(0, 0, 0, 0.3);
+    width: 600px;
+    height: 150px;
+    bottom: 0px;
+    left:100px;
+    position:absolute;
+    text-align: center;
+    color: white;
+    border-radius: 20px;
+  }
+  div.DM2 {
+    background: rgba(0, 0, 0, 0.3);
+    width: 600px;
+    height: 350px;
+    bottom: -200px;
+    left:100px;
+    position:absolute;
+    text-align: center;
+    color: white;
+    border-radius: 20px;
+  }
+  div.name{
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    left: 210px;
+    color:black;
+    bottom: 150px;
+  }
+  div.namewithimg{
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    left: 210px;
+    color:black;
+    bottom: 150px;
+  }  
+  img.noimage{
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    left: 150px;
+    bottom: 150px;
+    border-radius: 10px;
+  }
+  img.withimage{
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    left: 150px;
+    bottom: 150px;
+    border-radius: 10px;
+  }
+  div.noimage {
+    float:left;
+    width: 400px;
+    height: 1000px;
+    position:relative;
+    left:20;
+    text-align: center;
+    color: white;
+  }
+  div.withimage {
+    float:right;
+    width: 550px;
+    left: -250px;
+    height: 1000px;
+    position:relative;
+    text-align: center;
+    color: white;
+  }
+  body, html {
+    background: url(/images/testbg4.gif);
+    background-size:cover;
+    width: 100%;  
+    height: 100%;
+    margin: 0;
+  }
+</style>
