@@ -21,6 +21,12 @@ router.post('/', (req, res, next) => {
                     let head_img_url = user_info.head_img_url;
                     let content = utils.get_wechat_input(req, 'content');
                     console.log('Send to room', room_id);
+                    socketApi.reviewContent(room_id, JSON.stringify({
+                        "msg_type": 'text',
+                        "content": content,
+                        "nickname": nickname,
+                        "head_img_url": head_img_url
+                    }));
                     socketApi.sendNotification(room_id, JSON.stringify({
                         "msg_type": 'text',
                         "content": content,

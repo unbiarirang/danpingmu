@@ -22,6 +22,8 @@ router.post('/login', (req, res, next) => {
                 throw new errors.NotExistError('Wrong id or password');
 
             console.log('login success!');
+            req.session.login = true;
+            req.session.admin_id = input_id;
             return res.json({result: 1});
         })
         .catch(err => {

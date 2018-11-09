@@ -39,3 +39,10 @@ class WeChatResError extends BaseError {
     }
 }
 exports.WeChatResError = WeChatResError;
+
+class NotLoggedInError extends BaseError {
+    constructor(message) {
+        super(4, message || 'Need login.', 500);
+    }
+}
+exports.NotLoggedInError = NotLoggedInError;

@@ -8,13 +8,13 @@ const user_schema = new mongoose.Schema({
 exports.User = mongoose.model('User', user_schema);
 
 const activity_schema = new mongoose.Schema({
-    user_id: { type: String, required: true },
+    admin_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
     bullet_color_num: Number,
     bullet_colors: mongoose.Mixed,
     banned_words_url: String,
-    background_img_url: String,
+    bg_img_url: String,
 });
 exports.Activity = mongoose.model('Activity', activity_schema);
 

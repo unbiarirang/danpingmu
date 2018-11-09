@@ -7,12 +7,27 @@ const errors = require('../common/errors');
 
 const auth_router = require('./auth');
 const activity_router = require('./activity');
+const vote_router = require('./vote');
+const lottery_router = require('./lottery');
 
 router.use('/auth', auth_router);
 router.use('/activity', activity_router);
+router.use('/vote', vote_router);
+router.use('/lottery', lottery_router);
 
-router.get('/msglist', (req, res, next) => {
-    res.render('msglist');
+router.get('/msglist/:room_id', (req, res, next) => {
+    let room_id = req.params.room_id;
+    res.redirect('/msglist/' + room_id + '/page/' + 1);
+});
+
+router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
+    let room_id = req.params.room_id;
+    let page_id = req.params.page_id;
+
+    let sendData = {};
+    sendData.room_id = room_id;
+
+    res.render('msglist', sendData);
 });
 
 router.get('/screen/:room_id', (req, res, next) => {

@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 var redisOptions = {
     client: redisClient,
 };
-// admin session
+// Admin session
 app.use(session({
     store: new redisStore(redisOptions),
     saveUninitialized: true, // FIXME: false
@@ -42,7 +42,7 @@ app.use(session({
     secret: config.SESSION_SECRET,
     cookie: { maxAge: 24*60*60*1000 } // Expires in 1 day
 }));
-// wechat user info cache
+// Wechat user info cache
 app.set('cache', new Map());
 
 // Init index router

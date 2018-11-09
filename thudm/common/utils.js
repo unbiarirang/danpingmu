@@ -3,7 +3,7 @@ const rp = require('request-promise');
 const config = require('../config.json');
 const errors = require('./errors');
 
-let sign = () => {
+const sign = () => {
     return (req, res, next) => {
         let token = config.WECHAT_TOKEN;
 
@@ -31,7 +31,7 @@ let sign = () => {
 }
 exports.sign = sign;
 
-let get_access_token = (req) => {
+const get_access_token = (req) => {
     console.log('get_access_token');
     // access_token is valid
     if (req.app.get('access_token_expire') &&
@@ -62,13 +62,13 @@ let get_access_token = (req) => {
 };
 exports.get_access_token = get_access_token;
 
-let get_session = (req) => {
+const get_session = (req) => {
     let open_id = req.query.openid;
     return req.app.get('cache').get(open_id) || {};
 };
 
 // Request and store a user's information
-let request_user_info = (req) => {
+const request_user_info = (req) => {
     //let openid = req.body.xml.fromusername[0];
     let open_id = req.query.openid;
     return get_access_token(req)
@@ -99,7 +99,7 @@ let request_user_info = (req) => {
 };
 exports.request_user_info = request_user_info;
 
-let get_user_info = (req) => {
+const get_user_info = (req) => {
     let session = get_session(req);
     console.log('wechat session: ', session);
     if (session.nickname === undefined || session.head_img_url === undefined)
@@ -109,7 +109,7 @@ let get_user_info = (req) => {
 }
 exports.get_user_info = get_user_info;
 
-let update_user_info = (req, options) => {
+const update_user_info = (req, options) => {
     let session = get_session(req);
     let open_id = req.query.openid;
 
@@ -119,7 +119,7 @@ let update_user_info = (req, options) => {
 }
 exports.update_user_info = update_user_info;
 
-let get_wechat_input = (req, key) => {
+const get_wechat_input = (req, key) => {
     return req.body.xml[key][0];
 }
 exports.get_wechat_input = get_wechat_input;

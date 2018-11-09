@@ -72,7 +72,6 @@ script.
   $(function() {
     var socket = io();
 
-    console.log('screen.jade room_id' , room_id);
     var data = {'room_id': room_id};
     socket.emit('joinRoom', data);
 
