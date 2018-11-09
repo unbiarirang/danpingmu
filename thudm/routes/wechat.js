@@ -9,59 +9,73 @@ router.use(xmlparser());
 
 router.post('/', (req, res, next) => {
     console.log(req.query, req.params, req.body);
-    console.log('SID: ', req.session.id);
-    console.log('session: ', req.session);
-    console.log('maxAge: ', req.session.cookie.maxAge);
-    let body = req.body.xml;
+    console.log('post req.wsessionID: ', req.wsessionID);
+    console.log('post req.session: ', req.session);
+    console.log('post maxAge: ', req.session.cookie.maxAge);
 
-    let room_id;
-    switch (body.msgtype[0]) {
+    let msg_type = utils.get_input(req, 'msgtype');
+    switch (msg_type) {
         // User sent a text message
         case 'text':
-            room_id = req.session.room_id;
-            console.log('Send to room', room_id);
-            socketApi.sendNotification(room_id, JSON.stringify({
-                "msg_type": 'text',
-                "content": body.content[0]
-            }));
+            utils.get_sess_info(req)
+                .then((sess_info) => {
+                    let room_id = sess_info.room_id;
+                    let nickname = sess_info.nickname;
+                    let head_img_url = sess_info.head_img_url;
+                    let content = utils.get_input(req, 'content');
+                    console.log('Send to room', room_id);
+                    socketApi.sendNotification(room_id, JSON.stringify({
+                        "msg_type": 'text',
+                        "content": content,
+                        "nickname": nickname,
+                        "head_img_url": head_img_url
+                    }));
+                })
+                .catch((err) => { // TODO
+                    console.log(err);
+                });
             break;
 
-        // User sent a image
+        // User sent an image
         case 'image':
-            room_id = req.session.room_id;
-            console.log('Send to room', room_id);
-            socketApi.sendNotification(room_id, JSON.stringify({
-                "msg_type": 'image',
-                "content": body.picurl[0]
-            }));
+            utils.get_sess_info(req)
+                .then((sess_info) => {
+                    let room_id = sess_info.room_id;
+                    let nickname = sess_info.nickname;
+                    let head_img_url = sess_info.head_img_url;
+                    let content = utils.get_input(req, 'picurl');
+                    console.log('Send to room', room_id);
+                    socketApi.sendNotification(room_id, JSON.stringify({
+                        "msg_type": 'image',
+                        "content": content,
+                        "nickname": nickname,
+                        "head_img_url": head_img_url
+                    }));
+                })
+                .catch((err) => { // TODO
+                    console.log(err);
+                });
             break;
 
         // User entered a specific room
         case 'event':
-            if (body.event[0] === 'SCAN')
-                room_id = body.eventkey[0];
-            else if (body.event[0] === 'subscribe')
-                room_id = body.eventkey[0].split('_')[1];
+            let event = utils.get_input(req, 'event');
+            let event_key = utils.get_input(req, 'eventkey');
+            if (event === 'SCAN')
+                room_id = eventkey;
+            else if (event === 'subscribe')
+                room_id = eventkey.split('_')[1];
 
             req.session.room_id = room_id;
             console.log('Entered room', room_id);
 
-            utils.get_user_info(req, body.fromusername[0])
-                .then((user_info) => {
-                    console.log('User info: ', user_info);
-                    req.session.nickname = user_info.nickname;
-                    req.session.head_img_url = user_info.headimgurl;
-                    req.session.open_id = user_info.openid;
-                    req.session.save();
-                })
-                .catch((err) => {
+            utils.request_user_info(req)
+                .catch((err) => { // TODO
                     console.log(err);
-                    next(err);
                 });
             break;
     }
-
-    // Empty response
+    // Send empty response
     res.send("");
 });
 

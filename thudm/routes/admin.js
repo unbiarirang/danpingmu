@@ -4,14 +4,15 @@ const router = express.Router();
 const models = require('../models/models');
 const utils = require('../common/utils');
 const errors = require('../common/errors');
-const User = models.User;
 
-var auth_router = require('./auth');
+const auth_router = require('./auth');
+const activity_router = require('./activity');
 
 router.use('/auth', auth_router);
+router.use('/activity', activity_router);
 
-router.get('/msgList', (req, res, next) => {
-    res.render('msgList');
+router.get('/msglist', (req, res, next) => {
+    res.render('msglist');
 });
 
 router.get('/screen/:room_id', (req, res, next) => {

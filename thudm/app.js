@@ -25,22 +25,22 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-var redisOptions = {
-    client: redisClient,
-};
-app.use(session({
-    store: new redisStore(redisOptions),
-    saveUninitialized: true,
-    resave: false,
-    secret: config.SESSION_SECRET,
-    cookie: { maxAge: 24*60*60*1000 } // Expires in 1 day
-}));
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+var redisOptions = {
+    client: redisClient,
+};
+app.use(session({
+    store: new redisStore(redisOptions),
+    saveUninitialized: true, // FIXME: false
+    resave: false,
+    secret: config.SESSION_SECRET,
+    cookie: { maxAge: 24*60*60*1000 } // Expires in 1 day
+}));
 
 // Init index router
 require('./routes/index').init(app);

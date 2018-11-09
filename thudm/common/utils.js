@@ -66,7 +66,9 @@ let get_access_token = (req) => {
 };
 exports.get_access_token = get_access_token;
 
-let get_user_info = (req, openid) => {
+// Request and store a user's information
+let request_user_info = (req) => {
+    let openid = req.body.xml.fromusername[0];
     return get_access_token(req)
         .then((access_token) => {
             let options = {
@@ -84,7 +86,29 @@ let get_user_info = (req, openid) => {
             if (res.errcode)
                 throw new errors.WeChatResError(res.errmsg);
 
-            return res;
+            console.log('User info: ', res);
+            req.session.nickname = res.nickname;
+            req.session.head_img_url = res.headimgurl;
+            req.session.open_id = res.openid;
+            req.session.save();
+            return req;
         });
 };
-exports.get_user_info = get_user_info;
+exports.request_user_info = request_user_info;
+
+let get_sess_info = (req) => {
+    if (req.session.nickname === undefined || req.session.head_img_url === undefined)
+        return request_user_info(req).then(get_sess_info);
+
+    return Promise.resolve({
+        room_id: req.session.room_id,
+        nickname: req.session.nickname,
+        head_img_url: req.session.head_img_url
+    });
+}
+exports.get_sess_info = get_sess_info;
+
+let get_input = (req, key) => {
+    return req.body.xml[key][0];
+}
+exports.get_input = get_input;

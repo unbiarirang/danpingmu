@@ -1,23 +1,27 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+let router = express.Router();
 const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
 
 router.get('/login', (req, res, next) => {
+    console.log('+++req.session:', req.session);
+    console.log('+++req.session.id:', req.session.id);
+    console.log('+++req.sessionID:', req.sessionID);
     res.render('login');
 });
 
 router.post('/login', (req, res, next) => {
-    var input_id = req.body.input_id;
-    var input_pw = req.body.input_pw;
+    let input_id = req.body.input_id;
+    let input_pw = req.body.input_pw;
 
     User.find({id: input_id, password: input_pw})
         .then(user => {
             if (user.length === 0)
                 throw new errors.NotExistError('Wrong id or password');
 
+            console.log('login success!');
             return res.json({result: 1});
         })
         .catch(err => {
@@ -27,13 +31,15 @@ router.post('/login', (req, res, next) => {
 });
 
 router.get('/signup', (req, res, next) => {
+    console.log('+++req.session:', req.session);
+    console.log('+++req.session.id:', req.session.id);
     res.render('signup');
 });
 
 router.post('/signup', (req, res, next) => {
-    var input_id = req.body.input_id;
-    var input_pw = req.body.input_pw;
-    var input_email = req.body.input_email;
+    let input_id = req.body.input_id;
+    let input_pw = req.body.input_pw;
+    let input_email = req.body.input_email;
         
     User.find({id: input_id})
         .then(user => {
