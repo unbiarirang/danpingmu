@@ -12,12 +12,12 @@
     });
 </script>
 <body>
-<button> next </button>
-<div class = 'noimage'>
-</div>
-<div class = 'withimage'>
-  </div>
-</body>
+  <button> next </button>
+      <div class = 'total'></div>
+      <div class = 'pic_slot'>
+        <img class = 'picture' src="http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132"/>
+      </div>
+  </body>
 <script> 
   var id = 1;
   var id2 = 1;
@@ -38,31 +38,24 @@
         $("#"+del).remove();
         $("#img"+del).remove();
         $("#name"+del).remove();
-        
-        $("#imgwith"+del).remove();
-        $("#namewith"+del).remove();
-        $("#with"+del).remove();
         del++;
       }
     }
     function show(){
-      $('div.noimage').append('<img class = "noimage" id = "img'+ id + '"src="http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132"/>');
-      $('div.noimage').append('<div class = "name" id = name' + id +'>'+'최은비'+'</div>'); 
-      $('div.noimage').append('<div class = "DM" id = ' + id +'>'+'大家好我是理想昂和'+'</div>'); 
-
-      $('div.withimage').append('<img class = "withimage" id = "imgwith'+ id + '"src="http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132"/>');
-      $('div.withimage').append('<div class = "namewithimg" id = namewith' + id +'>'+'최은비'+'</div>'); 
-      $('div.withimage').append('<div class = "DM2" id = with' + id +'>'+'大家好我是理想昂和'+'</div>'); 
-
-      $('div.DM').animate({"bottom": "+=200px"},500);
-      $('div.DM2').animate({"bottom": "+=400px"},500);
-      $('img.noimage').animate({"bottom": "+=200px"},500);
-      $('img.withimage').animate({"bottom": "+=400px"},500);
-      $('div.name').animate({"bottom": "+=200px"},500);
-      $('div.namewithimg').animate({"bottom": "+=400px"},500);
+      $('div.total').append('<img class = "profile" id = "img'+ id + '"src="http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132"/>');
+      $('div.total').append('<div class = "name" id = name' + id +'>'+'최은비'+'</div>'); 
+      $('div.total').append('<div class = "DM" id =' + id +'>'+'大家好我是理想昂和'+'</div>'); 
+      $('div.DM').animate({"bottom": "+=23vh"},500);
+      $('img.profile').animate({"bottom": "+=23vh"},500);
+      $('div.name').animate({"bottom": "+=23vh"},500);
       id = id + 1;
-   }
+    }
+    function reset_pic(){
+      $('img.picture').fadeOut(1000);
+      $('img.picture').fadeIn(1000);
+    }
      setInterval(show,1800);
+     setInterval(reset_pic,4000);
      setInterval(delete_DM,1800);
   });
   //1920:904
@@ -76,23 +69,33 @@
     position: absolute;
   }
 
+  img.picture{
+    position: absolute;
+    left:10%;
+    top:10%;
+    width:80%;
+    height:80%;
+    border-radius: 20px;
+  }
+
   div.DM {
     background: rgba(0, 0, 0, 0.3);
-    width: 600px;
-    height: 150px;
+    width: 31vw;
+    height: 16.5vh;
     bottom: 0px;
-    left:100px;
+    left:5vw;
     position:absolute;
     text-align: center;
     color: white;
     border-radius: 20px;
   }
-  div.DM2 {
+  div.pic_slot{
     background: rgba(0, 0, 0, 0.3);
-    width: 600px;
-    height: 350px;
-    bottom: -200px;
-    left:100px;
+    width: 31vw;
+    height: 60vh;
+    bottom: 0px;
+    right:1vw;
+    bottom:1vw;
     position:absolute;
     text-align: center;
     color: white;
@@ -100,51 +103,28 @@
   }
   div.name{
     position: absolute;
-    width: 50px;
-    height: 30px;
-    left: 210px;
+    width: 10vh;
+    height: 3.3vh;
+    left: 23.2vh;
     color:black;
-    bottom: 150px;
+    bottom: 16.6vh;
   }
-  div.namewithimg{
+
+  img.profile{
     position: absolute;
-    width: 50px;
-    height: 30px;
-    left: 210px;
-    color:black;
-    bottom: 150px;
-  }  
-  img.noimage{
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    left: 150px;
-    bottom: 150px;
+    width: 5.5vh;
+    height: 5.5vh;
+    left: 16.6vh;
+    bottom: 16.6vh;
     border-radius: 10px;
   }
-  img.withimage{
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    left: 150px;
-    bottom: 150px;
-    border-radius: 10px;
-  }
-  div.noimage {
+
+  div.total {
     float:left;
-    width: 400px;
-    height: 1000px;
+    width: 50%;
+    height: 100%;
     position:relative;
-    left:20;
-    text-align: center;
-    color: white;
-  }
-  div.withimage {
-    float:right;
-    width: 550px;
-    left: -250px;
-    height: 1000px;
-    position:relative;
+    left:1%;
     text-align: center;
     color: white;
   }
