@@ -9,53 +9,20 @@ html(lang="zh-CN")
     |     
     script(src='/socket.io/socket.io.js')
     script.
-          function Queue(size) {
-            var list = [];
-
-            //向队列中添加数据
-            this.push = function(data) {
-                if (data==null) {
-                    return false;
-                }
-                //如果传递了size参数就设置了队列的大小
-                if (size != null && !isNaN(size)) {
-                    if (list.length == size) {
-                        this.pop();
-                    }
-                }
-                list.unshift(data);
-                return true;
-            }
-
-            //从队列中取出数据
-            this.pop = function() {
-                return list.pop();
-            }
-
-            //返回队列的大小
-            this.size = function() {
-                return list.length;
-            }
-
-            //返回队列的内容
-            this.quere = function() {
-                return list;
-            }
-        }
         var dm_cnt = 1;
-        var dm_list = new Queue();
+        var dm_list = new Array();
         console.log('hello');
         var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
         $(function() {
-            var socket = io();
-            console.log('screen.jade room_id' , room_id);
-            var data = {'room_id': room_id};
-            socket.emit('joinRoom', data);
-            socket.on('danmu', function(data) {
-              dm_list.push(data);
-              dm_cnt++;
-              console.log(data);
-            });
+          var socket = io();
+          console.log('screen.jade room_id' , room_id);
+          var data = {'room_id': room_id};
+          socket.emit('joinRoom', data);
+          socket.on('danmu', function(data) {
+            dm_list.push(data);
+            dm_cnt++;
+            console.log(data);
+          });
         });
         var id = 1;
         var id2 = 1;
@@ -63,11 +30,10 @@ html(lang="zh-CN")
 
         $(document).ready(function(){
           function delete_DM(){
-            if (dm_list.size() > 15){
+            if (dm_cnt > 15){
               console.log(dm_list.length,id);
               if (id > 7){
                 console.log(del);
-                dm_list.pop();
                 $("#"+del).remove();
                 $("#img"+del).remove();
                 $("#name"+del).remove();
@@ -76,25 +42,25 @@ html(lang="zh-CN")
               }
             }
           }
-        function show(){
-          if(dm_list.size() > id){
-            var msg_obj = JSON.parse(dm_list[id].msg);
-            $('div.total').append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
-            $('div.total').append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
-            $('div.total').append('<div class = "DM" id =' + id +'>'+msg_obj.content+'</div>');
-            $('div.DM').animate({"bottom": "+=23vh"},500);
-            $('img.profile').animate({"bottom": "+=23vh"},500);
-            $('div.name').animate({"bottom": "+=23vh"},500);
-            id = id + 1;
+          function show(){
+          if(dm_list.length > id){
+          var msg_obj = JSON.parse(dm_list[id].msg);
+          $('div.total').append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
+          $('div.total').append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
+          $('div.total').append('<div class = "DM" id =' + id +'>'+msg_obj.content+'</div>');
+          $('div.DM').animate({"bottom": "+=23vh"},500);
+          $('img.profile').animate({"bottom": "+=23vh"},500);
+          $('div.name').animate({"bottom": "+=23vh"},500);
+          id = id + 1;
           }
-        }
-        function reset_pic(){
+          }
+          function reset_pic(){
           $('img.picture').fadeOut(1000);
           $('img.picture').fadeIn(1000);
-        }
-        setInterval(show,1800);
-        setInterval(reset_pic,4000);
-        setInterval(delete_DM,1800);
+          }
+          setInterval(show,1800);
+          setInterval(reset_pic,4000);
+          setInterval(delete_DM,1800);
         });
   body 
     .total
