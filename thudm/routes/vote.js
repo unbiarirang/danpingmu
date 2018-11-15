@@ -11,9 +11,9 @@ router.get('/:vote_id', (req, res, next) => {
 
     let vote_id = req.params.vote_id;
 
-    Vote.find({ _id: vote_id })
+    Vote.findById(vote_id)
         .then(vote => {
-            if (vote.length === 0)
+            if (!vote)
                 throw new errors.NotExistError('No voting Activity exists.');
 
             return res.send(vote);

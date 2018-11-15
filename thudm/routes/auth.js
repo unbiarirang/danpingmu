@@ -16,9 +16,9 @@ router.post('/login', (req, res, next) => {
     let input_id = req.body.input_id;
     let input_pw = req.body.input_pw;
 
-    User.find({id: input_id, password: input_pw})
+    User.findOne({id: input_id, password: input_pw})
         .then(user => {
-            if (user.length === 0)
+            if (!user)
                 throw new errors.NotExistError('Wrong id or password');
 
             console.log('login success!');
@@ -43,9 +43,9 @@ router.post('/signup', (req, res, next) => {
     let input_pw = req.body.input_pw;
     let input_email = req.body.input_email;
         
-    User.find({id: input_id})
+    User.findOne({id: input_id})
         .then(user => {
-            if (user.length !== 0)
+            if (!user)
                 throw new errors.DuplicatedError('The id already exists');
 
             user = new User();

@@ -11,9 +11,9 @@ router.get('/:activity_id', (req, res, next) => {
 
     let activity_id = req.params.activity_id;
 
-    Activity.find({ _id: activity_id })
+    Activity.findById(activity_id)
         .then(act => {
-            if (act.length === 0)
+            if (!act)
                 throw new errors.NotExistError('Activity does not exist.');
 
             return res.send(act);

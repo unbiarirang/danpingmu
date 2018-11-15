@@ -11,9 +11,9 @@ router.get('/:lottery_id', (req, res, next) => {
 
     let lottery_id = req.params.lottery_id;
 
-    Lottery.find({ _id: lottery_id })
+    Lottery.findById(lottery_id)
         .then(lottery => {
-            if (lottery.length === 0)
+            if (!lottery)
                 throw new errors.NotExistError('No lottery activity exists.');
 
             return res.send(lottery);
