@@ -1,0 +1,140 @@
+doctype html
+html(lang="zh-CN")
+  head
+    meta(charset="utf-8")
+    |     
+    title 弹屏目
+    // js
+    script(src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js")
+    |     
+    script(src='/socket.io/socket.io.js')
+    script.
+        var dm_cnt = 1;
+        var dm_list = new Array();
+        console.log('hello');
+        var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
+        $(function() {
+        var socket = io();
+        console.log('screen.jade room_id' , room_id);
+        var data = {'room_id': room_id};
+        socket.emit('joinRoom', data);
+        socket.on('danmu', function(data) {
+        dm_list.push(data);
+        dm_cnt++;
+        console.log(data);
+        });
+        });
+        var id = 1;
+        var id2 = 1;
+        var del = 1;
+
+        $(document).ready(function(){
+        function delete_DM(){
+        if (dm_cnt > 15){
+        console.log(dm_list.length,id);
+        if (id > 7){
+        console.log(del);
+        $("#"+del).remove();
+        $("#img"+del).remove();
+        $("#name"+del).remove();
+        del++;
+        dm_cnt--;
+        }
+        }
+        }
+        function show(){
+        if(dm_list.length > id){
+        var msg_obj = JSON.parse(dm_list[id].msg);
+        $('div.total').append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
+        $('div.total').append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
+        $('div.total').append('<div class = "DM" id =' + id +'>'+msg_obj.content+'</div>');
+        $('div.DM').animate({"bottom": "+=23vh"},500);
+        $('img.profile').animate({"bottom": "+=23vh"},500);
+        $('div.name').animate({"bottom": "+=23vh"},500);
+        id = id + 1;
+        }
+        }
+        function reset_pic(){
+        $('img.picture').fadeOut(1000);
+        $('img.picture').fadeIn(1000);
+        }
+        setInterval(show,1800);
+        setInterval(reset_pic,4000);
+        setInterval(delete_DM,1800);
+        });
+  body 
+    .total
+    .pic_slot
+      img.picture(src='http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132')
+     
+      //1920:904
+    style(type="text/css").
+      ::-webkit-scrollbar{
+      display:none;
+      }
+      button{
+      position: absolute;
+      }
+      img.picture{
+      position: absolute;
+      left:10%;
+      top:10%;
+      width:80%;
+      height:80%;
+      border-radius: 20px;
+      }
+      div.DM {
+      background: rgba(0, 0, 0, 0.3);
+      width: 38vw;
+      height: 16.5vh;
+      bottom: 0px;
+      left:12vw;
+      position:absolute;
+      text-align: center;
+      color: white;
+      border-radius: 20px;
+      }
+      div.pic_slot{
+      background: rgba(0, 0, 0, 0.3);
+      width: 31vw;
+      height: 60vh;
+      bottom: 0px;
+      right:1vw;
+      bottom:1vw;
+      position:absolute;
+      text-align: center;
+      color: white;
+      border-radius: 20px;
+      }
+      div.name{
+      position: absolute;
+      width: 10vh;
+      height: 3.3vh;
+      left: 32.2vh;
+      color:black;
+      bottom: 16.6vh;
+      }
+      img.profile{
+      position: absolute;
+      width: 5.5vh;
+      height: 5.5vh;
+      left: 24vh;
+      bottom: 16.6vh;
+      border-radius: 10px;
+      }
+      div.total {
+      float:left;
+      width: 50%;
+      height: 100%;
+      position:relative;
+      left:1%;
+      text-align: center;
+      color: white;
+      }
+      body, html {
+      background: url(/images/testbg4.gif);
+      background-size:cover;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      }
