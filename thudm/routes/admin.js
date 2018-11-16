@@ -76,7 +76,7 @@ router.get('/ticket/:room_id', (req, res, next) => {
                 throw new errors.WeChatResError(body.errmsg);
 
             req.app.set('ticket' + room_id, body.ticket);
-            res.status(200).send('Get ticket OK');
+            res.redirect('http://123.206.96.15/QRCODE/1');
         })
         .catch((err) => {
             // POST failed

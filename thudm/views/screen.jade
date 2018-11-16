@@ -1,7 +1,7 @@
 doctype html
 html(lang="zh-CN")
   head
-    meta(charset="utf-8")
+    meta(charset="utf-8" )
     |     
     title 弹屏目
     // js
@@ -9,8 +9,35 @@ html(lang="zh-CN")
     |     
     script(src='/socket.io/socket.io.js')
     script.
+        function Queue(size){
+          var list = [];
+          this.push = function(data){
+            if (data == null){
+              return false;
+            }
+            if (size != null && !isNaN(size)){
+              if (list.length == size){
+                tihs.pop();
+              }
+            }
+            list.unshift(data);
+            return true;
+          }
+          this.pop = function(){
+            return list.pop();
+          }
+          this.size = function(){
+            return list.length;
+          }
+          this.quere = function(){
+            return list;
+          }
+        }
+
         var dm_cnt = 1;
-        var dm_list = new Array();
+        //var dm_list = new Array();
+        var dm_list = new Queue();
+        var pic_list = new Queue();
         console.log('hello');
         var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
         $(function() {
@@ -19,9 +46,14 @@ html(lang="zh-CN")
           var data = {'room_id': room_id};
           socket.emit('joinRoom', data);
           socket.on('danmu', function(data) {
-            dm_list.push(data);
-            dm_cnt++;
-            console.log(data);
+            var msg_obj = JSON.parse(data.msg);
+            if(msg_obj.msg_type == "text"){
+              dm_list.push(data);
+            }
+            else{
+              console.log(data);
+              pic_list.push(data);
+            }
           });
         });
         var id = 1;
@@ -30,43 +62,49 @@ html(lang="zh-CN")
 
         $(document).ready(function(){
           function delete_DM(){
-            if (dm_cnt > 15){
-              console.log(dm_list.length,id);
-              if (id > 7){
+            if (id - del > 15){
                 console.log(del);
                 $("#"+del).remove();
                 $("#img"+del).remove();
                 $("#name"+del).remove();
                 del++;
-                dm_cnt--;
-              }
             }
           }
           function show(){
-          if(dm_list.length > id){
-          var msg_obj = JSON.parse(dm_list[id].msg);
-          $('div.total').append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
-          $('div.total').append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
-          $('div.total').append('<div class = "DM" id =' + id +'>'+msg_obj.content+'</div>');
-          $('div.DM').animate({"bottom": "+=23vh"},500);
-          $('img.profile').animate({"bottom": "+=23vh"},500);
-          $('div.name').animate({"bottom": "+=23vh"},500);
-          id = id + 1;
-          }
+            if(dm_list.size() > 0){
+              var msg_obj = JSON.parse(dm_list.quere()[dm_list.size() - 1].msg);
+              $('div.total').append('<div class = "DM" id =' + id +'>'+'</div>');
+              $('#' + id).append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
+              //$('#' + id).append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
+              $('#' + id).append("<div class = 'info' id = info" + id +'>' + '</div>');
+              $('#info' + id).append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
+              $('#info' + id).append("<div class = 'content' id = content" + id +'>'+ msg_obj.content +'</div>');
+              $('div.DM').animate({"bottom": "+=23vh"},500);
+              if (Math.floor(Math.random() * 101) > 50)
+                $('#content' + id).css("color","#e53258");
+              //$('img.profile').animate({"bottom": "+=23vh"},500);
+              //$('div.name').animate({"bottom": "+=23vh"},500);
+              id = id + 1;
+              dm_list.pop();
+            }
           }
           function reset_pic(){
-          $('img.picture').fadeOut(1000);
-          $('img.picture').fadeIn(1000);
+            $('img.picture').fadeOut(1000);
+            if(pic_list.size() > 0){
+              var msg_obj = JSON.parse(pic_list.quere()[pic_list.size() - 1].msg);
+              $('img.picture').attr('src',msg_obj.content);
+            }
+            $('img.picture').fadeIn(1000);
           }
           setInterval(show,1800);
           setInterval(reset_pic,4000);
           setInterval(delete_DM,1800);
         });
   body 
+    a(href='../ticket/1',target="_blank",id = 'QRCODE') 获取QRCODE
     .total
     .pic_slot
       img.picture(src='http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132')
-     
       //1920:904
     style(type="text/css").
       ::-webkit-scrollbar{
@@ -77,18 +115,22 @@ html(lang="zh-CN")
       }
       img.picture{
       position: absolute;
-      left:10%;
-      top:10%;
-      width:80%;
-      height:80%;
+      left:5%;
+      top:5%;
+      width:90%;
+      height:90%;
       border-radius: 20px;
+      }
+      #QRCODE{
+        position:absolute;
+        left:80%;
       }
       div.DM {
       background: rgba(0, 0, 0, 0.3);
       width: 38vw;
       height: 16.5vh;
-      bottom: 0px;
-      left:12vw;
+      bottom: -20vh;
+      left:35%;
       position:absolute;
       text-align: center;
       color: white;
@@ -96,8 +138,8 @@ html(lang="zh-CN")
       }
       div.pic_slot{
       background: rgba(0, 0, 0, 0.3);
-      width: 31vw;
-      height: 60vh;
+      width: 26vw;
+      height: 54.6vh;
       bottom: 0px;
       right:1vw;
       bottom:1vw;
@@ -107,20 +149,38 @@ html(lang="zh-CN")
       border-radius: 20px;
       }
       div.name{
-      position: absolute;
-      width: 10vh;
-      height: 3.3vh;
-      left: 32.2vh;
-      color:black;
-      bottom: 16.6vh;
+      position: relative;
+      width: 100%;
+      height: 20%;
+      color:white;
+      text-align:left;
+      font-size: 1vw;
+      overflow: auto;
+      }
+      div.content{
+      position: relative;
+      width: 100%;
+      height: 80%;
+      color:white;
+      text-align:left;
+      font-size: 2vw;
+      display:block;
+      overflow: auto;
+      word-break: break-all;
+      word-wrap: break-word;
       }
       img.profile{
-      position: absolute;
-      width: 5.5vh;
-      height: 5.5vh;
-      left: 24vh;
-      bottom: 16.6vh;
+      position: relative;
+      float:left;
+      width: 20%;
+      height: 100%;
       border-radius: 10px;
+      }
+      div.info{
+        position:relative;
+        float:left;
+        width: 80%;
+        height: 100%;
       }
       div.total {
       float:left;

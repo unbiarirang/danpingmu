@@ -1,10 +1,13 @@
 html
   head
     link#bootstrap-css(href='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css', rel='stylesheet')
-    script(src='//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js')
     link(rel='stylesheet', href='style.css', type='text/css', media='screen')
     script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-    script(type = 'text/javascript').
+        script(src="http://cdn.bootcss.com/blueimp-md5/1.1.0/js/md5.js")
+    script(src="http://cdn.bootcss.com/blueimp-md5/1.1.0/js/md5.min.js")
+
+    script(script type="text/javascript")
+    script.
       function signupClick() {
         var id=document.signup.input_id.value;
         var pw=document.signup.input_pw.value;
@@ -32,13 +35,7 @@ html
             alert("Please confirm your Email!");
             return;
         }
-        var buf = crypto.randomBytes(64);
-        crypto.pbkdf2(input_pw, buf.toString('base64'), 10000, 50, 'sha512', (err,user)=>{
-            if (err)
-                throw err;
-            document.signup.input_pw.value = key.toString('base64');
-            document.salt = buf;
-        })
+          document.signup.input_pw.value = md5(pw);
           document.signup.submit();
       }
 
@@ -52,13 +49,13 @@ html
           p1(style='color:red') #{warning}
           form(method = "post",action ='signup',name = 'signup')
             .form-group
-              input#inputEmail.form-control(type = 'text', placeholder = '账户',name = 'input_id')
+              input#inputId.form-control(type = 'text', placeholder = '账户',name = 'input_id')
             .form-group
               input#inputEmail.form-control(type = 'text', placeholder = '邮箱',name = 'input_email')
             .form-group
               input#inputPassword.form-control(type = 'password', placeholder = '密码',name = 'input_pw')
             .form-group
-              input#inputPassword.form-control(type = 'password', placeholder = '确认密码',name = 'input_confirm')
+              input#inputConfirm.form-control(type = 'password', placeholder = '确认密码',name = 'input_confirm')
             .forgot  
           button.btn.btn-primary(onClick = 'signupClick()') 注册
           

@@ -4,6 +4,7 @@ const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
+const crypto = require('crypto');
 
 router.get('/login', (req, res, next) => {
     console.log('+++req.session:', req.session);
@@ -16,15 +17,20 @@ router.post('/login', (req, res, next) => {
     let input_id = req.body.input_id;
     let input_pw = req.body.input_pw;
 
-    User.find({id: input_id, password: input_pw})
+    User.find({id: input_id})
         .then(user => {
             if (user.length === 0)
-                throw new errors.NotExistError('Wrong id or password');
-
-            console.log('login success!');
-            req.session.login = true;
-            req.session.admin_id = input_id;
-            return res.json({result: 1});
+                throw new errors.NotExistError('Wrong id');
+            var buf = User.salt;
+            crypto.pbkdf2(input_pw, buf.toString('base64'), 10000, 50, 'sha512',function(err,key){
+              if(User.password == input_pw){
+                req.session.login = true;
+                req.session.admin_id = input_id;
+                res.redirect("../screen/1");
+              }
+              else
+                throw new errors.NotExistError('Wrong id');
+            })
         })
         .catch(err => {
             console.error(err);
@@ -47,15 +53,18 @@ router.post('/signup', (req, res, next) => {
         .then(user => {
             if (user.length !== 0)
                 throw new errors.DuplicatedError('The id already exists');
-
-            user = new User();
-            user.id = input_id;
-            user.password = input_pw;
-            user.email = input_email;
-            return user.save();
+            var buf = crypto.randomBytes(64);
+            crypto.pbkdf2(input_pw, buf.toString('base64'), 10000, 50, 'sha512',function(err, key){
+              user = new User();
+              user.id = input_id;
+              user.salt = buf;
+              user.password = key.toString('base64');
+              user.email = input_email;
+              return user.save();
+            })
         })
         .then(() => {
-            return res.json({result: 1});
+            res.redirect('login');
         })
         .catch(err => {
             console.error(err);

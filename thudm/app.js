@@ -38,7 +38,7 @@ var redisOptions = {
 // Admin session
 app.use(session({
     store: new redisStore(redisOptions),
-    saveUninitialized: true, // FIXME: false
+    saveUninitialized: false,
     resave: false,
     secret: config.SESSION_SECRET,
     cookie: { maxAge: 24*60*60*1000 } // Expires in 1 day

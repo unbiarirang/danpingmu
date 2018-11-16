@@ -16,7 +16,8 @@ router.post('/', (req, res, next) => {
         case 'text':
             utils.get_user_info(req)
                 .then((user_info) => {
-                    let room_id = user_info.room_id;
+                    //let room_id = user_info.room_id;
+                    let room_id = 1;
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
                     let content = utils.get_wechat_input(req, 'content');
@@ -43,7 +44,8 @@ router.post('/', (req, res, next) => {
         case 'image':
             utils.get_user_info(req)
                 .then((user_info) => {
-                    let room_id = user_info.room_id;
+                    //let room_id = user_info.room_id;
+                    let room_id = 1;
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
                     let content = utils.get_wechat_input(req, 'picurl');
