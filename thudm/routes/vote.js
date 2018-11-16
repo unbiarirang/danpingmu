@@ -24,6 +24,40 @@ router.get('/:vote_id', (req, res, next) => {
         });
 });
 
+// Get vote result
+router.get('/:vote_id/result', (req, res, next) => {
+    const redis = req.app.get('redis');
+    const key = 'vote_' + req.params.vote_id;
+
+    redis.hgetallAsync(key)
+        .then(data => {
+            console.log('data: ', data);
+            res.send(data);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+// Vote for one option
+router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
+    const redis = req.app.get('redis');
+    const key = 'vote_' + req.params.vote_id;
+    const field = req.params.option_id;
+
+    redis.hincrbyAsync(key, field, 1)
+        .then(data => {
+            console.log('data: ', data);
+            res.send(200);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+
 router.post('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();

@@ -1,5 +1,7 @@
 const redis = require('redis');
+const bluebird = require('bluebird');
 const RSMQPromise = require('rsmq-promise');
+bluebird.promisifyAll(redis);
 
 const options = (config) => {
     return {
@@ -12,7 +14,7 @@ const options = (config) => {
 let redisClient = (config) => {
     var redisClient = redis.createClient(options(config));
     redisClient.on('connect', () => { console.log('redis connected'); })
-               .on('error', (err) => { console.log(err); });
+               .on('error', (err) => { console.error(err); });
     return redisClient
 };
 exports.redisClient = redisClient;

@@ -25,6 +25,7 @@ const vote_schema = new mongoose.Schema({
     sub_title: String,
     option_num: Number,
     options: mongoose.Mixed,
+    pic_urls: mongoose.Mixed,
     start_time: Date,
     end_time: Date,
 });

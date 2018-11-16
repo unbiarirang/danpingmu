@@ -46,3 +46,10 @@ class NotLoggedInError extends BaseError {
     }
 }
 exports.NotLoggedInError = NotLoggedInError;
+
+class RedisError extends BaseError {
+    constructor(message) {
+        super(5, message || 'Error from redis', 500);
+    }
+}
+exports.RedisError = RedisError;

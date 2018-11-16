@@ -1,6 +1,6 @@
 const express = require('express');
 let router = express.Router();
-const assert = require('assert');
+const utils = require('../common/utils');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const Lottery = models.Lottery;
@@ -21,6 +21,19 @@ router.get('/:lottery_id', (req, res, next) => {
         .catch(err => {
             console.error(err);
             next(err);
+        });
+});
+
+// Draw for winners
+router.get('/:lottery_id/draw', (req, res, next) => {
+    // FIXME: for test
+    //if (!req.session.login)
+    //    throw new errors.NotLoggedInError();
+
+    utils.request_random_nums(10, 1, 100)
+        .then(data => {
+            console.log('random data: ', data);
+            res.send(data);
         });
 });
 

@@ -3,6 +3,13 @@ const rp = require('request-promise');
 const config = require('../config.json');
 const errors = require('./errors');
 
+String.prototype.getNums = function(){
+    let rx=/[+-]?((\.\d+)|(\d+(\.\d+)?)([eE][+-]?\d+)?)/g,
+    mapN = this.match(rx) || [];
+
+    return mapN.map(Number);
+};
+
 class Room {
     constructor(room_id, generated_id=0) {
         this.room_id = room_id;
@@ -55,6 +62,7 @@ const get_access_token = (req) => {
     }
 
     console.log('Get new access token');
+
     // Request a new access_token
     let options = {
         uri: 'https://api.weixin.qq.com/cgi-bin/token',
@@ -138,3 +146,25 @@ const get_wechat_input = (req, key) => {
     return req.body.xml[key][0];
 }
 exports.get_wechat_input = get_wechat_input;
+
+const request_random_nums = (amount, min, max) => {
+    let options = {
+        uri: 'https://www.random.org/integers/',
+        qs: {
+            num: amount,
+            min: min,
+            max: max,
+            col: amount,
+            base: 10,
+            format: 'plain',
+            rmd: 'new'
+        },
+        json: true
+    };
+
+    return rp(options)
+        .then(data => {
+            return data.getNums();
+        });
+}
+exports.request_random_nums = request_random_nums;
