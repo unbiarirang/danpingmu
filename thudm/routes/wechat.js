@@ -11,29 +11,38 @@ router.post('/', (req, res, next) => {
     console.log(req.query, req.params, req.body);
 
     let msg_type = utils.get_wechat_input(req, 'msgtype');
+    let tmp_generated_id;
     switch (msg_type) {
         // User sent a text message
         case 'text':
             utils.get_user_info(req)
                 .then((user_info) => {
-                    //let room_id = user_info.room_id;
-                    let room_id = 1;
+                    let room_id = user_info.room_id; // FIXME: for test
+                    //let room_id = 1;
+                    let content = utils.get_wechat_input(req, 'content');
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
-                    let content = utils.get_wechat_input(req, 'content');
-                    console.log('Send to room', room_id);
-                    socketApi.reviewContent(room_id, JSON.stringify({
-                        "msg_type": 'text',
+                    let room = req.app.get('room_' + room_id);
+                    let msg_obj = {
+                        "id": room.gen_id(req.app.get('redis')),
+                        "type": "text",
                         "content": content,
                         "nickname": nickname,
-                        "head_img_url": head_img_url
-                    }));
-                    socketApi.sendNotification(room_id, JSON.stringify({
-                        "msg_type": 'text',
-                        "content": content,
-                        "nickname": nickname,
-                        "head_img_url": head_img_url
-                    }));
+                        "head_img_url": head_img_url,
+                        "review_flag": 0
+                    };
+
+                    let rsmq = req.app.get('rsmq');
+                    rsmq.sendMessage({
+                            qname: room_id,
+                            message: JSON.stringify(msg_obj)
+                        })
+                        .then(data => {
+                            console.log("RSMQ data sent", data);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                        });
                 })
                 .catch((err) => { // TODO
                     console.log(err);
@@ -50,7 +59,7 @@ router.post('/', (req, res, next) => {
                     let head_img_url = user_info.head_img_url;
                     let content = utils.get_wechat_input(req, 'picurl');
                     console.log('Send to room', room_id);
-                    socketApi.sendNotification(room_id, JSON.stringify({
+                    socketApi.reviewContent(room_id, JSON.stringify({
                         "msg_type": 'image',
                         "content": content,
                         "nickname": nickname,

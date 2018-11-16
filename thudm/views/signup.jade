@@ -8,6 +8,9 @@ html
 
     script(script type="text/javascript")
     script.
+      var err = !{err != null? JSON.stringify(err): 'null'};
+      if (err) {alert(err.message);}
+
       function signupClick() {
         var id=document.signup.input_id.value;
         var pw=document.signup.input_pw.value;
@@ -15,24 +18,24 @@ html
         var email=document.signup.input_email.value;
        
         if(id==null||id.length==0){
-          alert("Please confirm your ID!");
+          alert("Please confirm your ID.");
           return;
         }
         if(pw==null||pw.length==0){
-          alert("Please confirm your password!");
+          alert("Please confirm your password.");
           return;
         }
         if(!(confirm == pw)){
-          alert("Please confirm your password!");
+          alert("Please confirm your password.");
           return;
         }
         if(pw.length < 8){
-            alert("The length of password should be longer than 8!");
+            alert("The length of password should be longer than 8.");
             return;
         }
         var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$");
         if (!reg.test(email)) {
-            alert("Please confirm your Email!");
+            alert("Please confirm your Email.");
             return;
         }
           document.signup.input_pw.value = md5(pw);
@@ -51,11 +54,11 @@ html
             .form-group
               input#inputId.form-control(type = 'text', placeholder = '账户',name = 'input_id')
             .form-group
-              input#inputEmail.form-control(type = 'text', placeholder = '邮箱',name = 'input_email')
-            .form-group
               input#inputPassword.form-control(type = 'password', placeholder = '密码',name = 'input_pw')
             .form-group
               input#inputConfirm.form-control(type = 'password', placeholder = '确认密码',name = 'input_confirm')
+            .form-group
+              input#inputEmail.form-control(type = 'text', placeholder = '邮箱',name = 'input_email')
             .forgot  
           button.btn.btn-primary(onClick = 'signupClick()') 注册
           

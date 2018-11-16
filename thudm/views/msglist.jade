@@ -16,14 +16,23 @@ body
 script(src='/socket.io/socket.io.js')
 script.
   var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
+  var msg_list = !{msg_list != null? JSON.stringify(msg_list): 'null'};
 
   $(function() {
     var socket = io();
     var data = {'room_id': room_id};
     socket.emit('joinRoom', data);
+    console.log('room_id: ', room_id);
+    console.log('msg_list: ', msg_list);
+
+    for (let msg of msg_list) {
+        socket.emit('passReview', msg);
+    }
 
     socket.on('review', function(data) {
+      console.log(data);
       msg_obj = JSON.parse(data.msg);
       $("#messages").append($('<li>').text(msg_obj.content));
+      socket.emit('passReview', data);
     });
   });

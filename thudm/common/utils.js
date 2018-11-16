@@ -3,6 +3,21 @@ const rp = require('request-promise');
 const config = require('../config.json');
 const errors = require('./errors');
 
+class Room {
+    constructor(room_id, generated_id=0) {
+        this.room_id = room_id;
+        this.generated_id = generated_id;
+    }
+
+    gen_id(redis) {
+        let id = this.generated_id;
+        redis.hset('generated_id', this.room_id, id);
+        this.generated_id++;
+        return id;
+    }
+}
+exports.Room = Room;
+
 const sign = () => {
     return (req, res, next) => {
         let token = config.WECHAT_TOKEN;

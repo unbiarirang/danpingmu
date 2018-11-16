@@ -4,6 +4,7 @@ const user_schema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     email: { type: String, required: true },
+    salt: { type: String, required: true },
 });
 exports.User = mongoose.model('User', user_schema);
 
@@ -35,4 +36,14 @@ const lottery_schema = new mongoose.Schema({
     sub_title: String,
     winner_num: Number,
 });
-exports.Lottery= mongoose.model('Lottery', lottery_schema);
+exports.Lottery = mongoose.model('Lottery', lottery_schema);
+
+const message_schema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    type: { type: String ,required: true },
+    content: { type: String, required: true },
+    nickname: { type: String, required: true },
+    head_img_url: { type: String, required: true },
+    review_flag: { type: Boolean, required: true, default: false },
+});
+exports.Message = mongoose.model('Message', message_schema);

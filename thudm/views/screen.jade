@@ -38,20 +38,19 @@ html(lang="zh-CN")
         //var dm_list = new Array();
         var dm_list = new Queue();
         var pic_list = new Queue();
-        console.log('hello');
         var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
         $(function() {
           var socket = io();
-          console.log('screen.jade room_id' , room_id);
           var data = {'room_id': room_id};
           socket.emit('joinRoom', data);
+          console.log('rooom: ',data);
           socket.on('danmu', function(data) {
             var msg_obj = JSON.parse(data.msg);
             if(msg_obj.msg_type == "text"){
+              console.log('data ',data);
               dm_list.push(data);
             }
             else{
-              console.log(data);
               pic_list.push(data);
             }
           });
@@ -63,7 +62,6 @@ html(lang="zh-CN")
         $(document).ready(function(){
           function delete_DM(){
             if (id - del > 15){
-                console.log(del);
                 $("#"+del).remove();
                 $("#img"+del).remove();
                 $("#name"+del).remove();
