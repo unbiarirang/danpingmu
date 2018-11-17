@@ -91,7 +91,7 @@ html(lang="zh-CN")
             $('img.picture').fadeOut(1000);
             if(pic_list.size() > 0){
               var msg_obj = JSON.parse(pic_list.quere()[pic_list.size() - 1].msg);
-              $('img.picture').attr('src',msg_obj.content);
+              $('img.picture').attr('src','../images/fromuser/' + msg_obj.content + '.png');
             }
             $('img.picture').fadeIn(1000);
           }

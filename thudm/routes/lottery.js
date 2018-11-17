@@ -56,7 +56,8 @@ router.post('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let lottery = new Lottery();
-    lottery.activity_id = req.session.activity_id;
+    //lottery.activity_id = req.session.activity_id;
+    lottery.activity_id = 1; //FIXME: for test
     lottery.title = req.body.title;
     lottery.sub_title = req.body.sub_title;
     lottery.winner_num = req.body.winner_num;

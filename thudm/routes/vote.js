@@ -90,7 +90,8 @@ router.post('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let vote = new Vote();
-    vote.activity_id = 1 // FIXME: 
+    //vote.activity_id = req.session.activity_id;
+    vote.activity_id = 1 // FIXME: for test
     vote.title = req.body.title;
     vote.sub_title = req.body.sub_title;
     vote.option_num = req.body.option_num;

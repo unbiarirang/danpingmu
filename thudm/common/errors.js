@@ -49,14 +49,21 @@ exports.NotLoggedInError = NotLoggedInError;
 
 class RedisError extends BaseError {
     constructor(message) {
-        super(5, message || 'Error from redis', 500);
+        super(5, message || 'Error from redis.', 500);
     }
 }
 exports.RedisError = RedisError;
 
 class TypeError extends BaseError {
     constructor(message) {
-        super(6, message || 'Type is wrong', 500);
+        super(6, message || 'Type is wrong.', 500);
     }
 }
 exports.TypeError = TypeError;
+
+class FileOpError extends BaseError {
+    constructor(message) {
+        super(7, message || 'File operation error.', 500);
+    }
+}
+exports.FileOpError = FileOpError;
