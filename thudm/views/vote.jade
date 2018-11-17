@@ -1,0 +1,136 @@
+doctype html
+html(lang="zh-CN")
+    head
+      meta(charset="utf-8")
+      title 投票
+      script(src="/js/ajax.js")
+      script.
+          $(document).ready(function(){
+              var obj;
+              var op_num = 4;
+              var candy_num = 0;
+              var pic_urls = new Array();
+              var title = new Array();
+              console.log("hello");
+              for (var i = 0; i < 4; i++){
+                  pic_urls[i] = 'http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132';
+                  title[i] = "hello";
+              } 
+              if (op_num % 2 == 0){
+                  line_num = op_num / 2;
+                  for(var i = 0; i < line_num; i++){
+                    $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
+                    $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                    $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                  }
+              }
+              else {
+                  line_num = op_num / 2 + 1;
+                  for(var i = 0; i < line_num; i++){
+                    $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
+                    $('#line' + id).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                    $('#line' + id).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                  }
+              }
+             console.log(line_num - 1);
+             $('#line' + (line_num - 1)).append('<input type = button action = voteclass = voteit value = Vote>');
+             for(var id = 0; id < op_num; id++){
+                 $('#candy' + id).append("<div class = form  id = form" + id + '></div>');
+                 $('#form' + id).append("<img src = " + pic_urls[id] + '>');
+                 $('#form' + id).append("<div class = title id = title" + id +'>' + '</div>');
+                 $('#title' + id).append("<input type = 'radio' class = check  id = radio" + id + ">" + title[id]);
+             }
+              
+             $("input.check").click(function(){
+               for(var i = 0; i < $("input.check").length; i++){
+                 if($(this).attr('id') != ('radio' + i)){
+                   $("#radio" + i).attr("checked",false);
+                 }
+               }
+             });
+             $("input.voteit").click(function(){
+               for(var i = 0; i < $("input.check").length; i++{
+                 if($("#radio" + id).attr('checked') == true){
+                    var vote_who = [{vote: id}];
+                    $.ajax({
+                      type:'GET',
+                      data:JSON.stringify(vote_who),
+                      contentType:'application/json',
+                      dataType:'json',
+                      url:'/vote/:vote_id/votefor/:option_id',
+                      success: function(data){
+                        alert("OK");
+                      },
+                      error: function(e){
+                        alert("error");
+                      }
+                    })
+                 }
+               }
+             })
+ 
+          });
+   body
+      .total
+
+style(type="text/css").
+  div.total{
+      position:relative;
+      width:100vw;
+      height:100vh;
+  }
+  div.line{
+      position:relative;
+      width:100%;
+      height:30%;
+  }
+  div.candidate{
+      position:relative;
+      width:50%;
+      height:100%;
+      float:left;
+      border-radius:20px;
+  }
+  div.form{
+      position:relative;
+      background:rgba(0,0,0,0.3);
+      border-radius: 20px;
+      left:10%;
+      width:80%;
+      height:80%;
+  }
+  div.title{
+      position:relative;
+      text-align:center;
+      width:auto;
+  }
+  input.voteit{
+      position:relative;
+      left:45%;
+      width:10%;
+
+  }
+  div.content{
+      position:relative;
+      width:100%;
+      text-align:center;
+      height:auto;
+      float:left;
+  }
+  input.check{
+      position:relative;
+  }
+  img{
+      position:relative;
+      width:60%;
+      height:70%;
+      left:20%;
+      border-radius:20px;
+  }
+  body, html{
+  background: url(../images/bg.jpg);
+  }
