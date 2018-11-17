@@ -45,6 +45,7 @@ html(lang="zh-CN")
           socket.emit('joinRoom', data);
           console.log('rooom: ',data);
           socket.on('danmu', function(data) {
+            console.log(data);
             var msg_obj = JSON.parse(data.msg);
             if(msg_obj.msg_type == "text"){
               console.log('data ',data);

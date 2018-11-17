@@ -3,8 +3,8 @@ const rp = require('request-promise');
 const config = require('../config.json');
 const errors = require('./errors');
 
-String.prototype.getNums = function(){
-    let rx=/[+-]?((\.\d+)|(\d+(\.\d+)?)([eE][+-]?\d+)?)/g,
+String.prototype.getNums = () => {
+    let rx =/[+-]?((\.\d+)|(\d+(\.\d+)?)([eE][+-]?\d+)?)/g,
     mapN = this.match(rx) || [];
 
     return mapN.map(Number);
@@ -143,6 +143,9 @@ const update_user_info = (req, options) => {
 exports.update_user_info = update_user_info;
 
 const get_wechat_input = (req, key) => {
+    if (!req.body.xml[key] || req.body.xml[key].length <= 0)
+        throw new errors.NotExistError('The wechat message does not have the property you required');
+
     return req.body.xml[key][0];
 }
 exports.get_wechat_input = get_wechat_input;
@@ -164,7 +167,15 @@ const request_random_nums = (amount, min, max) => {
 
     return rp(options)
         .then(data => {
-            return data.getNums();
+            console.log('random data: ', data);
+
+            if (typeof(data) === 'string')
+                return data.getNums();
+
+            if (typeof(data) === 'number')
+                return [data];
+
+            throw new errors.TypeError();
         });
 }
 exports.request_random_nums = request_random_nums;

@@ -145,7 +145,7 @@ router.get('/screen/:room_id', (req, res, next) => {
     let room_id = req.params.room_id;
     let rsmq = req.app.get('rsmq');
 
-    // FIXME: create queue in create activity
+    // FIXME: for test. create queue in create activity
     rsmq.createQueue({ qname: room_id })
         .then(done => {
             console.log("QUEUE created");

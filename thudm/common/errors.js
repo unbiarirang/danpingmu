@@ -53,3 +53,10 @@ class RedisError extends BaseError {
     }
 }
 exports.RedisError = RedisError;
+
+class TypeError extends BaseError {
+    constructor(message) {
+        super(6, message || 'Type is wrong', 500);
+    }
+}
+exports.TypeError = TypeError;

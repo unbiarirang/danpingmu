@@ -1,0 +1,13 @@
+{
+    "WECHAT_APPID": "wx44f0c8e2b7c72fb3",
+    "WECHAT_APPSECRET": "2f2d7f23899424fbc4562f9bd6ed2f2c",
+    "WECHAT_TOKEN": "5xehkj17i_c&c79*8b601c$^a5jjl@e9!gw859fz=k%oe-l5%4",
+    "DB_NAME": "test",
+    "DB_HOST": "123.206.96.15",
+    "DB_PORT": 7000,
+    "REDIS_HOST": "123.206.96.15",
+    "REDIS_PORT": 6000,
+    "REDIS_SECRET": "THUDM_DANPINGMU_REDIS",
+    "REDIS_DB_INDEX": 1, 
+    "SESSION_SECRET": "temp"
+}

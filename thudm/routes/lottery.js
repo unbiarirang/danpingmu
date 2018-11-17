@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const utils = require('../common/utils');
 const errors = require('../common/errors');
+const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Lottery = models.Lottery;
 
@@ -24,16 +25,29 @@ router.get('/:lottery_id', (req, res, next) => {
         });
 });
 
-// Draw for winners
+// Draw for winners // FIXME: temporary
 router.get('/:lottery_id/draw', (req, res, next) => {
     // FIXME: for test
     //if (!req.session.login)
     //    throw new errors.NotLoggedInError();
 
-    utils.request_random_nums(10, 1, 100)
+    let sendData = {};
+    let users = req.app.get('cache');
+    sendData.users = JSON.stringify([...users]);
+
+    let winner_num = 1;
+    let min_num = 0; // FIXME: 1 for test
+    let max_num = users.size;
+    utils.request_random_nums(winner_num, 0, max_num)
         .then(data => {
-            console.log('random data: ', data);
-            res.send(data);
+            sendData.data = data;
+            console.log('sendData: ', sendData);
+            socketApi.displayMessage(1, sendData);
+            res.send(sendData);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
         });
 });
 

@@ -16,9 +16,9 @@ router.post('/', (req, res, next) => {
         // User sent a text message
         case 'text':
             utils.get_user_info(req)
-                .then((user_info) => {
-                    let room_id = user_info.room_id; // FIXME: for test
-                    //let room_id = 1;
+                .then(user_info => {
+                    //let room_id = user_info.room_id; // FIXME: for test
+                    let room_id = 1;
                     let content = utils.get_wechat_input(req, 'content');
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
@@ -39,13 +39,10 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
-                        })
-                        .catch(err => {
-                            console.log(err);
                         });
                 })
-                .catch((err) => { // TODO
-                    console.log(err);
+                .catch((err) => {
+                    console.error(err);
                 });
             break;
 
@@ -91,6 +88,7 @@ router.post('/', (req, res, next) => {
                 });
             break;
     }
+
     // Send empty response
     res.send("");
 });

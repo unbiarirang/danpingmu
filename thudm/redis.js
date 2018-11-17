@@ -7,7 +7,8 @@ const options = (config) => {
     return {
         host: config.REDIS_HOST,
         port: config.REDIS_PORT,
-        password: config.REDIS_SECRET
+        password: config.REDIS_SECRET,
+        db: config.REDIS_DB_INDEX
     };
 };
 
