@@ -56,7 +56,7 @@ router.get('/:vote_id/user', (req, res, next) => {
 
             console.log('vote: ', vote);
 
-            return res.send({
+            return res.render('vote', {
                 options: vote.options,
                 pic_urls: vote.pic_urls
             });

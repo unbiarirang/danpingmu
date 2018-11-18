@@ -43,7 +43,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
             sendData.data = data;
             console.log('sendData: ', sendData);
             socketApi.displayMessage(1, sendData);
-            res.send(sendData);
+            res.render('lottery',sendData);
         })
         .catch(err => {
             console.error(err);

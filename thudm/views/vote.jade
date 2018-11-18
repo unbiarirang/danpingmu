@@ -5,17 +5,14 @@ html(lang="zh-CN")
       title 投票
       script(src="/js/ajax.js")
       script.
+          var options = !{options != null? JSON.stringify(options): 'null'};
+          var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
+          console.log("options = ",options);
+          console.log("pic_urls = ",pic_urls);
           $(document).ready(function(){
-              var obj;
-              var op_num = 4;
+              var op_num = options.length;
               var candy_num = 0;
-              var pic_urls = new Array();
-              var title = new Array();
-              console.log("hello");
-              for (var i = 0; i < 4; i++){
-                  pic_urls[i] = 'http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132';
-                  title[i] = "hello";
-              } 
+              var line_num;
               if (op_num % 2 == 0){
                   line_num = op_num / 2;
                   for(var i = 0; i < line_num; i++){
@@ -37,12 +34,12 @@ html(lang="zh-CN")
                   }
               }
              console.log(line_num - 1);
-             $('#line' + (line_num - 1)).append('<input type = button action = voteclass = voteit value = Vote>');
+             $('#line' + (line_num - 1)).append('<input type = button action = vote class = voteit value = Vote>');
              for(var id = 0; id < op_num; id++){
                  $('#candy' + id).append("<div class = form  id = form" + id + '></div>');
                  $('#form' + id).append("<img src = " + pic_urls[id] + '>');
                  $('#form' + id).append("<div class = title id = title" + id +'>' + '</div>');
-                 $('#title' + id).append("<input type = 'radio' class = check  id = radio" + id + ">" + title[id]);
+                 $('#title' + id).append("<input type = 'radio' class = check  id = radio" + id + ">" + options[id]);
              }
               
              $("input.check").click(function(){
@@ -53,24 +50,31 @@ html(lang="zh-CN")
                }
              });
              $("input.voteit").click(function(){
-               for(var i = 0; i < $("input.check").length; i++{
-                 if($("#radio" + id).attr('checked') == true){
-                    var vote_who = [{vote: id}];
+               var flag = 0;
+               for(var i = 0; i < $("input.check").length; i++){
+                 if($("#radio" + i).attr('checked') == true){
+                    flag = 1;
+                    console.log("vote id = ",i);
                     $.ajax({
-                      type:'GET',
-                      data:JSON.stringify(vote_who),
-                      contentType:'application/json',
-                      dataType:'json',
-                      url:'/vote/:vote_id/votefor/:option_id',
+                      type:"GET",
+                      data:{"vote": i},
+                      dataType:"text",
+                      url:"/vote/5bf01187dadb0b7d97d0ef36/votefor/" + i,
                       success: function(data){
                         alert("OK");
+                        console.log(data);
                       },
-                      error: function(e){
-                        alert("error");
+                      error: function(XMLHttpRequest,textStatus,errorThrown){
+                       alert(XMLHttpRequest.status);
+                       alert(XMLHttpRequest.readyState);
+                       alert(textStatus);
                       }
                     })
                  }
+                 window.location = "../../vote_warning.html";
                }
+               if(flag == 0)
+                alert("请选择一个对象");
              })
  
           });
@@ -132,5 +136,5 @@ style(type="text/css").
       border-radius:20px;
   }
   body, html{
-  background: url(../images/bg.jpg);
+  background: url(/images/bg.jpg);
   }

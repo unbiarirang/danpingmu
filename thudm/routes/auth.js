@@ -43,7 +43,7 @@ router.post('/login', (req, res, next) => {
 router.get('/signup', (req, res, next) => {
     console.log('+++req.session:', req.session);
     console.log('+++req.session.id:', req.session.id);
-    res.render('signup');
+    res.render('lottery');
 });
 
 router.post('/signup', (req, res, next) => {
