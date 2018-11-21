@@ -1,0 +1,169 @@
+doctype html
+html(lang='zh')
+  head
+    meta(charset='UTF-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title 弹幕审核
+    link(rel='stylesheet', type='text/css', href='msg/normalize.css')
+    link(rel='stylesheet', type='text/css', href='msg/demo.css')
+    //- 相关函数
+    script(type='text/javascript').
+      var json = { data: [] };
+      function add() {
+        var name = $("#name").val();
+        var content = $("#content").val();
+        if(name == null || name.length == 0){ 
+          alert("名字不能为空！");
+          return;}
+        if(content == null || content.length == 0){
+          alert("弹幕内容不能为空！");
+          return;}
+        json.data.push({name: "aaa"});
+        //渲染模板
+        $("#listShow").html(TrimPath.processDOMTemplate("listTemplate", json));
+        //调用客户端分页
+        $(this).cPager({
+        pageSize: 8, //每一页显示的记录条数
+        pageid: "pager", //分页容器ID
+        itemClass: "li-item" //个体元素名称
+        });
+        div(style="text-align:center;margin:50px 0; font:normal 14px/24px 'MicroSoft YaHei';")
+        br
+        br
+        $("table").append("<tr><td><input type='checkbox' name='ck'></td><td>" + name + "</td><td>" + content +"</td><td><button onclick='allow(this)'>发送</button>"+"  <button onclick='refuse(this)'>拒绝</button></td></tr>");
+      }
+
+      function refuse(a){
+      $(a).parent().parent().remove();
+      }
+      function allow(a){
+      $(a).parent().parent().remove();
+      }
+      function ckall(e){
+      var es= $(":input[name='ck']");
+      for(var i=0;i<es.length;i++){
+      es[i].checked=e.checked;
+      }
+      }
+      function piliang(){
+      var checks=$(":checked[name=ck]");
+      if (checks.length==0) {
+      alert("请至少选择一条！");
+      return;
+      }
+      for(var i in checks){
+      checks[i].parentNode.parentNode.remove();}
+      }
+    //- 主要样式
+    link(rel='stylesheet', type='text/css', href='msg/cPager.css')
+    style(type='text/css').
+      html,
+      body,
+      ul,
+      li {
+      margin: 0;
+      padding: 0;
+      }
+      .container{
+      width: 800px;
+      max-width: 100%;
+      }
+      ul li.li-item{
+      list-style: none;
+      line-height: 35px;
+      border-bottom: 1px solid #eee;
+      font-family: 微软雅黑;
+      animation: fadeIn 1s 1 0s;
+      -webkit-animation:fadeIn 1s 1 0s;
+      -moz-animation:fadeIn 1s 1 0s;
+      -ms-animation:fadeIn 1s 1 0s;
+      -o-animation:fadeIn 1s 1 0s;
+      }
+      
+      /**淡入淡出过渡效果**/
+      @keyframes fadeIn {
+      0% {
+      opacity: 0; /*初始状态 透明度为0*/
+      }
+      50% {
+      opacity: 0.5; /*中间状态 透明度为0.5*/
+      }
+      100% {
+      opacity: 1; /*结尾状态 透明度为1*/
+      }
+      }
+      @-webkit-keyframes fadeIn {
+      0% {
+      opacity: 0; /*初始状态 透明度为0*/
+      }
+      50% {
+      opacity: 0.5; /*中间状态 透明度为0.5*/
+      }
+      100% {
+      opacity: 1; /*结尾状态 透明度为1*/
+      }
+      }
+      @-moz-keyframes fadeIn {
+      0% {
+      opacity: 0; /*初始状态 透明度为0*/
+      }
+      50% {
+      opacity: 0.5; /*中间状态 透明度为0.5*/
+      }
+      100% {
+      opacity: 1; /*结尾状态 透明度为1*/
+      }
+      }
+      @-ms-keyframes fadeIn {
+      0% {
+      opacity: 0; /*初始状态 透明度为0*/
+      }
+      50% {
+      opacity: 0.5; /*中间状态 透明度为0.5*/
+      }
+      100% {
+      opacity: 1; /*结尾状态 透明度为1*/
+      }
+      }
+      @-o-keyframes fadeIn {
+      0% {
+      opacity: 0; /*初始状态 透明度为0*/
+      }
+      50% {
+      opacity: 0.5; /*中间状态 透明度为0.5*/
+      }
+      100% {
+      opacity: 1; /*结尾状态 透明度为1*/
+      }
+      }
+      .li-item {
+      margin: auto 20px;
+      }
+  body
+    //- 上功能栏
+    div
+      | 姓名
+      input#name
+      | 弹幕
+      input#content
+      button(onclick='add()') 添加
+      br
+      button(onclick='piliang()') 批量通过
+
+    .container
+      // 容器
+      ul#listShow
+      // 分页容器
+      #pager.turn-page
+      // 模板
+      textarea#listTemplate(style='display: none;')
+        | {for item in data}
+        | <li class="li-item hide">${item.name}</li>
+        | {/for}
+    script(src='js/jquery-1.4.3.min.js', type='text/javascript')
+    // 引入JS模板引擎
+    script(type='text/javascript', src='msg/template.js')
+    // 引入客服端分页插件
+    script(type='text/javascript', src='msg/cPager.js')
+     

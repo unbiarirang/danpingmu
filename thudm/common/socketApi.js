@@ -8,14 +8,9 @@ io.on('connection', (socket) => {
     console.log('A user connected');
 
     socket.on('joinRoom', (data) => {
-        let room_id = data.room_id;
-        socket.room_id = data.room_id;
+        var room_id = data.room_id;
         socket.join(room_id);
-        socket.broadcast.to(socket.room_id).emit('event','User joined a room');
-    });
-
-    socket.on('passReview', (data) => {
-        socket.broadcast.to(socket.room_id).emit('danmu', data);
+        io.sockets.in(room_id).emit('event','User joined a room');
     });
 
     socket.on('disconnect', () => {
@@ -23,13 +18,7 @@ io.on('connection', (socket) => {
     });
 });
 
-socketApi.reviewMessage = (room_id, msg) => {
-    console.log('socketAPI reviewMessage msg: ', msg);
-    io.sockets.in(room_id).emit('review', {msg: msg});
-}
-
-socketApi.displayMessage = (room_id, msg) => {
-    console.log('msg: ', msg);
+socketApi.sendNotification = (room_id, msg) => {
     io.sockets.in(room_id).emit('danmu', {msg: msg});
 }
 
