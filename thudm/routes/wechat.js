@@ -40,6 +40,8 @@ router.post('/', (req, res, next) => {
                         .then(data => {
                             console.log("RSMQ data sent", data);
                         });
+
+                    socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
                 })
                 .catch((err) => {
                     console.error(err);

@@ -48,11 +48,12 @@ html(lang="zh-CN")
           socket.on('danmu', function(data) {
             console.log(data);
             var msg_obj = JSON.parse(data.msg);
-            if(msg_obj.msg_type == "text"){
+            if(msg_obj.type == "text"){
               console.log('data ',data);
               dm_list.push(data);
             }
             else{
+              console.log(msg_obj.type);
               pic_list.push(data);
             }
           });

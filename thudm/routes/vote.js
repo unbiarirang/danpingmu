@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const assert = require('assert');
 const errors = require('../common/errors');
+const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Vote = models.Vote;
 
@@ -36,6 +37,10 @@ router.get('/:vote_id/result', (req, res, next) => {
     redis.hgetallAsync(key)
         .then(data => {
             console.log('data: ', data);
+            socketApi.displayMessage(1, { //FIXME: for test
+                type: "text",
+                content: data
+            });
             res.send(data);
         })
         .catch(err => {
@@ -57,6 +62,8 @@ router.get('/:vote_id/user', (req, res, next) => {
             console.log('vote: ', vote);
 
             return res.render('vote', {
+                title: vote.title,
+                sub_title: vote.sub_title,
                 options: vote.options,
                 pic_urls: vote.pic_urls
             });
