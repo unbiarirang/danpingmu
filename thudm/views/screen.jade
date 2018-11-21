@@ -146,6 +146,7 @@ html(lang="zh-CN")
         });
   body 
     a(href='../ticket/1',target="_blank",id = 'QRCODE') 获取QRCODE
+    a(href='../../vote_result.html',target="_blank",id = 'RANK')查看投票
     .total
     .pic_slot
       img.picture
@@ -169,12 +170,17 @@ html(lang="zh-CN")
         position:absolute;
         left:80%;
       }
+      #RANK{
+        position:absolute;
+        left:80%;
+        top:3%;
+      }
       div.DM {
       background: rgba(0, 0, 0, 0.3);
-      width: 60vw;
-      height: 16.5vh;
+      width: 55vw;
+      height: 18vh;
       bottom: -20vh;
-      left:10%;
+      left:15%;
       position:absolute;
       text-align: center;
       color: white;
@@ -198,7 +204,7 @@ html(lang="zh-CN")
       height: 20%;
       color:white;
       text-align:left;
-      font-size: 1vw;
+      font-size: 1.5vw;
       overflow: auto;
       }
       div.content{
@@ -207,7 +213,7 @@ html(lang="zh-CN")
       height: 80%;
       color:white;
       text-align:left;
-      font-size: 2vw;
+      font-size: 3vw;
       display:block;
       overflow: auto;
       word-break: break-all;

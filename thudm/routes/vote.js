@@ -37,6 +37,7 @@ router.get('/:vote_id/result', (req, res, next) => {
     redis.hgetallAsync(key)
         .then(data => {
             console.log('data: ', data);
+            data._id = String(data._id);
             socketApi.displayMessage(1, { //FIXME: for test
                 type: "text",
                 content: data

@@ -7,10 +7,8 @@ html(lang="zh-CN")
       script.
           var options = !{options != null? JSON.stringify(options): 'null'};
           var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
-          //var title = !{JSON.stringify(title)};
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
-          //console.log("_id",title);
         
 
           $(document).ready(function(){
@@ -65,12 +63,11 @@ html(lang="zh-CN")
                       type:"GET",
                       data:{"vote": i},
                       dataType:"text",
-                      url:"/vote/" + _id[0] + "/votefor/" + i,
+                      url:"/vote/5bf588a235192a28284ac003/votefor/" + i,
                       success: function(data){
                         alert("OK");
                       },
                       error: function(e){
-                       alert("Error");
                       }
                     })
                  }
