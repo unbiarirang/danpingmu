@@ -7,14 +7,16 @@ html(lang="zh-CN")
       script.
           var options = !{options != null? JSON.stringify(options): 'null'};
           var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
+          var title = !{sub_title != null? JSON.stringify(sub_title): 'null'};
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
-        
+          console.log("title = ",title); 
 
           $(document).ready(function(){
               var op_num = options.length;
               var candy_num = 0;
               var line_num;
+              $(document).attr("title",title);
               if (op_num % 2 == 0){
                   line_num = op_num / 2;
                   for(var i = 0; i < line_num; i++){

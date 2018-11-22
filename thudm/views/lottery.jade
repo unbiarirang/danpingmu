@@ -18,6 +18,7 @@ html(xmlns='http://www.w3.org/1999/xhtml')
       var top_list = [526.214,498.869,356.812,331.464,437.822,577.891,652.349,618.189,496.211,345.098,227.778,186.525,233.679,349.452,494.018,618.928,685.355,671.808,582.605,443.258,292.962,170.996,108.317,121.001,205.522,337.817,481.377,594.95,645.058,614.085,509.338,362.223,219.429,121.205,99.4781,164.035,292.597,433.55,523.831,513.776,401.86,253.51,167.56,217.984,355.172,342.331];
       var users = !{users != null? users: 'null'};
       var info = new Array();
+      console.log(users);
       for(var i = 0;i < users.length; i++){
         info.push(JSON.stringify(users[i][1]));
         console.log("JSON = ",JSON.parse(info[i]).head_img_url);
@@ -45,7 +46,7 @@ html(xmlns='http://www.w3.org/1999/xhtml')
             clearInterval(interval);
             console.log("data",data[i]);
             $('body').append('<div class = winner id = winner' + i + ' style = "display: none; width:' + (100/data.length) + 'vw;"></div>');
-            $('#winner' + i).append('<img class = "prize" src =' + JSON.parse(info[0]).head_img_url + '>' );
+            $('#winner' + i).append('<img class = "prize" src =' + JSON.parse(info[data[0] - 1]).head_img_url + '>' );
             $('div.winner').fadeIn(5000);
           }
         }

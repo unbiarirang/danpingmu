@@ -146,7 +146,8 @@ html(lang="zh-CN")
         });
   body 
     a(href='../ticket/1',target="_blank",id = 'QRCODE') 获取QRCODE
-    a(href='../../vote_result.html',target="_blank",id = 'RANK')查看投票
+    a(href='http://123.206.96.15/vote/5bf588a235192a28284ac003/result',target="_blank",id = 'RANK')查看投票
+    a(href='/lottery/5bf5828aff415624a54e5137/draw',id = 'LOTTO') 进行抽奖
     .total
     .pic_slot
       img.picture
@@ -165,6 +166,11 @@ html(lang="zh-CN")
       width:90%;
       height:90%;
       border-radius: 20px;
+      }
+      #LOTTO{
+        position:absolute;
+        left:80%;
+        top:6%;
       }
       #QRCODE{
         position:absolute;
