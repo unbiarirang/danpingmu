@@ -197,7 +197,7 @@ const download_image = (pic_url, msg_id) => {
 }
 exports.download_image = download_image;
 
-const MAX_FROMUSER_IMAGE_NUM = 5;
+const MAX_FROMUSER_IMAGE_NUM = 30;
 const delete_image = () => {
     const dir_name = 'public/images/fromuser/';
     const file_list = fs.readdirSync(dir_name);

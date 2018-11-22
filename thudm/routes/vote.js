@@ -11,7 +11,7 @@ router.get('/:vote_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let vote_id = req.params.vote_id;
+    const vote_id = req.params.vote_id;
 
     Vote.findById(vote_id)
         .then(vote => {
@@ -31,18 +31,33 @@ router.get('/:vote_id/result', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
+    const vote_id = req.params.vote_id;
     const redis = req.app.get('redis');
     const key = 'vote_' + req.params.vote_id;
+    let sendData = {};
 
     redis.hgetallAsync(key)
         .then(data => {
             console.log('data: ', data);
-            data._id = String(data._id);
+            sendData.result = data;
+        })
+        .then(data => {
+            return Vote.findById(vote_id)
+                .then(vote => {
+                    if (!vote)
+                        throw new errors.NotExistError('No voting Activity exists.');
+
+                    return vote;
+                });
+        })
+        .then(vote => {
+            sendData.options = vote.options;
+            sendData.pic_urls = vote.pic_urls;
             socketApi.displayMessage(1, { //FIXME: for test
-                type: "text",
-                content: data
+                type: "text",             //FIXME: temp
+                content: sendData 
             });
-            res.send(data);
+            res.send(sendData);
         })
         .catch(err => {
             console.error(err);

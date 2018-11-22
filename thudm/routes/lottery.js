@@ -36,7 +36,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
     sendData.users = JSON.stringify([...users]);
 
     let winner_num = 1;
-    let min_num = 0; // FIXME: 1 for test
+    let min_num = 1;
     let max_num = users.size;
     utils.request_random_nums(winner_num, 0, max_num)
         .then(data => {
