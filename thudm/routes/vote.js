@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const assert = require('assert');
 const errors = require('../common/errors');
+const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Vote = models.Vote;
 
@@ -10,7 +11,7 @@ router.get('/:vote_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let vote_id = req.params.vote_id;
+    const vote_id = req.params.vote_id;
 
     Vote.findById(vote_id)
         .then(vote => {
@@ -30,13 +31,33 @@ router.get('/:vote_id/result', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
+    const vote_id = req.params.vote_id;
     const redis = req.app.get('redis');
     const key = 'vote_' + req.params.vote_id;
+    let sendData = {};
 
     redis.hgetallAsync(key)
         .then(data => {
             console.log('data: ', data);
-            res.send(data);
+            sendData.result = data;
+        })
+        .then(data => {
+            return Vote.findById(vote_id)
+                .then(vote => {
+                    if (!vote)
+                        throw new errors.NotExistError('No voting Activity exists.');
+
+                    return vote;
+                });
+        })
+        .then(vote => {
+            sendData.options = vote.options;
+            sendData.pic_urls = vote.pic_urls;
+            socketApi.displayMessage(1, { //FIXME: for test
+                type: "text",             //FIXME: temp
+                content: sendData 
+            });
+            res.send(sendData);
         })
         .catch(err => {
             console.error(err);
@@ -56,7 +77,9 @@ router.get('/:vote_id/user', (req, res, next) => {
 
             console.log('vote: ', vote);
 
-            return res.send({
+            return res.render('vote', {
+                title: vote.title,
+                sub_title: vote.sub_title,
                 options: vote.options,
                 pic_urls: vote.pic_urls
             });
@@ -90,7 +113,8 @@ router.post('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let vote = new Vote();
-    vote.activity_id = 1 // FIXME: 
+    //vote.activity_id = req.session.activity_id;
+    vote.activity_id = 1 // FIXME: for test
     vote.title = req.body.title;
     vote.sub_title = req.body.sub_title;
     vote.option_num = req.body.option_num;

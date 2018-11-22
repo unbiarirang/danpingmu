@@ -22,15 +22,17 @@ router.post('/login', (req, res, next) => {
             if (!user)
                 throw new errors.NotExistError('Wrong id or password.');
             var salt = user.salt;
+            console.log("id: ",user.id);
             console.log("salt: ",salt);
             crypto.pbkdf2(input_pw, salt, 10000, 50, 'sha512', (err, key) => {
+                console.log("salt2: ",key.toString('base64'));
                 if (user.password === key.toString('base64')) {
                     req.session.login = true;
                     req.session.admin_id = input_id;
                     res.redirect("../screen/1");
                 }
-                else
-                    throw new errors.NotExistError('Wrong id or password.');
+                //else
+                 //   throw new errors.NotExistError('Wrong id or password.');
             });
         })
         .catch(err => {

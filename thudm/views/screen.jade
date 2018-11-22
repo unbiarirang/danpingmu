@@ -5,7 +5,7 @@ html(lang="zh-CN")
     |     
     title 弹屏目
     // js
-    script(src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js")
+    script(src="/js/ajax.js")
     |     
     script(src='/socket.io/socket.io.js')
     script.
@@ -35,6 +35,7 @@ html(lang="zh-CN")
         }
 
         var dm_cnt = 1;
+        const pic_limit = 30;
         //var dm_list = new Array();
         var dm_list = new Queue();
         var pic_list = new Queue();
@@ -47,11 +48,12 @@ html(lang="zh-CN")
           socket.on('danmu', function(data) {
             console.log(data);
             var msg_obj = JSON.parse(data.msg);
-            if(msg_obj.msg_type == "text"){
+            if(msg_obj.type == "text"){
               console.log('data ',data);
               dm_list.push(data);
             }
             else{
+              console.log(msg_obj.type);
               pic_list.push(data);
             }
           });
@@ -87,23 +89,68 @@ html(lang="zh-CN")
               dm_list.pop();
             }
           }
-          function reset_pic(){
-            $('img.picture').fadeOut(1000);
-            if(pic_list.size() > 0){
-              var msg_obj = JSON.parse(pic_list.quere()[pic_list.size() - 1].msg);
-              $('img.picture').attr('src',msg_obj.content);
+          var fadeflag = 0;
+          var picflag = 0;
+          var pic_cnt = 0;
+          var first = 0;
+          var pic_free = new Queue();
+          function reset_pic(){ 
+            if(fadeflag == 5){
+              $('img.picture').fadeOut(500);
+              fadeflag = 0;
+              picflag = 0;
             }
-            $('img.picture').fadeIn(1000);
+            else if(fadeflag == 1 && picflag == 0){
+              $('img.picture').fadeIn(500);
+              picflag = 1;
+              fadeflag++;
+              if(pic_list.size() > 0){
+                console.log(pic_list.quere());
+                console.log("pic size:",pic_list.size());
+                var msg_obj = JSON.parse(pic_list.quere()[pic_list.size() - 1].msg);
+                pic_free.push(msg_obj.content);
+                console.log(msg_obj.content);
+                if(pic_free.size() > pic_limit)//决定留下的图片的个数
+                  pic_free.pop();
+
+                pic_list.pop();
+                console.log(msg_obj.content);
+                $('img.picture').attr('src','../images/fromuser/' + msg_obj.content + '.png');
+              }
+              else {
+                 if(pic_cnt == 0 && first == 0){
+                   pic_cnt = pic_free.size();
+                   console.log("freesize",pic_free.size());
+                   if(pic_cnt != 0){
+                     pic_cnt--;
+                     first = 1;
+                   }
+                 }
+                 console.log('pic_cnt',pic_cnt);
+                 if(pic_free.size() > 0){
+                   $('img.picture').attr('src','../images/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
+                   pic_cnt--;
+                   //console.log('pic_cnt',pic_cnt);
+                   console.log('pic_free',pic_free.size());
+                   if(pic_cnt == -1)
+                     pic_cnt = pic_free.size() - 1;
+                 }
+              }
+            }
+            else
+              fadeflag++;
           }
           setInterval(show,1800);
-          setInterval(reset_pic,4000);
+          setInterval(reset_pic,400);
           setInterval(delete_DM,1800);
         });
   body 
     a(href='../ticket/1',target="_blank",id = 'QRCODE') 获取QRCODE
+    a(href='http://123.206.96.15/vote/5bf588a235192a28284ac003/result',target="_blank",id = 'RANK')查看投票
+    a(href='/lottery/5bf5828aff415624a54e5137/draw',id = 'LOTTO') 进行抽奖
     .total
     .pic_slot
-      img.picture(src='http://thirdwx.qlogo.cn/mmopen/mHhciamkUdIMrdZomD0hqXMpeN6oWCLMtQiaBEj8eHH4sKIXjTaRqM0gCNaib9yGCDh94Rk33X576o1JRHcmeV1YU74TPZ9BhCU/132')
+      img.picture
       //1920:904
     style(type="text/css").
       ::-webkit-scrollbar{
@@ -120,16 +167,26 @@ html(lang="zh-CN")
       height:90%;
       border-radius: 20px;
       }
+      #LOTTO{
+        position:absolute;
+        left:80%;
+        top:6%;
+      }
       #QRCODE{
         position:absolute;
         left:80%;
       }
+      #RANK{
+        position:absolute;
+        left:80%;
+        top:3%;
+      }
       div.DM {
       background: rgba(0, 0, 0, 0.3);
-      width: 38vw;
-      height: 16.5vh;
+      width: 55vw;
+      height: 18vh;
       bottom: -20vh;
-      left:35%;
+      left:15%;
       position:absolute;
       text-align: center;
       color: white;
@@ -153,7 +210,7 @@ html(lang="zh-CN")
       height: 20%;
       color:white;
       text-align:left;
-      font-size: 1vw;
+      font-size: 1.5vw;
       overflow: auto;
       }
       div.content{
@@ -162,7 +219,7 @@ html(lang="zh-CN")
       height: 80%;
       color:white;
       text-align:left;
-      font-size: 2vw;
+      font-size: 3vw;
       display:block;
       overflow: auto;
       word-break: break-all;

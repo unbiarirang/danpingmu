@@ -1,8 +1,8 @@
-var xmlparser = require('express-xml-bodyparser');
-var express = require('express');
-var router = express.Router();
-var utils = require('../common/utils');
-var socketApi = require('../common/socketApi');
+const xmlparser = require('express-xml-bodyparser');
+const express = require('express');
+const router = express.Router();
+const utils = require('../common/utils');
+const socketApi = require('../common/socketApi');
 
 // Parse WeChat XML POST request
 router.use(xmlparser());
@@ -40,6 +40,8 @@ router.post('/', (req, res, next) => {
                         .then(data => {
                             console.log("RSMQ data sent", data);
                         });
+
+                    socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
                 })
                 .catch((err) => {
                     console.error(err);
@@ -48,28 +50,46 @@ router.post('/', (req, res, next) => {
 
         // User sent an image
         case 'image':
+            let room_id, pic_url, msg_id;
             utils.get_user_info(req)
-                .then((user_info) => {
+                .then(user_info => {
                     //let room_id = user_info.room_id;
-                    let room_id = 1;
+                    room_id = 1;
+                    pic_url = utils.get_wechat_input(req, 'picurl');
+                    msg_id = utils.get_wechat_input(req, 'msgid');
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
-                    let content = utils.get_wechat_input(req, 'picurl');
-                    console.log('Send to room', room_id);
-                    socketApi.reviewContent(room_id, JSON.stringify({
-                        "msg_type": 'image',
-                        "content": content,
+                    let room = req.app.get('room_' + room_id);
+                    let msg_obj = {
+                        "id": room.gen_id(req.app.get('redis')),
+                        "type": "image",
+                        "content": msg_id, // Save image as the msg_id
                         "nickname": nickname,
-                        "head_img_url": head_img_url
-                    }));
+                        "head_img_url": head_img_url,
+                        "review_flag": 0
+                    };
+                    console.log('Send to room', room_id);
+                    return msg_obj;
+                })
+                .then(msg_obj => {
+                    return utils.download_image(pic_url, msg_id)
+                                .then(() => {
+                                    return msg_obj;
+                                });
+                })
+                .then(msg_obj => {
+                    socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
+                })
+                .then(() => {
+                    utils.delete_image();
                 })
                 .catch((err) => { // TODO
-                    console.log(err);
+                    console.error(err);
                 });
             break;
 
         // User entered a specific room
-        case 'event':
+        case 'event': {
             let event = utils.get_wechat_input(req, 'event');
             let event_key = utils.get_wechat_input(req, 'eventkey');
             let room_id;
@@ -86,7 +106,7 @@ router.post('/', (req, res, next) => {
                 .catch((err) => { // TODO
                     console.log(err);
                 });
-            break;
+        } break;
     }
 
     // Send empty response

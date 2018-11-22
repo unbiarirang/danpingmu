@@ -1,0 +1,190 @@
+doctype html
+html(lang="zh-CN")
+    head
+      meta(charset="utf-8")
+      title 投票
+      script(src="/js/ajax.js")
+      script.
+          var options = !{options != null? JSON.stringify(options): 'null'};
+          var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
+          var title = !{sub_title != null? JSON.stringify(sub_title): 'null'};
+          console.log("options = ",options);
+          console.log("pic_urls = ",pic_urls);
+          console.log("title = ",title); 
+
+          $(document).ready(function(){
+              var op_num = options.length;
+              var candy_num = 0;
+              var line_num;
+              $(document).attr("title",title);
+              if (op_num % 2 == 0){
+                  line_num = op_num / 2;
+                  for(var i = 0; i < line_num; i++){
+                    $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
+                    $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    console.log("ha");
+                    candy_num++;
+                    $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                  }
+              }
+              else {
+                  line_num = (op_num + 1) / 2;
+                  console.log(line_num);
+                  for(var i = 0; i < line_num; i++){
+                   console.log()
+                   $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
+                    $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                    $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
+                    candy_num++;
+                  }
+              }
+             console.log(line_num - 1);
+             $('#line' + (line_num - 1)).append('<input type = button action = vote class = voteit value = Vote>');
+             for(var id = 0; id < op_num; id++){
+                 $('#candy' + id).append("<div class = form  id = form" + id + '></div>');
+                 $('#form' + id).append("<img src = " + pic_urls[id] + '>');
+                 $('#form' + id).append("<div class = title id = title" + id +'>' + '</div>');
+                 $('#title' + id).append("<label><input type = 'radio' class = cb  id = radio" + id + "><label></label>" + options[id]) + '</label>';
+             }         
+             $("input.cb").click(function(){
+               for(var i = 0; i < $("input.cb").length; i++){
+                 if($(this).attr('id') != ('radio' + i)){
+                   $("#radio" + i).attr("checked",false);
+                 }
+               }
+             });
+             $("input.voteit").click(function(){
+               var flag = 0;
+               for(var i = 0; i < $("input.cb").length; i++){
+                 if($("#radio" + i).attr('checked') == true){
+                    flag = 1;
+                    console.log("vote id = ",i);
+                    $.ajax({
+                      type:"GET",
+                      data:{"vote": i},
+                      dataType:"text",
+                      url:"/vote/5bf588a235192a28284ac003/votefor/" + i,
+                      success: function(data){
+                        alert("OK");
+                      },
+                      error: function(e){
+                      }
+                    })
+                 }
+                 window.location = "../../vote_warning.html";
+               }
+               if(flag == 0)
+                alert("请选择一个对象");
+             })
+ 
+          });
+   body
+      .total
+
+style(type="text/css").
+  div.total{
+      position:relative;
+      width:100vw;
+      height:100vh;
+  }
+  div.line{
+      position:relative;
+      width:100%;
+      height:30%;
+  }
+  div.candidate{
+      position:relative;
+      width:50%;
+      height:100%;
+      float:left;
+  }
+  div.form{
+      position:relative;
+      border-radius: 20px;
+      left:20%;
+      width:60%;
+      height:80%;
+  }
+  div.title{
+      position:relative;
+      text-align:center;
+      width:auto;
+  }
+  input.voteit{
+      position:relative;
+      left:45%;
+      width:10%;
+  }
+  div.content{
+      position:absolute;
+      width:100%;
+      top:10%;
+      text-align:center;
+      height:auto;
+      float:left;
+  }
+  input.check{
+      position:relative;
+  }
+  
+  img{
+      position:relative;
+      width:90%;
+      height:70%;
+      top:10%;
+      left:5%;
+      border-radius:20px;
+  }
+  body, html{
+  background: url(/images/bg.jpg);
+  }
+  .cb {
+
+  display: none;
+
+  }
+
+  .cb + label {
+
+  background-color: #fafafa;
+  border: 1px solid #cacece;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
+  padding: 9px;
+  border-radius: 3px;
+  display: inline-block;
+  position: relative;
+  top:4px;
+  }
+
+  .cb + label:active, .cb:checked + label:active {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .cb:checked + label {
+  background-color: #e9ecee;
+
+  border: 1px solid #adb8c0;
+
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05), inset 15px 10px -12px rgba(255,255,255,0.1);
+
+  color: #99a1a7;
+
+  }
+
+  .cb:checked + label:after {
+
+  content: '\2714';
+
+  font-size: 14px;
+
+  position: absolute;
+
+  top: 0px;
+
+  left: 3px;
+
+  color: #065997;
+
+  }

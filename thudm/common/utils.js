@@ -1,5 +1,7 @@
 const crypto = require('crypto');
+const fs = require('fs');
 const rp = require('request-promise');
+const request = require('request');
 const config = require('../config.json');
 const errors = require('./errors');
 
@@ -179,3 +181,36 @@ const request_random_nums = (amount, min, max) => {
         });
 }
 exports.request_random_nums = request_random_nums;
+
+// request-promise: STREAMING THE RESPONSE (e.g. .pipe(...)) is DISCOURAGED
+// Use request module instead
+const download_image = (pic_url, msg_id) => {
+    const file_name = 'public/images/fromuser/'
+                      + msg_id + '.png';
+
+    return new Promise((resolve, reject) => {
+        request.head(pic_url, (err, res, body) => {
+            request(pic_url).pipe(fs.createWriteStream(file_name))
+                .on('close', resolve);
+        });
+    });
+}
+exports.download_image = download_image;
+
+const MAX_FROMUSER_IMAGE_NUM = 30;
+const delete_image = () => {
+    const dir_name = 'public/images/fromuser/';
+    const file_list = fs.readdirSync(dir_name);
+    if (file_list.length <= MAX_FROMUSER_IMAGE_NUM)
+        return;
+
+    // Delete the oldest image. Don't need to be synchronous
+    console.log('delete filename: ', dir_name + file_list[0]);
+    fs.unlink(dir_name + file_list[0], err => {
+        if (err)
+            throw new errors.FileOpError(err);
+
+        console.log('Delete complete');
+    });
+}
+exports.delete_image = delete_image;

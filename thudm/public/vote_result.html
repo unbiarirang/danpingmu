@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>投票结果</title>
+<script src="/js/ajax.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var award_list = new Array();
+  $(function() {
+    var socket = io();
+    socket.on('danmu', function(data) {
+      console.log(data);
+      var msg_obj = JSON.parse(data.msg);
+    })
+  })
+  $(document).ready(function() {
+    for (var i = 0; i < award_list.length; i++) {
+      $('div.total').append('<div class = candidate id = ' + i + '></div>');
+      $('#id' + i).append('<div class = rank id = rank' + i + '>' + i + '</div>');
+      $('#id' + i).append('<div class = name id = name' + i + '>' + msg_obj. + '</div>');
+      $('#id' + i).append('<div class = vote id = vote' + i + '>' + vote + '</div>');
+    }
+  })
+</script>
+<body>
+    <div class = total></div>
+</body>
+</html>
+<style>
+   div.total{
+       positon:relative;
+       left:10vw;
+       width:80vw;
+       height:100vh;
+   }
+   div.candidate{
+       position:relative;
+       width:100%;
+       height:20%;
+   }
+   div.rank{
+       position:relative;
+       float:left;
+       width:10%;
+       height:100%;
+   }
+    div.profile{
+       position:relative;
+       float:left;
+       width:50%;
+       height:100%;
+   }
+   div.name{
+       position:relative;
+       float:left;
+       width:30%;
+       height:100%;
+   }
+   div.vote{
+       position:relative;
+       float:left;
+       width:10%;
+       height:100%;
+   }
+</style>

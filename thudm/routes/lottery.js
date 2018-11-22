@@ -36,14 +36,14 @@ router.get('/:lottery_id/draw', (req, res, next) => {
     sendData.users = JSON.stringify([...users]);
 
     let winner_num = 1;
-    let min_num = 0; // FIXME: 1 for test
+    let min_num = 1;
     let max_num = users.size;
     utils.request_random_nums(winner_num, 0, max_num)
         .then(data => {
             sendData.data = data;
             console.log('sendData: ', sendData);
             socketApi.displayMessage(1, sendData);
-            res.send(sendData);
+            res.render('lottery',sendData);
         })
         .catch(err => {
             console.error(err);
@@ -56,7 +56,8 @@ router.post('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let lottery = new Lottery();
-    lottery.activity_id = req.session.activity_id;
+    //lottery.activity_id = req.session.activity_id;
+    lottery.activity_id = 1; //FIXME: for test
     lottery.title = req.body.title;
     lottery.sub_title = req.body.sub_title;
     lottery.winner_num = req.body.winner_num;
