@@ -36,6 +36,7 @@ router.post('/', (req, res, next) => {
     act.bullet_colors = req.body.bullet_colors;
     act.banned_words_url = req.body.banned_words_url;
     act.bg_img_url = req.body.bg_img_url;
+    act.end_time = req.body.end_time;
     act.save()
         .then(() => {
             req.session.activity_id = act._id;

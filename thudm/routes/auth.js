@@ -73,9 +73,7 @@ router.post('/signup', (req, res, next) => {
         })
         .catch(err => {
             console.error(err);
-            let sendData = {};
-            sendData.err = err;
-            res.render('signup', sendData);
+            res.render('signup', { err: err });
             next(err);
         });
 });

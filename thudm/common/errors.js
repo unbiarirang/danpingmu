@@ -61,9 +61,16 @@ class TypeError extends BaseError {
 }
 exports.TypeError = TypeError;
 
+class KeyError extends BaseError {
+    constructor(message) {
+        super(7, message || 'Key not exist.', 500);
+    }
+}
+exports.KeyError = KeyError;
+
 class FileOpError extends BaseError {
     constructor(message) {
-        super(7, message || 'File operation error.', 500);
+        super(8, message || 'File operation error.', 500);
     }
 }
 exports.FileOpError = FileOpError;

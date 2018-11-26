@@ -31,7 +31,6 @@ router.get('/:lottery_id/draw', (req, res, next) => {
     //if (!req.session.login)
     //    throw new errors.NotLoggedInError();
 
-    let sendData = {};
     let users = req.app.get('cache');
     sendData.users = JSON.stringify([...users]);
 
@@ -42,8 +41,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         .then(data => {
             sendData.data = data;
             console.log('sendData: ', sendData);
-            socketApi.displayMessage(1, sendData);
-            res.render('lottery',sendData);
+            res.render('lottery', sendData);
         })
         .catch(err => {
             console.error(err);

@@ -53,10 +53,6 @@ router.get('/:vote_id/result', (req, res, next) => {
         .then(vote => {
             sendData.options = vote.options;
             sendData.pic_urls = vote.pic_urls;
-            socketApi.displayMessage(1, { //FIXME: for test
-                type: "text",             //FIXME: temp
-                content: sendData 
-            });
             res.send(sendData);
         })
         .catch(err => {
@@ -77,12 +73,7 @@ router.get('/:vote_id/user', (req, res, next) => {
 
             console.log('vote: ', vote);
 
-            return res.render('vote', {
-                title: vote.title,
-                sub_title: vote.sub_title,
-                options: vote.options,
-                pic_urls: vote.pic_urls
-            });
+            return res.render('vote', vote);
         })
         .catch(err => {
             console.error(err);

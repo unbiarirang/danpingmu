@@ -13,21 +13,26 @@ const activity_schema = new mongoose.Schema({
     title: { type: String, required: true },
     sub_title: String,
     bullet_color_num: Number,
-    bullet_colors: mongoose.Mixed,
+    //bullet_colors: mongoose.Mixed,
+    bullet_colors: [String],
     banned_words_url: String,
     bg_img_url: String,
+    end_time: { type: Number, required: true }, // second
+    list_media_id: String,
 });
 exports.Activity = mongoose.model('Activity', activity_schema);
 
+const VOTE_STATUS = ['READY', 'ONGOING', 'OVER'];
 const vote_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
     option_num: Number,
-    options: mongoose.Mixed,
-    pic_urls: mongoose.Mixed,
-    start_time: Date,
-    end_time: Date,
+    //options: mongoose.Mixed,
+    //pic_urls: mongoose.Mixed,
+    options: [String],
+    pic_urls: [String],
+    status: { type: String, enum: VOTE_STATUS , default: 'READY' },
 });
 exports.Vote = mongoose.model('Vote', vote_schema);
 
@@ -40,6 +45,7 @@ const lottery_schema = new mongoose.Schema({
 exports.Lottery = mongoose.model('Lottery', lottery_schema);
 
 const message_schema = new mongoose.Schema({
+    activity_id: { type: String, required: true },
     id: { type: String, required: true, unique: true },
     type: { type: String ,required: true },
     content: { type: String, required: true },

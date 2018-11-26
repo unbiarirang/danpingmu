@@ -8,9 +8,11 @@ html(lang="zh-CN")
           var options = !{options != null? JSON.stringify(options): 'null'};
           var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
           var title = !{sub_title != null? JSON.stringify(sub_title): 'null'};
+          var vote_id = !{_id != null? JSON.stringify(_id): 'null'};
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
           console.log("title = ",title); 
+          console.log("vote_id = ", vote_id);
 
           $(document).ready(function(){
               var op_num = options.length;

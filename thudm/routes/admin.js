@@ -2,7 +2,9 @@ const express = require('express');
 const rp = require('request-promise');
 const promise = require('bluebird');
 const router = express.Router();
+const config = require('../config');
 const utils = require('../common/utils');
+const consts = require('../common/consts');
 const errors = require('../common/errors');
 const socketApi = require('../common/socketApi');
 const models = require('../models/models');
@@ -23,7 +25,6 @@ router.get('/msglist/:room_id', (req, res, next) => {
     res.redirect('/msglist/' + room_id + '/page/1');
 });
 
-let NUM_MSG_PER_PAGE = 15;
 router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
     let rsmq = req.app.get('rsmq');
     let room_id = req.params.room_id;
@@ -38,8 +39,8 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
         })
         .then(attr => {
             console.log('attr: ', attr);
-            const request_min_id = NUM_MSG_PER_PAGE * (page_id - 1);
-            const request_max_id = NUM_MSG_PER_PAGE * page_id;
+            const request_min_id = consts.MSG_PER_PAGE_NUM * (page_id - 1);
+            const request_max_id = consts.MSG_PER_PAGE_NUM * page_id;
             let totalrecv = attr.totalrecv;
             let totalsent = attr.totalsent;
 
@@ -66,7 +67,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
             }
 
             // Retrieve request messages
-            for (let i = 0; i < NUM_MSG_PER_PAGE; i++) {
+            for (let i = 0; i < consts.MSG_PER_PAGE_NUM; i++) {
                 let msg_id = request_min_id + i;
 
                 // Message not exist for the msg_id
@@ -126,7 +127,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
             return Promise
                 .all(ret_promises);
         })
-        .then((msg_list) => {
+        .then(msg_list => {
             console.log(msg_list);
             let sendData = {};
             sendData.msg_list = msg_list;
@@ -164,7 +165,7 @@ router.get('/screen/:room_id', (req, res, next) => {
             console.log("QUEUE created");
         })
         .catch(err => {
-            console.error("QUEUE already exists");
+            console.error(err);
         })
         .finally(() => {
             let sendData = {};
@@ -177,24 +178,25 @@ router.get('/screen/:room_id', (req, res, next) => {
 
 router.get('/qrcode/:room_id', (req, res, next) => {
     let room_id = req.params.room_id;
+    let ticket = req.query.ticket;
 
-    console.log('ticket:', req.app.get('ticket' + room_id));
     res.redirect('https://mp.weixin.qq.com/cgi-bin/showqrcode'
-        + '?ticket=' + req.app.get('ticket' + room_id));
+        + '?ticket=' + ticket);
 });
 
 router.get('/ticket/:room_id', (req, res, next) => {
     let room_id = req.params.room_id;
+    console.log('ticket room_id: ', room_id);
 
     let sendData = {};
 
-    sendData.expire_seconds = 86400; // 3hours
-    sendData.action_name = 'QR_SCENE';
-    // scene_id 1~100000, scene_str
-    sendData.action_info = {'scene': {'scene_id': room_id}};
+    sendData.expire_seconds = consts.QRCODE_EXPIRE_SEC;
+    sendData.action_name = 'QR_STR_SCENE';
+    // QR_SCENE: scene_id (1~100000) QR_STR_SCENE: scene_str
+    sendData.action_info = {'scene': {'scene_str': room_id}};
 
     utils.get_access_token(req)
-        .then((access_token) => {
+        .then(access_token => {
             let options = {
                 method: 'POST',
                 uri: 'https://api.weixin.qq.com/cgi-bin/qrcode/create' +
@@ -204,18 +206,18 @@ router.get('/ticket/:room_id', (req, res, next) => {
             };
             return rp(options);
         })
-        .then((body) => {
+        .then(body => {
             // POST succeeded
             // Error from wechat
             if (body.errcode)
                 throw new errors.WeChatResError(body.errmsg);
 
-            req.app.set('ticket' + room_id, body.ticket);
-            res.redirect('http://123.206.96.15/QRCODE/1');
+            res.redirect('http://' + config.SERVER_IP + '/qrcode/' + room_id
+                          + '?ticket=' + body.ticket);
         })
-        .catch((err) => {
+        .catch(err => {
             // POST failed
-            console.log(err);
+            console.error(err);
             next(err);
         });
 });

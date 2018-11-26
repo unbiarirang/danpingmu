@@ -2,30 +2,77 @@ const crypto = require('crypto');
 const fs = require('fs');
 const rp = require('request-promise');
 const request = require('request');
-const config = require('../config.json');
+const consts = require('./consts');
 const errors = require('./errors');
+const models = require('../models/models');
+const Activity = models.Activity;
+const Vote = models.Vote;
+let config;
+
+const init = (cfg) => {
+    config = cfg;
+};
+exports.init = init;
 
 String.prototype.getNums = () => {
     let rx =/[+-]?((\.\d+)|(\d+(\.\d+)?)([eE][+-]?\d+)?)/g,
-    mapN = this.match(rx) || [];
+    map_num = this.match(rx) || [];
 
-    return mapN.map(Number);
+    return map_num.map(Number);
 };
 
+// In memory Activity model. room_id == activity_id
 class Room {
-    constructor(room_id, generated_id=0) {
-        this.room_id = room_id;
-        this.generated_id = generated_id;
+    constructor(activity_id) {
+        this.room_id = activity_id;
+        this.activity_id = activity_id;
+        // The following properties are initialized in init function
+        this.activity = {}; // mongodb Activity instance
+        this.generated_id = 0;
+    }
+
+    init(req) { // Asynchronous db process
+        const redis = req.app.get('redis');
+        Activity.findById(this.activity_id)
+            .then(act => {
+                if (!act)
+                    throw new errors.NotExistError('No voting Activity exists.');
+
+                this.activity = act;
+            });
+
+        redis.hget("generated_id", this.activity_id, (err, id) => {
+            if (err) id = 0;
+
+            console.log('generated_id: ', id);
+            this.generated_id = id;
+        });
     }
 
     gen_id(redis) {
-        let id = this.generated_id;
-        redis.hset('generated_id', this.room_id, id);
         this.generated_id++;
-        return id;
+        redis.hset('generated_id', this.activity_id, this.generated_id);
+        return this.generated_id;
     }
 }
 exports.Room = Room;
+
+const load_activities = (app) => {
+    return Activity.find()
+        .then(activities => {
+            activities.forEach(activity => {
+                // Not load finished activities
+                if (activity.end_time < (Date.now() / 1000))
+                    return;
+
+                let act_id = activity._id.toString();
+                let room = new Room(act_id);
+                room.init({ app: app });
+                app.set('room_' + act_id, room); // Store in memory
+            });
+        })
+}
+exports.load_activities = load_activities;
 
 const sign = () => {
     return (req, res, next) => {
@@ -94,10 +141,9 @@ const get_session = (req) => {
 
 // Request and store a user's information
 const request_user_info = (req) => {
-    //let openid = req.body.xml.fromusername[0];
     let open_id = req.query.openid;
     return get_access_token(req)
-        .then((access_token) => {
+        .then(access_token => {
             let options = {
                 uri: 'https://api.weixin.qq.com/cgi-bin/user/info',
                 qs: { 
@@ -108,7 +154,7 @@ const request_user_info = (req) => {
             };
             return rp(options);
         })
-        .then((res) => {
+        .then(res => {
             // Error from wechat
             if (res.errcode)
                 throw new errors.WeChatResError(res.errmsg);
@@ -140,7 +186,9 @@ const update_user_info = (req, options) => {
 
     for (let key in options)
         session[key] = options[key];
+
     req.app.set('cache').set(open_id, session);
+    console.log('update_user_info cache: ', session);
 }
 exports.update_user_info = update_user_info;
 
@@ -197,11 +245,10 @@ const download_image = (pic_url, msg_id) => {
 }
 exports.download_image = download_image;
 
-const MAX_FROMUSER_IMAGE_NUM = 30;
 const delete_image = () => {
     const dir_name = 'public/images/fromuser/';
     const file_list = fs.readdirSync(dir_name);
-    if (file_list.length <= MAX_FROMUSER_IMAGE_NUM)
+    if (file_list.length <= consts.MAX_FROMUSER_IMAGE_NUM)
         return;
 
     // Delete the oldest image. Don't need to be synchronous
@@ -214,3 +261,103 @@ const delete_image = () => {
     });
 }
 exports.delete_image = delete_image;
+
+// Synchronize wechat menu with consts.WECHAT_MENU
+const sync_menu = (req) => {
+    let menu = consts.WECHAT_MENU;
+    return get_access_token(req)
+        .then(access_token => {
+            let options = {
+                method: 'POST',
+                uri: 'https://api.weixin.qq.com/cgi-bin/menu/create',
+                body: menu,
+                qs: {
+                    access_token: access_token,
+                },
+                json: true
+            };
+
+            return rp(options)
+                .then(res => {
+                    // Error from wechat
+                    if (res.errcode)
+                        throw new errors.WeChatResError(res.errmsg);
+
+                    console.log('sync_menu complete');
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        });
+}
+exports.sync_menu = sync_menu;
+
+// Return ongoing vote events
+const get_vote_info = (room) => {
+    let activity_id = room.activity_id;
+    return Vote.find({ activity_id: activity_id })
+        .then(votes => {
+            let votes_ongoing = [];
+            for (let vote of votes) {
+                if (vote.status === 'ONGOING')
+                    votes_ongoing.push(vote);
+            }
+
+            return votes_ongoing;
+        });
+}
+exports.get_vote_info = get_vote_info;
+
+const get_reply_base = (type, data) => {
+    const file_name = '/../public/templates/' + type + '.xml';
+
+    let xml = fs.readFileSync(__dirname + file_name, 'utf-8');
+    if (type === 'article') return xml;
+
+    xml = xml.replace('[]', '[' + data.to_user_name + ']');
+    xml = xml.replace('[]', '[' + data.from_user_name + ']');
+    xml = xml.replace('[]', '[' + data.create_time + ']');
+
+    return xml;
+}
+
+const get_reply_text = (data) => {
+    let xml = get_reply_base('text', data);
+    xml = xml.replace('[]', '[' + data.content + ']');
+
+    return Promise.resolve(xml);
+}
+exports.get_reply_text = get_reply_text;
+
+const get_reply_image = (data) => {
+    let xml = get_reply_base('image', data);
+    xml = xml.replace('[]', '[' + data.media_id + ']');
+
+    return Promise.resolve(xml);
+}
+exports.get_reply_image = get_reply_image;
+
+const get_reply_news = (data) => {
+    let xml = get_reply_base('news', data);
+    xml = xml.replace('[]', '[' + data.article_count+ ']');
+
+    let xml_artcs = '';
+    let xml_artc_base = get_reply_base('article', data);
+    data.articles.forEach(article => {
+        let xml_artc = xml_artc_base;
+        xml_artc = xml_artc.replace('[]', '[' + article.title + ']');
+        xml_artc = xml_artc.replace('[]', '[' + article.desc + ']');
+        xml_artc = xml_artc.replace('[]', '[' + article.pic_url+ ']');
+        xml_artc = xml_artc.replace('[]', '[' + article.url + ']');
+        xml_artcs += xml_artc;
+    });
+    xml = xml.replace('[]', xml_artcs);
+
+    return Promise.resolve(xml);
+}
+exports.get_reply_news = get_reply_news;
+
+const get_url = (path) => {
+    return 'http://' + config.SERVER_DOMAIN + path;
+}
+exports.get_url = get_url;
