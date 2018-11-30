@@ -28,7 +28,7 @@ exports.NotExistError = NotExistError;
 
 class DuplicatedError extends BaseError {
     constructor(message) {
-        super(2, message || 'Data duplicated.', 500);
+        super(2, message || 'Data duplicated.', 403);
     }
 }
 exports.DuplicatedError = DuplicatedError;

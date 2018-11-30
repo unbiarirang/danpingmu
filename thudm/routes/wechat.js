@@ -15,14 +15,18 @@ router.post('/', (req, res, next) => {
     switch (msg_type) {
         // User sent a text message
         case 'text':
+            // Send empty response
+            res.send("");
+
             utils.get_user_info(req)
                 .then(user_info => {
                     let room_id = user_info.room_id;
+                    // if (!room_id) return; // User not belong any activity
                     if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                     let content = utils.get_wechat_input(req, 'content');
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
-                    let room = req.app.get('room_' + room_id);
+                    let room = utils.get_room_info(req, room_id);
 
                     // Filter unspported message
                     if (content === '[Unsupported Message]')
@@ -57,15 +61,21 @@ router.post('/', (req, res, next) => {
 
         // User sent an image
         case 'image':
+            // Send empty response
+            res.send("");
+
             let room_id, pic_url, msg_id;
             utils.get_user_info(req)
                 .then(user_info => {
-                    let room_id = user_info.room_id;
+                    room_id = user_info.room_id;
+                    // if (!room_id) return;
+                    if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+
                     pic_url = utils.get_wechat_input(req, 'picurl');
                     msg_id = utils.get_wechat_input(req, 'msgid');
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
-                    let room = req.app.get('room_' + room_id);
+                    let room = utils.get_room_info(req, room_id);
                     let msg_obj = {
                         "id": room.gen_id(req.app.get('redis')),
                         "type": "image",
@@ -78,7 +88,7 @@ router.post('/', (req, res, next) => {
                     return msg_obj;
                 })
                 .then(msg_obj => {
-                    return utils.download_image(pic_url, msg_id)
+                    return utils.download_image(pic_url, msg_id, room_id)
                                 .then(() => {
                                     return msg_obj;
                                 });
@@ -87,7 +97,7 @@ router.post('/', (req, res, next) => {
                     socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
                 })
                 .then(() => {
-                    utils.delete_image();
+                    utils.delete_image(room_id);
                 })
                 .catch(err => {
                     console.error(err);
@@ -119,13 +129,17 @@ router.post('/', (req, res, next) => {
                 data.create_time = Math.floor(Date.now() / 1000);
                 switch (event_key) {
                     case 'KEY_VOTE':
+                        let open_id;
                         pr_chain = pr_chain.then(() => {
                                 return utils.get_user_info(req);
                             })
                             .then(user_info => {
+                                open_id = user_info.open_id;
                                 let room_id = user_info.room_id;
+                                //if (!room_id) return res.send("");
+
                                 if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
-                                let room = req.app.get('room_' + room_id);
+                                let room = utils.get_room_info(req, room_id);
                                 return utils.get_vote_info(room);
                             })
                             .then(votes => {
@@ -140,7 +154,7 @@ router.post('/', (req, res, next) => {
                                     article.title = vote.title;
                                     article.desc = vote.sub_title;
                                     article.pic_url = utils.get_url('/images/eye.jpg');
-                                    article.url = utils.get_url('/vote/' + vote._id + '/user');
+                                    article.url = utils.get_url('/vote/' + vote._id + '/user?open_id=' + open_id);
                                     articles.push(article);
                                 }
 
@@ -158,8 +172,10 @@ router.post('/', (req, res, next) => {
                             })
                             .then(user_info => {
                                 let room_id = user_info.room_id;
+                                //if (!room_id) return res.send("");
+
                                 if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
-                                let room = req.app.get('room_' + room_id);
+                                let room = utils.get_room_info(req, room_id);
                                 data.media_id = room.activity.list_media_id;
 
                                 return utils.get_reply_image(data);
@@ -186,12 +202,8 @@ router.post('/', (req, res, next) => {
                     next(err);
                 });
 
-
         } break;
     }
-
-    // Send empty response
-    //res.send("");
 });
 
 router.use('/', utils.sign());

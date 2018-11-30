@@ -84,13 +84,28 @@ router.get('/:vote_id/user', (req, res, next) => {
 // User vote for one option
 router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
     const redis = req.app.get('redis');
-    const key = 'vote_' + req.params.vote_id;
-    const field = req.params.option_id;
+    //const open_id = req.query.get('open_id'); // FIXME: front should send open_id query string
+    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
+    const vote_id = req.params.vote_id;
+    const option_id = req.params.option_id;
+    console.log(vote_id, option_id);
 
-    redis.hincrbyAsync(key, field, 1)
+    redis.hgetAsync('voteuser_' + vote_id, open_id)
         .then(data => {
             console.log('data: ', data);
-            res.send(200);
+            // Duplicate voting
+            if (data)
+                throw new errors.DuplicatedError('You have already voted.');
+
+            return redis.hsetAsync('voteuser_' + vote_id, open_id, 1);
+        })
+        .then(data => {
+            console.log('data: ', data);
+            return redis.hincrbyAsync('vote_' + vote_id, option_id, 1)
+        })
+        .then(data => {
+            console.log('data: ', data);
+            res.sendStatus(200);
         })
         .catch(err => {
             console.error(err);

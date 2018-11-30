@@ -8,6 +8,8 @@ var cron = require('cron');
 var config = require('./config_test.json');
 var mongodb = require('./mongodb');
 var indexRouter = require('./routes/index');
+var utils = require('./common/utils');
+var consts = require('./common/consts');
 
 var app = express();
 // view engine setup
@@ -32,38 +34,44 @@ app.use(session({
     saveUninitialized: false,
     resave: false,
     secret: config.SESSION_SECRET,
-    cookie: { maxAge: 24*60*60*1000 } // Expires in 1 day
+    cookie: { maxAge: consts.SESSION_EXPIRE_MSEC }
 }));
 
+// Connect to Mongodb
+mongodb.init(config);
+utils.init(config);
+
+/* global variables */
 // Redis client
 app.set('redis', redisClient);
-
 // Redis message queue
 app.set('rsmq', rsmq);
+// Wechat cache. All activities share a user info cache
+app.set('cache', {
+    user_info: new Map(),   // Key: open_id Value: user info
+    room_info: new Map()    // Key: room_id Valie: Room()
+});
 
-// Wechat user info cache
-app.set('cache', new Map());
+// Load all ongoing activities.
+utils.load_activities(app);
 
-// Flush user info every day at midnight
-new cron.CronJob('0 0 0 * * *', function() {
+// Flush cache every day at 6 a.m
+new cron.CronJob('0 0 6 * * *', function() {
     console.log('CRON> Flush cache');
 
-    app.get('cache').clear();
+    app.get('cache').user_info.clear();
+    app.get('cache').room_info.forEach((room, room_id, map) => {
+        // A activity was finished
+        if (room.activity.end_time < Date.now()) {
+            map.delete(room_id);
+            // Remove the activity's image dir
+            // 
+        }
+    });
 }, null, true, 'Asia/Shanghai');
 
 // Init index router
 require('./routes/index').init(app);
-
-// Connect to Mongodb
-mongodb.init(config);
-
-// FIXME: for test
-let Room = require('./common/utils').Room;
-redisClient.hget("generated_id", '1', (err, id) => {
-    if (err) id = 0;
-    console.log('tmp_generated_id: ', id);
-    app.set('room_1', new Room(1, id));
-});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

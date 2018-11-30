@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const rp = require('request-promise');
+const util = require('util');
+const exec = require('child_process').exec;
 const request = require('request');
 const consts = require('./consts');
 const errors = require('./errors');
@@ -25,7 +27,6 @@ String.prototype.getNums = () => {
 class Room {
     constructor(activity_id) {
         this.room_id = activity_id;
-        this.activity_id = activity_id;
         // The following properties are initialized in init function
         this.activity = {}; // mongodb Activity instance
         this.generated_id = 0;
@@ -33,7 +34,7 @@ class Room {
 
     init(req) { // Asynchronous db process
         const redis = req.app.get('redis');
-        Activity.findById(this.activity_id)
+        Activity.findById(this.room_id)
             .then(act => {
                 if (!act)
                     throw new errors.NotExistError('No voting Activity exists.');
@@ -41,7 +42,7 @@ class Room {
                 this.activity = act;
             });
 
-        redis.hget("generated_id", this.activity_id, (err, id) => {
+        redis.hget("generated_id", this.room_id, (err, id) => {
             if (err) id = 0;
 
             console.log('generated_id: ', id);
@@ -51,7 +52,7 @@ class Room {
 
     gen_id(redis) {
         this.generated_id++;
-        redis.hset('generated_id', this.activity_id, this.generated_id);
+        redis.hset('generated_id', this.room_id, this.generated_id);
         return this.generated_id;
     }
 }
@@ -66,11 +67,11 @@ const load_activities = (app) => {
                     return;
 
                 let act_id = activity._id.toString();
-                let room = new Room(act_id);
-                room.init({ app: app });
-                app.set('room_' + act_id, room); // Store in memory
+                let room_info = new Room(act_id);
+                room_info.init({ app: app });
+                load_room_info({ app: app }, act_id, room_info); // Store in memory
             });
-        })
+        });
 }
 exports.load_activities = load_activities;
 
@@ -134,10 +135,20 @@ const get_access_token = (req) => {
 };
 exports.get_access_token = get_access_token;
 
-const get_session = (req) => {
+const _get_user_info = (req) => {
     let open_id = req.query.openid;
-    return req.app.get('cache').get(open_id) || {};
+    return req.app.get('cache').user_info.get(open_id) || {};
 };
+
+const get_user_info = (req) => {
+    let user_info = _get_user_info(req);
+    console.log('get_user_info: ', user_info);
+    if (user_info.nickname === undefined || user_info.head_img_url === undefined)
+        return request_user_info(req).then(get_user_info);
+
+    return Promise.resolve(user_info);
+}
+exports.get_user_info = get_user_info;
 
 // Request and store a user's information
 const request_user_info = (req) => {
@@ -159,7 +170,7 @@ const request_user_info = (req) => {
             if (res.errcode)
                 throw new errors.WeChatResError(res.errmsg);
 
-            console.log('User info: ', res);
+            console.log('request_user_info');
             update_user_info(req, {
                 nickname: res.nickname,
                 head_img_url: res.headimgurl,
@@ -170,27 +181,33 @@ const request_user_info = (req) => {
 };
 exports.request_user_info = request_user_info;
 
-const get_user_info = (req) => {
-    let session = get_session(req);
-    console.log('wechat session: ', session);
-    if (session.nickname === undefined || session.head_img_url === undefined)
-        return request_user_info(req).then(get_user_info);
-
-    return Promise.resolve(session);
-}
-exports.get_user_info = get_user_info;
-
 const update_user_info = (req, options) => {
-    let session = get_session(req);
+    let user_info = _get_user_info(req);
     let open_id = req.query.openid;
 
     for (let key in options)
-        session[key] = options[key];
+        user_info[key] = options[key];
 
-    req.app.set('cache').set(open_id, session);
-    console.log('update_user_info cache: ', session);
+    req.app.get('cache').user_info.set(open_id, user_info);
+    console.log('update_user_info');
 }
 exports.update_user_info = update_user_info;
+
+const get_room_info = (req, room_id) => {
+    let room_info = req.app.get('cache').room_info.get(room_id);
+
+    if (!room_info)
+        throw new errors.NotExistError('The activity is not exist or is over.');
+
+    return room_info;
+};
+exports.get_room_info = get_room_info;
+
+const load_room_info = (req, room_id, room_info) => {
+    req.app.get('cache').room_info.set(room_id, room_info);
+    console.log('load_room_info: ', room_info);
+}
+exports.load_room_info = load_room_info;
 
 const get_wechat_input = (req, key) => {
     if (!req.body.xml[key] || req.body.xml[key].length <= 0)
@@ -232,9 +249,9 @@ exports.request_random_nums = request_random_nums;
 
 // request-promise: STREAMING THE RESPONSE (e.g. .pipe(...)) is DISCOURAGED
 // Use request module instead
-const download_image = (pic_url, msg_id) => {
+const download_image = (pic_url, msg_id, room_id) => {
     const file_name = 'public/images/fromuser/'
-                      + msg_id + '.png';
+                      + room_id + '/'+ msg_id + '.png';
 
     return new Promise((resolve, reject) => {
         request.head(pic_url, (err, res, body) => {
@@ -245,8 +262,8 @@ const download_image = (pic_url, msg_id) => {
 }
 exports.download_image = download_image;
 
-const delete_image = () => {
-    const dir_name = 'public/images/fromuser/';
+const delete_image = (room_id) => {
+    const dir_name = 'public/images/fromuser/' + room_id + '/';
     const file_list = fs.readdirSync(dir_name);
     if (file_list.length <= consts.MAX_FROMUSER_IMAGE_NUM)
         return;
@@ -263,7 +280,7 @@ const delete_image = () => {
 exports.delete_image = delete_image;
 
 // Synchronize wechat menu with consts.WECHAT_MENU
-const sync_menu = (req) => {
+const update_menu = (req) => {
     let menu = consts.WECHAT_MENU;
     return get_access_token(req)
         .then(access_token => {
@@ -283,18 +300,43 @@ const sync_menu = (req) => {
                     if (res.errcode)
                         throw new errors.WeChatResError(res.errmsg);
 
-                    console.log('sync_menu complete');
+                    console.log('update_menu complete');
                 })
                 .catch(err => {
                     console.error(err);
                 });
         });
 }
-exports.sync_menu = sync_menu;
+exports.update_menu = update_menu;
+
+const register_list_image = (req, file_path) => {
+    return get_access_token(req)
+        .then(access_token => {
+                let command = 'curl -F media=@public'
+                            + file_path
+                            + ' http://file.api.weixin.qq.com/cgi-bin/material/add_material?access_token='
+                            + access_token;
+
+                exec(command, (err, res) => {
+                    if (err)
+                        throw new errors.UnknownError(err);
+
+                    // According to session's room_id store res.media_id in Activity.list_media_id
+                    let activity_id = req.session.activity_id;
+                    let room_info = get_room_info(req, activity_id);
+                    room_info.activity.list_media_id;
+                    room_info.save();
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            });
+}
+exports.register_list_image = register_list_image;
 
 // Return ongoing vote events
 const get_vote_info = (room) => {
-    let activity_id = room.activity_id;
+    let activity_id = room.room_id;
     return Vote.find({ activity_id: activity_id })
         .then(votes => {
             let votes_ongoing = [];

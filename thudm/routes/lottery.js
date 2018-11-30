@@ -31,7 +31,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
     //if (!req.session.login)
     //    throw new errors.NotLoggedInError();
 
-    let users = req.app.get('cache');
+    let users = req.app.get('cache').user_info; // get all users in the activity
     sendData.users = JSON.stringify([...users]);
 
     let winner_num = 1;

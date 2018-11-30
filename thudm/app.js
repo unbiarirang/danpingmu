@@ -46,16 +46,28 @@ utils.init(config);
 app.set('redis', redisClient);
 // Redis message queue
 app.set('rsmq', rsmq);
-// Wechat user info cache. All activities share a cache
-app.set('cache', new Map());
-// Load all ongoing activities. app.set('room_{room_id}', room)
+// Wechat cache. All activities share a user info cache
+app.set('cache', {
+    user_info: new Map(),   // Key: open_id Value: user info
+    room_info: new Map()    // Key: room_id Valie: Room()
+});
+
+// Load all ongoing activities.
 utils.load_activities(app);
 
-// Flush user info cache every day at midnight
-new cron.CronJob('0 0 0 * * *', function() {
+// Flush cache every day at 6 a.m
+new cron.CronJob('0 0 6 * * *', function() {
     console.log('CRON> Flush cache');
 
-    app.get('cache').clear();
+    app.get('cache').user_info.clear();
+    app.get('cache').room_info.forEach((room, room_id, map) => {
+        // A activity was finished
+        if (room.activity.end_time < Date.now()) {
+            map.delete(room_id);
+            // Remove the activity's image dir
+            // 
+        }
+    });
 }, null, true, 'Asia/Shanghai');
 
 // Init index router

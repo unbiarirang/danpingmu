@@ -1,5 +1,6 @@
 const express = require('express');
 let router = express.Router();
+const fs = require('fs');
 const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
@@ -40,12 +41,15 @@ router.post('/', (req, res, next) => {
     act.save()
         .then(() => {
             req.session.activity_id = act._id;
+            // Create a directory
+            fs.mkdir('public/images/fromuser/' + act._id, (res) => { console.log('mkdir'); });
             return res.json({ result: 1 });
         })
         .catch(err => {
             console.error(err);
             next(err);
         });
+
 });
 
 module.exports = router;
