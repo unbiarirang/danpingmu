@@ -1,6 +1,5 @@
 doctype transitional
-// saved from url=(0066)http://www.17sucai.com/preview/33040/2014-03-05/3D_Cloud/demo.html
-html(xmlns='http://www.w3.org/1999/xhtml')
+html()
   head
     meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
     title 抽奖
@@ -21,7 +20,7 @@ html(xmlns='http://www.w3.org/1999/xhtml')
       console.log(users);
       for(var i = 0;i < users.length; i++){
         info.push(JSON.stringify(users[i][1]));
-        console.log("JSON = ",JSON.parse(info[i]).head_img_url);
+        console.log("JSON = ",JSON.parse(info[i]).nickname);
         var temp = JSON.parse(info[i]).head_img_url;
         console.log("haha",temp);
       }
@@ -40,14 +39,19 @@ html(xmlns='http://www.w3.org/1999/xhtml')
       var timerun = 0;
       var interval = setInterval(function(){
         timerun++;
-        if(timerun == 25){
+        if(timerun == 2){
           $('div.tagBall').remove();
           for(var i = 0; i < data.length; i++){
             clearInterval(interval);
+            $('body').css("background-image","url(/images/bg.jpg)"); 
             console.log("data",data[i]);
             $('body').append('<div class = winner id = winner' + i + ' style = "display: none; width:' + (100/data.length) + 'vw;"></div>');
-            $('#winner' + i).append('<img class = "prize" src =' + JSON.parse(info[data[0] - 1]).head_img_url + '>' );
+            $('#winner' + i).append('<div class = information id = info' + i + '></div>');
+            $('#info' + i).append('<div class = profile id = profile' + i + '></div>');
+            $('#info' + i).append('<div class = name>' + JSON.parse(info[data[0] - 1]).nickname + '</div>');
+            $('#profile' + i).append('<img class = "prize" src =' + JSON.parse(info[data[0] - 1]).head_img_url + '>' );
             $('div.winner').fadeIn(5000);
+
           }
         }
         if(timerun < 10){
@@ -169,4 +173,17 @@ html(xmlns='http://www.w3.org/1999/xhtml')
     height:30%;
     border-radius:20px;
     top: 40%;
+    }
+    div.name{
+    position:relative;
+    text-align:center;
+    font-weight:800;
+    font-size:4vw;
+    }
+    body{
+    background: url(/images/bg.jpg) no-repeat;
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    background-size:cover;
     }

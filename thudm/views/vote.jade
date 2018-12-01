@@ -34,8 +34,7 @@ html(lang="zh-CN")
                   line_num = (op_num + 1) / 2;
                   console.log(line_num);
                   for(var i = 0; i < line_num; i++){
-                   console.log()
-                   $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
+                    $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
                     candy_num++;
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
@@ -48,12 +47,23 @@ html(lang="zh-CN")
                  $('#candy' + id).append("<div class = form  id = form" + id + '></div>');
                  $('#form' + id).append("<img src = " + pic_urls[id] + '>');
                  $('#form' + id).append("<div class = title id = title" + id +'>' + '</div>');
-                 $('#title' + id).append("<label><input type = 'radio' class = cb  id = radio" + id + "><label></label>" + options[id]) + '</label>';
+                 $('#title' + id).append("<label><input type = 'radio' class = cb  id = radio" + id + "><label class = box id =" + id +"></label>" + options[id]) + '</label>';
              }         
              $("input.cb").click(function(){
                for(var i = 0; i < $("input.cb").length; i++){
                  if($(this).attr('id') != ('radio' + i)){
                    $("#radio" + i).attr("checked",false);
+                 }
+               }
+             });
+             $("label.box").click(function(){
+               for(var i = 0; i < $("input.cb").length; i++){
+                 if($(this).attr('id') != (i)){
+                   $("#radio" + i).attr("checked",false);
+                 }
+                 else{
+                   console.log($(this).attr('id'),i);
+                   $("#radio" + i).attr("checked",true);
                  }
                }
              });
@@ -64,12 +74,12 @@ html(lang="zh-CN")
                     flag = 1;
                     console.log("vote id = ",i);
                     $.ajax({
-                      type:"GET",
+                      type:"get",
                       data:{"vote": i},
-                      dataType:"text",
-                      url:"/vote/5bf588a235192a28284ac003/votefor/" + i,
+                      datatype:"text",
+                      url:"/vote/"+ act_id  +"/votefor/" + i,
                       success: function(data){
-                        alert("OK");
+                        alert("ok");
                       },
                       error: function(e){
                       }
