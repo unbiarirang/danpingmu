@@ -24,13 +24,13 @@ router.post('/', (req, res, next) => {
                     // if (!room_id) return; // User not belong any activity
                     if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                     let content = utils.get_wechat_input(req, 'content');
-                    let nickname = user_info.nickname;
-                    let head_img_url = user_info.head_img_url;
-                    let room = utils.get_room_info(req, room_id);
-
                     // Filter unspported message
                     if (content === '[Unsupported Message]')
                         return;
+
+                    let nickname = user_info.nickname;
+                    let head_img_url = user_info.head_img_url;
+                    let room = utils.get_room_info(req, room_id);
 
                     let msg_obj = {
                         "activity_id": room_id,
@@ -109,24 +109,37 @@ router.post('/', (req, res, next) => {
             let event = utils.get_wechat_input(req, 'event');
             let event_key = utils.get_wechat_input(req, 'eventkey');
 
+            let data = {};
+            data.to_user_name = utils.get_wechat_input(req, 'fromusername');
+            data.from_user_name = utils.get_wechat_input(req, 'tousername');
+            data.create_time = Math.floor(Date.now() / 1000);
+
             // User entered a specific room
             if (event === 'SCAN') {
                 let room_id = event_key;
                 utils.update_user_info(req, { room_id: room_id });
-                console.log('Entered room', room_id);
+                console.log('A user entered room', room_id);
+                data.content = "Welcome to DANPINGMU";
+                utils.get_reply_text(data)
+                    .then(xml => {
+                        res.set('Content-Type', 'text/xml');
+                        res.send(xml);
+                    });
             }
             // FIXME: case of just subscribe room_id=undefined
             else if (event === 'subscribe') {
                 let room_id = event_key.split('_')[1];
                 utils.update_user_info(req, { room_id: room_id });
-                console.log('Entered room', room_id);
+                console.log('A user entered room', room_id);
+                data.content = "Welcome to DANPINGMU";
+                utils.get_reply_text(data)
+                    .then(xml => {
+                        res.set('Content-Type', 'text/xml');
+                        res.send(xml);
+                    });
             }
             else if (event === 'CLICK') {
                 let pr_chain = Promise.resolve();
-                let data = {};
-                data.to_user_name = utils.get_wechat_input(req, 'fromusername'); 
-                data.from_user_name = utils.get_wechat_input(req, 'tousername');
-                data.create_time = Math.floor(Date.now() / 1000);
                 switch (event_key) {
                     case 'KEY_VOTE':
                         let open_id;
@@ -172,9 +185,9 @@ router.post('/', (req, res, next) => {
                             })
                             .then(user_info => {
                                 let room_id = user_info.room_id;
-                                //if (!room_id) return res.send("");
+                                if (!room_id) return res.send("");
 
-                                if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                                //if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                                 let room = utils.get_room_info(req, room_id);
                                 data.media_id = room.activity.list_media_id;
 
@@ -191,8 +204,11 @@ router.post('/', (req, res, next) => {
                 return pr_chain
                     .then(xml => {
                         res.set('Content-Type', 'text/xml');
-                        res.send(xml);
+                        return res.send(xml);
                     });
+            }
+            else { // Others
+                res.send("");
             }
 
             // Store or refresh user info in cache
