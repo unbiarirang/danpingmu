@@ -11,6 +11,7 @@ router.get('/:activity_id', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.params.activity_id;
+    req.session.activity_id = activity_id;
 
     Activity.findById(activity_id)
         .then(act => {
@@ -53,6 +54,7 @@ const createActivity = (req) => {
     act.banned_words_url = req.body.banned_words_url;
     act.bg_img_url = req.body.bg_img_url;
     act.end_time = req.body.end_time;
+    act.list_media_id = req.body.list_media_id;
     return act.save();
 }
 

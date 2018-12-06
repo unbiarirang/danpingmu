@@ -47,9 +47,9 @@ describe('User(both old and new subscriber) entered a activity', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.text).toMatch('<MsgType><![CDATA[text]]></MsgType>\n    <Content><![CDATA[Welcome to DANPINGMU]]></Content>\n</xml>');
-                    utils.get_user_info({ app: app, query: { openid: open_id } });
+                    utils.get_user_info({ app: app, query: { openid: open_id } })
                         .then(user_info => {
-                            expect(user_info.room_id).toBe();
+                            expect(user_info.room_id).toBe(activity_id);
                             done();
                         });
                 }, 1000);

@@ -13,7 +13,6 @@ const activity_schema = new mongoose.Schema({
     title: { type: String, required: true },
     sub_title: String,
     bullet_color_num: Number,
-    //bullet_colors: mongoose.Mixed,
     bullet_colors: [String],
     banned_words_url: String,
     bg_img_url: String,
@@ -27,10 +26,8 @@ const vote_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
-    option_num: Number,
-    //options: mongoose.Mixed,
-    //pic_urls: mongoose.Mixed,
-    options: [String],
+    option_num:{ type: Number, required: true },
+    options: { type: [String], required: true },
     pic_urls: [String],
     status: { type: String, enum: VOTE_STATUS , default: 'READY' },
 });
@@ -40,7 +37,7 @@ const lottery_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
-    winner_num: Number,
+    winner_num: { type: Number, min: 1, required: true },
 });
 exports.Lottery = mongoose.model('Lottery', lottery_schema);
 

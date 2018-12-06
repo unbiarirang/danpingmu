@@ -31,13 +31,25 @@ router.get('/:lottery_id/draw', (req, res, next) => {
     //if (!req.session.login)
     //    throw new errors.NotLoggedInError();
 
+    let lottery_id = req.params.lottery_id;
+
+    let sendData = {};
     let users = req.app.get('cache').user_info; // get all users in the activity
     sendData.users = JSON.stringify([...users]);
 
-    let winner_num = 1;
-    let min_num = 1;
-    let max_num = users.size;
-    utils.request_random_nums(winner_num, 0, max_num)
+    Lottery.findById(lottery_id)
+        .then(data => {
+            let winner_num = data.winner_num;
+            let max_num = users.size;
+            let min_num = 1;
+
+            if (max_num === 0)
+                return;
+            if (max_num === 1)
+                return [1];
+
+            return utils.request_random_nums(winner_num, min_num, max_num)
+        })
         .then(data => {
             sendData.data = data;
             console.log('sendData: ', sendData);

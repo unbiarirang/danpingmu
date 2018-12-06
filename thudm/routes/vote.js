@@ -62,7 +62,6 @@ router.get('/:vote_id/result', (req, res, next) => {
 });
 
 // User get vote information
-// FIXME: 
 router.get('/:vote_id/user', (req, res, next) => {
     let vote_id = req.params.vote_id;
 
@@ -92,7 +91,6 @@ router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
 
     redis.hgetAsync('voteuser_' + vote_id, open_id)
         .then(data => {
-            console.log('data: ', data);
             // Duplicate voting
             if (data)
                 throw new errors.DuplicatedError('You have already voted.');
@@ -100,11 +98,9 @@ router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
             return redis.hsetAsync('voteuser_' + vote_id, open_id, 1);
         })
         .then(data => {
-            console.log('data: ', data);
             return redis.hincrbyAsync('vote_' + vote_id, option_id, 1)
         })
         .then(data => {
-            console.log('data: ', data);
             res.sendStatus(200);
         })
         .catch(err => {
@@ -119,15 +115,14 @@ router.post('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let vote = new Vote();
-    //vote.activity_id = req.session.activity_id;
-    vote.activity_id = 1 // FIXME: for test
+    vote.activity_id = req.session.activity_id;
+    //vote.activity_id = '5c03ba2fec64483fe182a7d2' // FIXME: for test
     vote.title = req.body.title;
     vote.sub_title = req.body.sub_title;
     vote.option_num = req.body.option_num;
     vote.options = req.body.options;
     vote.pic_urls = req.body.pic_urls;
-    vote.start_time = new Date(req.body.start_time);
-    vote.end_time = new Date(req.body.end_time);
+    vote.status = req.body.status;
     vote.save()
         .then(() => {
             return res.json({ result: 1 });
