@@ -36,7 +36,6 @@ html(lang="zh-CN")
 
         var dm_cnt = 1;
         const pic_limit = 30; // FIXME
-        //var dm_list = new Array();
         var dm_list = new Queue();
         var pic_list = new Queue();
         var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
@@ -61,7 +60,6 @@ html(lang="zh-CN")
         var id = 1;
         var id2 = 1;
         var del = 1;
-
         $(document).ready(function(){
           function delete_DM(){
             if (id - del > 15){
@@ -76,15 +74,12 @@ html(lang="zh-CN")
               var msg_obj = JSON.parse(dm_list.quere()[dm_list.size() - 1].msg);
               $('div.total').append('<div class = "DM" id =' + id +'>'+'</div>');
               $('#' + id).append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
-              //$('#' + id).append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
               $('#' + id).append("<div class = 'info' id = info" + id +'>' + '</div>');
               $('#info' + id).append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
               $('#info' + id).append("<div class = 'content' id = content" + id +'>'+ msg_obj.content +'</div>');
               $('div.DM').animate({"bottom": "+=23vh"},500);
               if (Math.floor(Math.random() * 101) > 50)
                 $('#content' + id).css("color","#e53258");
-              //$('img.profile').animate({"bottom": "+=23vh"},500);
-              //$('div.name').animate({"bottom": "+=23vh"},500);
               id = id + 1;
               dm_list.pop();
             }
@@ -130,7 +125,6 @@ html(lang="zh-CN")
                  if(pic_free.size() > 0){
                    $('img.picture').attr('src','../images/activity/' + room_id + '/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
                    pic_cnt--;
-                   //console.log('pic_cnt',pic_cnt);
                    console.log('pic_free',pic_free.size());
                    if(pic_cnt == -1)
                      pic_cnt = pic_free.size() - 1;

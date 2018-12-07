@@ -142,6 +142,19 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
     return promise_chain;
 });
 
+//some additional html
+router.get('/msglist', (req, res, next) => {
+    res.render('msglist');
+});
+
+router.get('/activity-list', (req, res, next) => {
+    res.render('activity-list');
+});
+
+router.get('/create-activity', (req, res, next) =>{
+    res.render('create-activity');
+});
+
 router.get('/screen/:room_id', (req, res, next) => {
     let room_id = req.params.room_id;
     let rsmq = req.app.get('rsmq');

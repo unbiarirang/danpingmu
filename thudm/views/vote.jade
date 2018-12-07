@@ -7,12 +7,12 @@ html(lang="zh-CN")
       script.
           var options = !{options != null? JSON.stringify(options): 'null'};
           var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
-          var title = !{sub_title != null? JSON.stringify(sub_title): 'null'};
-          var vote_id = !{_id != null? JSON.stringify(_id): 'null'};
+          var title = !{title != null? JSON.stringify(title): 'null'};
+          var _id = !{_id != null? JSON.stringify(_id): 'null'};
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
           console.log("title = ",title); 
-          console.log("vote_id = ", vote_id);
+          console.log("vote_id = ", _id);
 
           $(document).ready(function(){
               var op_num = options.length;
@@ -77,29 +77,34 @@ html(lang="zh-CN")
                       type:"get",
                       data:{"vote": i},
                       datatype:"text",
-                      url:"/vote/"+ act_id  +"/votefor/" + i,
+                      url:"/vote/"+ _id +"/votefor/" + i,
                       success: function(data){
-                        alert("ok");
+                        console.log('data:', data);
+                        if(data.error.name == 'DuplicatedError')
+                          alert("您已参加过投票！");
+                        window.location = "../../vote_warning.html";
                       },
                       error: function(e){
+                         console.log(e);
+                         alert('投票失败，请重试');
                       }
                     })
                  }
-                 window.location = "../../vote_warning.html";
-               }
+                               }
                if(flag == 0)
                 alert("请选择一个对象");
              })
  
           });
    body
+      .theme
       .total
 
 style(type="text/css").
   div.total{
       position:relative;
       width:100vw;
-      height:100vh;
+      height:90vh;
   }
   div.line{
       position:relative;

@@ -26,7 +26,7 @@ router.post('/login', (req, res, next) => {
                 if (user.password === key.toString('base64')) {
                     req.session.login = true;
                     req.session.admin_id = input_id;
-                    res.redirect("../screen/1");
+                    res.redirect("../activity-list");
                 }
                 //else
                 //    throw new errors.NotExistError('Wrong id or password.');

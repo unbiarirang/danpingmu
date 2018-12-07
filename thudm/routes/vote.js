@@ -11,7 +11,6 @@ router.get('/:vote_id', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     const vote_id = req.params.vote_id;
-
     Vote.findById(vote_id)
         .then(vote => {
             if (!vote)
@@ -29,31 +28,27 @@ router.get('/:vote_id', (req, res, next) => {
 router.get('/:vote_id/result', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-
+    
     const vote_id = req.params.vote_id;
     const redis = req.app.get('redis');
     const key = 'vote_' + req.params.vote_id;
     let sendData = {};
-
     redis.hgetallAsync(key)
         .then(data => {
             console.log('data: ', data);
             sendData.result = data;
         })
-        .then(data => {
+        .then(() => {
             return Vote.findById(vote_id)
                 .then(vote => {
                     if (!vote)
                         throw new errors.NotExistError('No voting Activity exists.');
 
-                    return vote;
+                    sendData.title= vote.title;
+                    sendData.options = vote.options;
+                    sendData.pic_urls = vote.pic_urls;
+                    return res.render('result', { candidate: sendData });
                 });
-        })
-        .then(vote => {
-            sendData.title = vote.title;
-            sendData.options = vote.options;
-            sendData.pic_urls = vote.pic_urls;
-            res.send(sendData);
         })
         .catch(err => {
             console.error(err);
@@ -73,7 +68,7 @@ router.get('/:vote_id/user', (req, res, next) => {
             console.log('vote: ', vote);
 
             return res.render('vote', vote);
-        })
+       })
         .catch(err => {
             console.error(err);
             next(err);
@@ -104,7 +99,7 @@ router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
             res.sendStatus(200);
         })
         .catch(err => {
-            res.error = err;
+            res.send({ error: err });
             console.error(err);
             next(err);
         });

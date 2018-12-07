@@ -22,11 +22,8 @@ html()
         info.push(JSON.stringify(users[i][1]));
         console.log("JSON = ",JSON.parse(info[i]).nickname);
         var temp = JSON.parse(info[i]).head_img_url;
-        console.log("haha",temp);
       }
       var data = !{data != null? JSON.stringify(data):'null'};
-      console.log("users",info);
-      console.log("data",data);
       $(document).ready(function(){
       var cnt = 0;
       for(var i = 0; i < 46; i++){
@@ -48,8 +45,8 @@ html()
             $('body').append('<div class = winner id = winner' + i + ' style = "display: none; width:' + (100/data.length) + 'vw;"></div>');
             $('#winner' + i).append('<div class = information id = info' + i + '></div>');
             $('#info' + i).append('<div class = profile id = profile' + i + '></div>');
-            $('#info' + i).append('<div class = name>' + JSON.parse(info[data[0] - 1]).nickname + '</div>');
-            $('#profile' + i).append('<img class = "prize" src =' + JSON.parse(info[data[0] - 1]).head_img_url + '>' );
+            $('#info' + i).append('<div class = name>' + JSON.parse(info[data[i] - 1]).nickname + '</div>');
+            $('#profile' + i).append('<img class = "prize" src =' + JSON.parse(info[data[i] - 1]).head_img_url + '>' );
             $('div.winner').fadeIn(5000);
 
           }
@@ -168,8 +165,8 @@ html()
     }
     img.prize{
     position:relative;
-    left: 40%;
-    width: 20%;
+    left: 10%;
+    width: 80%;
     height:30%;
     border-radius:20px;
     top: 40%;
@@ -186,4 +183,8 @@ html()
     width:100%;
     overflow:hidden;
     background-size:cover;
+    }
+    div.information{
+    position:relative;
+    top:20%;
     }
