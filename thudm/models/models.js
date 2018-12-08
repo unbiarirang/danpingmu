@@ -18,6 +18,8 @@ const activity_schema = new mongoose.Schema({
     bg_img_url: String,
     end_time: { type: Number, required: true }, // second
     list_media_id: String,
+    blacklist_user: [String],
+    blacklist_word: [String],
 });
 exports.Activity = mongoose.model('Activity', activity_schema);
 

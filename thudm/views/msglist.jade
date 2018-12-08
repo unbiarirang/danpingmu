@@ -3,7 +3,7 @@ html
   head
     meta(charset='UTF-8')
     title 弹幕审核
-    script(src='js/jquery-1.4.3.min.js')
+    script(src='../../../js/jquery-1.4.3.min.js')
     script.
       function aa() {
       var name = $("#name").val();
@@ -61,6 +61,12 @@ html
             td 姓名
             td 弹幕内容
             td 操作
+
+    form(action='/activity/5bfaca2ac045082acf9c5a72/upload', method='POST', enctype='multipart/form-data')
+      | Select an image to upload:
+      input(type='file', name='list_image')
+      input(type='submit', value='Upload Image')
+
 
 // socket.io
 script(src='/socket.io/socket.io.js')

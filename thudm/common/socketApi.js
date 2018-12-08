@@ -11,7 +11,7 @@ io.on('connection', (socket) => {
         let room_id = data.room_id;
         socket.room_id = data.room_id;
         socket.join(room_id);
-        socket.broadcast.to(socket.room_id).emit('event','User joined a room');
+        socket.broadcast.to(socket.room_id).emit('event', 'User joined a room');
     });
 
     socket.on('passReview', (data) => {

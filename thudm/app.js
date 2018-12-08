@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var cron = require('cron');
-var config = require('./config.json');
+var config = require('./config');
 var mongodb = require('./mongodb');
 var indexRouter = require('./routes/index');
 var utils = require('./common/utils');
@@ -63,9 +63,8 @@ new cron.CronJob('0 0 6 * * *', function() {
     app.get('cache').room_info.forEach((room, room_id, map) => {
         // A activity was finished
         if (room.activity.end_time < Date.now()) {
+            room.destroy(redisClient);
             map.delete(room_id);
-            // Remove the activity's image dir
-            // 
         }
     });
 }, null, true, 'Asia/Shanghai');

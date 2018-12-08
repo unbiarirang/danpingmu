@@ -71,7 +71,7 @@ describe('User clicked "vote" button', () => {
     const room_id = '5c03ba2fec64483fe182a7d2';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
 
-    test('It should return response with the list image\'s media_id', (done) => {
+    test('It should return all ongoing vote events', (done) => {
         utils.load_activities(app)
             .then(() => {
                 utils.update_user_info({ app: app, query: { openid: open_id } }, { room_id: room_id });

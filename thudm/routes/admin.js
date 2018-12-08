@@ -40,7 +40,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
         .then(attr => {
             console.log('attr: ', attr);
             const request_min_id = consts.MSG_PER_PAGE_NUM * (page_id - 1);
-            const request_max_id = consts.MSG_PER_PAGE_NUM * page_id;
+            const request_max_id = consts.MSG_PER_PAGE_NUM * page_id - 1;
             let totalrecv = attr.totalrecv;
             let totalsent = attr.totalsent;
 
@@ -82,7 +82,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
                                 .then(msg => {
                                     console.log('Get from mongodb');
                                     if (!msg)
-                                        throw new errors.NotExistError("Message not exists.");
+                                        console.error(new errors.NotExistError("Message not exists. msg_id: " + msg_id));
 
                                     return resolve(msg);
                                 })
@@ -142,19 +142,6 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
     return promise_chain;
 });
 
-//some additional html
-router.get('/msglist', (req, res, next) => {
-    res.render('msglist');
-});
-
-router.get('/manage', (req, res, next) => {
-    res.render('manage');
-});
-
-router.get('/test', (req, res, next) => {
-    res.render('test');
-});
-
 router.get('/screen/:room_id', (req, res, next) => {
     let room_id = req.params.room_id;
     let rsmq = req.app.get('rsmq');
@@ -207,7 +194,6 @@ router.get('/ticket/:room_id', (req, res, next) => {
             return rp(options);
         })
         .then(body => {
-            // POST succeeded
             // Error from wechat
             if (body.errcode)
                 throw new errors.WeChatResError(body.errmsg);
@@ -216,7 +202,6 @@ router.get('/ticket/:room_id', (req, res, next) => {
                           + '?ticket=' + body.ticket);
         })
         .catch(err => {
-            // POST failed
             console.error(err);
             next(err);
         });

@@ -2,7 +2,6 @@ const express = require('express');
 let router = express.Router();
 const assert = require('assert');
 const errors = require('../common/errors');
-const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Vote = models.Vote;
 
@@ -51,6 +50,7 @@ router.get('/:vote_id/result', (req, res, next) => {
                 });
         })
         .then(vote => {
+            sendData.title = vote.title;
             sendData.options = vote.options;
             sendData.pic_urls = vote.pic_urls;
             res.send(sendData);
@@ -104,6 +104,7 @@ router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
             res.sendStatus(200);
         })
         .catch(err => {
+            res.error = err;
             console.error(err);
             next(err);
         });

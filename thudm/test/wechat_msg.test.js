@@ -54,7 +54,7 @@ describe('User send an image type message', () => {
     const msg_id = '1234567890'
 
     beforeAll(() => {
-        const dir_name = 'public/images/fromuser/' + room_id + '/';
+        const dir_name = 'public/images/activity/' + room_id + '/fromuser';
         const file_list = fs.readdirSync(dir_name);
         file_list.forEach(file_name => {
             fs.unlink(dir_name + file_name, () => {});
@@ -82,7 +82,7 @@ describe('User send an image type message', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    const dir_name = 'public/images/fromuser/' + room_id + '/';
+                    const dir_name = 'public/images/activity/' + room_id + '/fromuser';
                     const file_list = fs.readdirSync(dir_name);
                     expect(file_list).toContain(msg_id + '.png');
                     done();
@@ -91,14 +91,11 @@ describe('User send an image type message', () => {
     });
 });
 
-let log_output2 = "";
-const storeLog2 = input => (log_output2 += input);
 describe('User send an invalid type message', () => {
     const room_id = '5c03ba2fec64483fe182a7d2';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 
     test('It should do nothing', (done) => {
-        console.log = jest.fn(storeLog2);
         utils.load_activities(app)
             .then(() => {
                 utils.update_user_info({ app: app, query: { openid: open_id } }, { room_id: room_id });
@@ -118,7 +115,6 @@ describe('User send an invalid type message', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(log_output2).not.toMatch('RSMQ data sent');
                     done();
                 }, 500);
             });

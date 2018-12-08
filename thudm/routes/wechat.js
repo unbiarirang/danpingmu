@@ -21,16 +21,19 @@ router.post('/', (req, res, next) => {
             utils.get_user_info(req)
                 .then(user_info => {
                     let room_id = user_info.room_id;
-                    // if (!room_id) return; // User not belong any activity
-                    if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                    // User not belong to any activityroom_id;
+                    // if (!room_id) return;
+                    if (!room_id) room_id = '5bfaca2ac045082acf9c5a72';// FIXME: for test
+                    let room = utils.get_room_info(req, room_id);
                     let content = utils.get_wechat_input(req, 'content');
-                    // Filter unspported message
-                    if (content === '[Unsupported Message]')
+
+                    if (room.is_blocked_user(user_info.open_id)
+                        || room.is_blocked_word(content)
+                        || content === '[Unsupported Message]')
                         return;
 
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
-                    let room = utils.get_room_info(req, room_id);
 
                     let msg_obj = {
                         "activity_id": room_id,
@@ -77,6 +80,7 @@ router.post('/', (req, res, next) => {
                     let head_img_url = user_info.head_img_url;
                     let room = utils.get_room_info(req, room_id);
                     let msg_obj = {
+                        "activity_id": room_id,
                         "id": room.gen_id(req.app.get('redis')),
                         "type": "image",
                         "content": msg_id, // Save image as the msg_id
@@ -95,6 +99,15 @@ router.post('/', (req, res, next) => {
                 })
                 .then(msg_obj => {
                     socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
+
+                    let rsmq = req.app.get('rsmq');
+                    return rsmq.sendMessage({
+                            qname: room_id,
+                            message: JSON.stringify(msg_obj)
+                        })
+                        .then(data => {
+                            console.log("RSMQ data sent", data);
+                        });
                 })
                 .then(() => {
                     utils.delete_image(room_id);

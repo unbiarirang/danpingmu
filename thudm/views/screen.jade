@@ -115,7 +115,7 @@ html(lang="zh-CN")
 
                 pic_list.pop();
                 console.log(msg_obj.content);
-                $('img.picture').attr('src','../images/fromuser/' + room_id + '/' + msg_obj.content + '.png');
+                $('img.picture').attr('src','../images/activity/' + room_id + '/fromuser/' + msg_obj.content + '.png');
               }
               else {
                  if(pic_cnt == 0 && first == 0){
@@ -128,7 +128,7 @@ html(lang="zh-CN")
                  }
                  console.log('pic_cnt',pic_cnt);
                  if(pic_free.size() > 0){
-                   $('img.picture').attr('src','../images/fromuser/' + room_id + '/' + pic_free.quere()[pic_cnt] + '.png');
+                   $('img.picture').attr('src','../images/activity/' + room_id + '/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
                    pic_cnt--;
                    //console.log('pic_cnt',pic_cnt);
                    console.log('pic_free',pic_free.size());

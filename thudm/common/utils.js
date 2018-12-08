@@ -1,5 +1,6 @@
 const crypto = require('crypto');
-const fs = require('fs');
+const fs = require('fs-extra');
+require('bluebird').promisifyAll(fs);
 const rp = require('request-promise');
 const util = require('util');
 const exec = require('child_process').exec;
@@ -50,10 +51,57 @@ class Room {
         });
     }
 
+    destroy(redis) {
+        let del_keys = [
+            'rsmq:' + this.room_id,
+            'rsmq:' + this.room_id + ':Q',
+        ];
+        Vote.find({ activity_id: this.room_id })
+            .then(votes => {
+                votes.forEach(vote => {
+                    del_keys.push('vote_' + vote._id.toString());
+                    del_keys.push('voteuser_' + vote._id.toString());
+                });
+            })
+            .then(() => {
+                return redis.delAsync(del_keys);
+            })
+            .then(() => {
+                console.log('flush redis');
+            });
+
+        const dir_name = 'public/images/activity/' + this.room_id;
+        return fs.removeAsync(dir_name)
+            .then(() => { console.log('rmdir'); });
+    }
+
     gen_id(redis) {
         this.generated_id++;
         redis.hset('generated_id', this.room_id, this.generated_id);
         return this.generated_id;
+    }
+
+    is_blocked_user(open_id) {
+        let blacklist = this.activity.blacklist_user;
+        if (!blacklist || blacklist.length === 0)
+            return false;
+
+        if (blacklist.indexOf(open_id) < 0)
+            return false;
+
+        return true;
+    }
+
+    is_blocked_word(text) {
+        let blacklist = this.activity.blacklist_word;
+        if (!blacklist || blacklist.length === 0)
+            return false;
+
+        let regex = new RegExp(blacklist.join('|'));
+        if (!text.match(regex))
+            return false;
+
+        return true;
     }
 }
 exports.Room = Room;
@@ -67,13 +115,18 @@ const load_activities = (app) => {
                     return;
 
                 let act_id = activity._id.toString();
-                let room_info = new Room(act_id);
-                room_info.init({ app: app });
-                load_room_info({ app: app }, act_id, room_info); // Store in memory
+                load_activity({ app: app }, act_id);
             });
         });
 }
 exports.load_activities = load_activities;
+
+const load_activity = (req, act_id) => {
+    let room_info = new Room(act_id);
+    room_info.init(req);
+    load_room_info(req, act_id, room_info);
+}
+exports.load_activity = load_activity;
 
 const sign = () => {
     return (req, res, next) => {
@@ -250,8 +303,8 @@ exports.request_random_nums = request_random_nums;
 // request-promise: STREAMING THE RESPONSE (e.g. .pipe(...)) is DISCOURAGED
 // Use request module instead
 const download_image = (pic_url, msg_id, room_id) => {
-    const file_name = 'public/images/fromuser/'
-                      + room_id + '/'+ msg_id + '.png';
+    const file_name = 'public/images/activity/'
+                      + room_id + '/fromuser/'+ msg_id + '.png';
 
     return new Promise((resolve, reject) => {
         request.head(pic_url, (err, res, body) => {
@@ -263,7 +316,7 @@ const download_image = (pic_url, msg_id, room_id) => {
 exports.download_image = download_image;
 
 const delete_image = (room_id) => {
-    const dir_name = 'public/images/fromuser/' + room_id + '/';
+    const dir_name = 'public/images/activity/' + room_id + '/fromuser';
     const file_list = fs.readdirSync(dir_name);
     if (file_list.length <= consts.MAX_FROMUSER_IMAGE_NUM)
         return;
@@ -309,7 +362,7 @@ const update_menu = (req) => {
 }
 exports.update_menu = update_menu;
 
-const register_list_image = (req, file_path) => {
+const upload_list_image = (req, file_path) => {
     return get_access_token(req)
         .then(access_token => {
                 let command = 'curl -F media=@public'
@@ -332,7 +385,7 @@ const register_list_image = (req, file_path) => {
                 });
             });
 }
-exports.register_list_image = register_list_image;
+exports.upload_list_image = upload_list_image;
 
 // Return ongoing vote events
 const get_vote_info = (room) => {
