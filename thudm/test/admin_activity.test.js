@@ -39,7 +39,7 @@ describe('GET /activity/:activity_id', () => {
                 setTimeout(() => {
                     expect(res.text).toMatch('admin_id');
                     expect(res.text).toMatch('title');
-                    expect(res.text).toMatch('end_time');
+                    expect(res.text).toMatch('status');
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -61,7 +61,6 @@ describe('POST /activity', () => {
                 bullet_colors: [ 'red', 'yellow', 'white' ],
                 banned_words_url: 'some.url',
                 bg_img_url: 'some.url',
-                end_time: 12345678,
                 list_media_id: 'test media id'
             })
             .then(res => {
@@ -87,5 +86,117 @@ describe('POST /activity', () => {
     afterAll(() => {
         models.Activity.deleteOne({ title: test_title })
             .then(() => {});
+    });
+});
+
+describe('GET /activity/:activity_id/blacklist/user', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+
+    test('It should get user blacklist', (done) => {
+        return auth_session
+            .get('/activity/' + activity_id + '/blacklist/user')
+            .then(res => {
+                setTimeout(() => {
+                    expect(Array.isArray(JSON.parse(res.text))).toBe(true);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('PUT /activity/:activity_id/blacklist/user', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const open_id = 'testopenid';
+
+    test('It should append a user to the user blacklist', (done) => {
+        return auth_session
+            .put('/activity/' + activity_id + '/blacklist/user')
+            .send({
+                blocked_id: open_id
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).toMatch(open_id);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('DELETE /activity/:activity_id/blacklist/user', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const open_id = 'testopenid';
+
+    test('It should delete a user from the user blacklist', (done) => {
+        return auth_session
+            .delete('/activity/' + activity_id + '/blacklist/user')
+            .send({
+                blocked_id: open_id
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).not.toMatch(open_id);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('GET /activity/:activity_id/blacklist/word', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+
+    test('It should get word blacklist', (done) => {
+        return auth_session
+            .get('/activity/' + activity_id + '/blacklist/word')
+            .then(res => {
+                setTimeout(() => {
+                    expect(Array.isArray(JSON.parse(res.text))).toBe(true);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('PUT /activity/:activity_id/blacklist/word', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const word = 'xxx';
+
+    test('It should append a user to the word blacklist', (done) => {
+        return auth_session
+            .put('/activity/' + activity_id + '/blacklist/word')
+            .send({
+                blocked_word: word
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).toMatch(word);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('DELETE /activity/:activity_id/blacklist/word', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const word = 'xxx';
+
+    test('It should delete a word from the word blacklist', (done) => {
+        return auth_session
+            .delete('/activity/' + activity_id + '/blacklist/word')
+            .send({
+                blocked_word: word
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).not.toMatch(word);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
     });
 });

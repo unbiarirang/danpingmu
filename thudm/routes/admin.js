@@ -39,13 +39,13 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
         })
         .then(attr => {
             console.log('attr: ', attr);
-            const request_min_id = consts.MSG_PER_PAGE_NUM * (page_id - 1);
-            const request_max_id = consts.MSG_PER_PAGE_NUM * page_id - 1;
+            const request_min_id = consts.MSG_PER_PAGE_NUM * (page_id - 1) + 1;
+            const request_max_id = consts.MSG_PER_PAGE_NUM * page_id;
             let totalrecv = attr.totalrecv;
             let totalsent = attr.totalsent;
 
             // Pop messages before reqest min id
-            while(totalrecv < request_min_id) {
+            while(totalrecv < request_min_id - 1) {
                 not_ret_promises.push(new Promise((resolve, reject) => {
                         rsmq.popMessage({ qname: room_id })
                             .then(data => {
@@ -71,14 +71,14 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
                 let msg_id = request_min_id + i;
 
                 // Message not exist for the msg_id
-                if (msg_id >= totalsent)
+                if (msg_id > totalsent)
                     break;
 
                 // Requested message was already in Mongodb
-                if (msg_id < totalrecv) {
-                    console.log('msg_id, totalsent', msg_id, totalsent);
+                if (msg_id <= totalrecv) {
+                    console.log('from mongodb', msg_id);
                     ret_promises.push(new Promise((resolve, reject) => {
-                            Message.findOne({ id: msg_id })
+                            Message.findOne({ activity_id: room_id, id: msg_id })
                                 .then(msg => {
                                     console.log('Get from mongodb');
                                     if (!msg)
@@ -95,7 +95,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
 
                 // Pop message from redis queue and store it in Mongodb
                 else if (msg_id <= totalsent) {
-                    console.log('msg_id, totalrecv', msg_id, totalrecv);
+                    console.log('from redis', msg_id);
                     ret_promises.push(new Promise((resolve, reject) => {
                             rsmq.popMessage({ qname: room_id })
                                 .then(data => {

@@ -78,6 +78,7 @@ class Room {
     gen_id(redis) {
         this.generated_id++;
         redis.hset('generated_id', this.room_id, this.generated_id);
+        console.log('@@@@gen_id: ', this.generated_id);
         return this.generated_id;
     }
 
@@ -111,7 +112,7 @@ const load_activities = (app) => {
         .then(activities => {
             activities.forEach(activity => {
                 // Not load finished activities
-                if (activity.end_time < (Date.now() / 1000))
+                if (activity.status === "OVER")
                     return;
 
                 let act_id = activity._id.toString();
@@ -365,7 +366,7 @@ exports.update_menu = update_menu;
 const upload_list_image = (req, file_path) => {
     return get_access_token(req)
         .then(access_token => {
-                let command = 'curl -F media=@public'
+                let command = 'curl -F media=@'
                             + file_path
                             + ' http://file.api.weixin.qq.com/cgi-bin/material/add_material?access_token='
                             + access_token;
@@ -374,14 +375,10 @@ const upload_list_image = (req, file_path) => {
                     if (err)
                         throw new errors.UnknownError(err);
 
-                    // According to session's room_id store res.media_id in Activity.list_media_id
-                    let activity_id = req.session.activity_id;
+                    let activity_id = req.params.activity_id;
                     let room_info = get_room_info(req, activity_id);
-                    room_info.activity.list_media_id;
-                    room_info.save();
-                })
-                .catch(err => {
-                    console.error(err);
+                    room_info.activity.list_media_id = JSON.parse(res).media_id;
+                    room_info.activity.save();
                 });
             });
 }

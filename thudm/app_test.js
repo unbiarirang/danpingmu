@@ -62,7 +62,7 @@ new cron.CronJob('0 0 6 * * *', function() {
     app.get('cache').user_info.clear();
     app.get('cache').room_info.forEach((room, room_id, map) => {
         // A activity was finished
-        if (room.activity.end_time < Date.now()) {
+        if (room.activity.status === "OVER") {
             map.delete(room_id);
             // Remove the activity's image dir
             // 

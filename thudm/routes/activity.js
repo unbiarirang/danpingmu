@@ -39,7 +39,6 @@ const createActivity = (req) => {
     act.bullet_colors = req.body.bullet_colors;
     act.banned_words_url = req.body.banned_words_url;
     act.bg_img_url = req.body.bg_img_url;
-    act.end_time = req.body.end_time;
     act.list_media_id = req.body.list_media_id;
     return act.save();
 }
@@ -90,9 +89,11 @@ router.put('/:activity_id/blacklist/user', (req, res, next) => {
 
     let room = utils.get_room_info(req, room_id);
     let blacklist = room.activity.blacklist_user;
-    blacklist.push(blocked_id);
-    room.activity.save();
 
+    if (blocked_id)
+        blacklist.push(blocked_id);
+
+    room.activity.save();
     res.send(blacklist);
 });
 
@@ -169,12 +170,36 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post('/:activity_id/upload', upload.single('list_image'), (req, res, next) => {
-    //if (!req.session.login)
-    //    throw new errors.NotLoggedInError();
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
 
     let room_id = req.params.activity_id;
+
     console.log(req.file);
-    res.sendStatus(200);
+    return utils.upload_list_image(req, req.file.path)
+        .then(() => {
+            res.sendStatus(200);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+router.get('/activity-list', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let admin_id = req.session.admin_id;
+
+    Activity.findById({ admin_id: admin_id })
+        .then(activities => {
+            return res.send(activities);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 module.exports = router;

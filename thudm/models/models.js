@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const STATUS = ['READY', 'ONGOING', 'OVER'];
+
 const user_schema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -16,14 +18,13 @@ const activity_schema = new mongoose.Schema({
     bullet_colors: [String],
     banned_words_url: String,
     bg_img_url: String,
-    end_time: { type: Number, required: true }, // second
     list_media_id: String,
     blacklist_user: [String],
     blacklist_word: [String],
+    status: { type: String, enum: STATUS , default: 'ONGOING' },
 });
 exports.Activity = mongoose.model('Activity', activity_schema);
 
-const VOTE_STATUS = ['READY', 'ONGOING', 'OVER'];
 const vote_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
@@ -31,7 +32,7 @@ const vote_schema = new mongoose.Schema({
     option_num:{ type: Number, required: true },
     options: { type: [String], required: true },
     pic_urls: [String],
-    status: { type: String, enum: VOTE_STATUS , default: 'READY' },
+    status: { type: String, enum: STATUS , default: 'READY' },
 });
 exports.Vote = mongoose.model('Vote', vote_schema);
 
@@ -45,7 +46,7 @@ exports.Lottery = mongoose.model('Lottery', lottery_schema);
 
 const message_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
-    id: { type: String, required: true, unique: true },
+    id: { type: String, required: true },
     type: { type: String ,required: true },
     content: { type: String, required: true },
     nickname: { type: String, required: true },

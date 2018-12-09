@@ -42,7 +42,7 @@ router.post('/', (req, res, next) => {
                         "content": content,
                         "nickname": nickname,
                         "head_img_url": head_img_url,
-                        "review_flag": 0
+                        "review_flag": false
                     };
 
                     let rsmq = req.app.get('rsmq');
@@ -86,7 +86,7 @@ router.post('/', (req, res, next) => {
                         "content": msg_id, // Save image as the msg_id
                         "nickname": nickname,
                         "head_img_url": head_img_url,
-                        "review_flag": 0
+                        "review_flag": false
                     };
                     console.log('Send to room', room_id);
                     return msg_obj;
@@ -198,9 +198,9 @@ router.post('/', (req, res, next) => {
                             })
                             .then(user_info => {
                                 let room_id = user_info.room_id;
-                                if (!room_id) return res.send("");
+                                //if (!room_id) return res.send("");
 
-                                //if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                                if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                                 let room = utils.get_room_info(req, room_id);
                                 data.media_id = room.activity.list_media_id;
 
