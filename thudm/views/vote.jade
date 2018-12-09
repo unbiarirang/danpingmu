@@ -80,13 +80,12 @@ html(lang="zh-CN")
                       url:"/vote/"+ _id +"/votefor/" + i,
                       success: function(data){
                         console.log('data:', data);
-                        if(data.error.name == 'DuplicatedError')
-                          alert("您已参加过投票！");
-                        window.location = "../../vote_warning.html";
+                        window.location = "/vote_warning.html";
                       },
                       error: function(e){
-                         console.log(e);
-                         alert('投票失败，请重试');
+                         if(e.status == 403)
+                           alert("您已参加过投票！");
+                         window.location = "/vote_warning.html";
                       }
                     })
                  }

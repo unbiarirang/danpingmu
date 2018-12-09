@@ -121,6 +121,7 @@ router.post('/:vote_id/votefor/:option_id', (req, res, next) => {
 
             return redis.hsetAsync('voteuser_' + vote_id, open_id, 1);
         })
+
         .then(data => {
             return redis.hincrbyAsync('vote_' + vote_id, option_id, 1)
         })

@@ -61,63 +61,129 @@ html(lang='en')
                         .col-md-5
                           .form-group
                             label 活动名称
-                            input.form-control(type='text')
+                            input.form-control(type='text' id = 'Title')
                       .row
                         .col-md-5
                           .form-group
                             label 活动说明
-                            input.form-control(type='text')
+                            input.form-control(type='text' id = 'SubTitle')
                       .row
                         .col-md-9
-                          .form-group
-                            label 禁止单词
-                            input.form-control(type='text')
-                      .row
-                        .col-md-9
-                          .form-group
                             label 背景图片
-                            input.form-control(type='text')
+                            input(type='file' id = 'BackgroundPic')
                       .row
                         .col-md-12
                           .form-group
                             label 弹幕颜色
                             .ColorArray
-                              .ColorBox
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:50px;')
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:100px;')
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:150px;')
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:200px;')
-                                .SetColor(style='background:#5eb3c8;')
+                              #0.ColorBox
+                                #C0.SetColor(style='background:#5eb3c8;')
+                              #1.ColorBox(style='left:50px;')
+                                #C1.SetColor(style='background:#ff80c0;')
+                              #2.ColorBox(style='left:100px;')
+                                #C2.SetColor(style='background:#6b4d9d;')
+                              #3.ColorBox(style='left:150px;')
+                                #C3.SetColor(style='background:#008040;')
+                              #4.ColorBox(style='left:200px;')
+                                #C4.SetColor(style='background:#0080c0;')
                             br
                             br
                             .ColorArray
-                              .ColorBox
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:50px;')
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:100px;')
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:150px;')
-                                .SetColor(style='background:#5eb3c8;')
-                              .ColorBox(style='left:200px;')
-                                .SetColor(style='background:#5eb3c8;')
-                      button.btn.btn-info.btn-fill(type='submit') 创建
+                              #5.ColorBox
+                                #C5.SetColor(style='background:#e26b6b;')
+                              #6.ColorBox(style='left:50px;')
+                                #C6.SetColor(style='background:#d1ce5c;')
+                              #7.ColorBox(style='left:100px;')
+                                #C7.SetColor(style='background:#66dbbb;')
+                              #8.ColorBox(style='left:150px;')
+                                #C8.SetColor(style='background:#ff8000;')
+                              #9.ColorBox(style='left:200px;')
+                                #C9.SetColor(style='background:#408080;')
+                     #create.button.btn.btn-info.btn-fill(type='submit') 创建
                       .clearfix
+              .col-md-4
+                  #bg.example
+                //    img(src='images/testbg4.gif')
     // Core JS Files
-    script(src='assets/js/jquery.3.2.1.min.js', type='text/javascript')
-    script(src='assets/js/bootstrap.min.js', type='text/javascript')
+    script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
+    script(src='/assets/js/bootstrap.min.js', type='text/javascript')
     // Charts Plugin
-    script(src='assets/js/chartist.min.js')
+    script(src='/assets/js/chartist.min.js')
     // Notifications Plugin
-    script(src='assets/js/bootstrap-notify.js')
+    script(src='/assets/js/bootstrap-notify.js')
     // Light Bootstrap Table Core javascript and methods for Demo purpose
-    script(src='assets/js/light-bootstrap-dashboard.js?v=1.4.0')
+    script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
     // Light Bootstrap Table DEMO methods, don't include it in your project!
-    script(src='assets/js/demo.js')
+    script.
+      var ColorList = new Array();
+      for(var i = 0; i < 10; i++)
+        ColorList[i] = 0;
+      $(function(){
+        $('div.ColorBox').click(function(){
+          var IdNum;
+          IdNum = $(this).attr('id');
+          if(ColorList[IdNum] == 0){
+            ColorList[IdNum] = 1;
+            $('#C' + IdNum).css('border','2px solid #a40000');
+          }
+          else{
+            ColorList[IdNum] = 0;
+            $('#C' + IdNum).css('border','none');
+          }
+        });
+      })
+      $('#BackgroundPic').on('change',function(){
+          var filePath = $(this).val();
+          var formData = new FormData(filePath);
+          $.ajax({
+              url:'/activity',
+              type:'post',
+              data: formData;
+              dataType: 'json',
+              async: false,
+              cache: false,
+              contentType: false,
+              processData: false,
+              success: function(data){        
+              },
+              error: function(data){
+              }
+          });
+          $('#bg').css('background-image','url(' + filePath + ')');
+      })
+
+      $(function(){
+        $('#create').click(function(){
+          var ActBackground = $('#BackgroundPic').val();
+          var ColorNum = 0;
+          var ColorSelected = new Array();
+          if(ActTitle == "" || ActSubTitle == "" ||ActBackground == ""){
+            alert("输入栏不能有空!");
+            return;
+          }
+          for(var i = 0; i < 10; i++){
+            if(ColorList[i] == 1){
+              ColorSelected.push($('#C' + i).css('background-color'));
+              ColorNum++;
+            }
+          }
+          console.log(ActTitle,ActSubTitle,ActBackground);
+          $.ajax({
+            type:"post",
+            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colores": ColorSelected},
+            datatype:"json",
+            url:"/activity",
+            success: function(data){
+               window.location = '/activity-list'; 
+            },
+            error: function(data){
+               alert("创建失败，请重试!");          
+            }
+          })
+        })
+      })
+
+
     style.
       div.ColorBox{
       position:relative;
@@ -133,4 +199,11 @@ html(lang='en')
       div.ColorArray{
       position:relative;
       height:20px;
+      }
+      div.example{
+      background: url(/images/testbg4.gif);
+      background-size:100% 100%;
+      background-repeat:no-repeat;
+      width:100%;
+      height:80vh;
       }

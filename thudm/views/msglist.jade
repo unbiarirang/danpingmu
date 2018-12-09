@@ -8,18 +8,18 @@ html
     meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
     meta(name='viewport', content='width=device-width')
     // Bootstrap core CSS
-    link(href='../../../assets/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/assets/css/bootstrap.min.css', rel='stylesheet')
     // Animation library for notifications
-    link(href='../../../assets/css/animate.min.css', rel='stylesheet')
+    link(href='/assets/css/animate.min.css', rel='stylesheet')
     // Light Bootstrap Table core CSS
-    link(href='../../../assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
+    link(href='/assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
     // Fonts and icons
     link(href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
     link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
-    link(href='../../../assets/css/pe-icon-7-stroke.css', rel='stylesheet')
+    link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
   body
     .wrapper
-      .sidebar(data-color='purple', data-image='../../../assets/img/eye.jpg')
+      .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
         //
           Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
           Tip 2: you can also add an image using data-image tag
@@ -32,14 +32,26 @@ html
             input(type='file', name='bg_image')
             input(type='submit', value='Upload Image')
           ul.nav
-            li.active
-              a(href='dashboard.html')
-                i.pe-7s-graph
-                p 活动列表
             li
               a(href='user.html')
                 i.pe-7s-user
-                p 创建节目
+                p 弹幕墙
+            li.active
+              a(href='dashboard.html')
+                i.pe-7s-graph
+                p 弹幕审核
+            li
+              a(href='user.html')
+                i.pe-7s-user
+                p 投票
+            li
+              a(href='user.html')
+                i.pe-7s-user
+                p 抽奖
+            li
+              a(href='user.html')
+                i.pe-7s-user
+                p 活动信息
       .main-panel
         nav.navbar.navbar-default.navbar-fixed
           .container-fluid
@@ -62,20 +74,22 @@ html
                   .content.table-responsive.table-full-width
                     table.table.table-hover
                       thead
-                        tr
-                          th NO
+                        tr  
+                          th
+                            input#all.check(type='checkbox')
+                            | NO
                           th 昵称
                           th 内容
                           th 状态
                       tbody
     // Core JS Files
-    script(src='../../../assets/js/jquery.3.2.1.min.js', type='text/javascript')
-    script(src='../../../assets/js/bootstrap.min.js', type='text/javascript')
+    script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
+    script(src='/assets/js/bootstrap.min.js', type='text/javascript')
     // Charts Plugin
     // Notifications Plugin
-    script(src='../../../assets/js/bootstrap-notify.js')
+    script(src='/assets/js/bootstrap-notify.js')
     // Light Bootstrap Table Core javascript and methods for Demo purpose
-    script(src='../../../assets/js/light-bootstrap-dashboard.js?v=1.4.0')
+    script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
     // Light Bootstrap Table DEMO methods, don't include it in your project!
     script(type='text/javascript').
       $(document).ready(function(){
@@ -105,7 +119,7 @@ script.
     
     msg_list.forEach((msg) => {
        $('tbody').append("<tr id=" + msg.id + "></tr>");
-       $('#' + msg.id).append($("<td>").text(msg.id));
+       $('#' + msg.id).append("<td><input type='checkbox' class = check id =" + msg.id + '>' + msg.id);
        $('#' + msg.id).append($("<td>").text(msg.nickname));
        $('#' + msg.id).append($("<td>").text(msg.content));
        $('#' + msg.id).append($("<td>").text(msg.review_flag));
