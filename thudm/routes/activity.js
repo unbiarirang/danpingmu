@@ -72,9 +72,9 @@ router.get('/:activity_id/blacklist/user', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
 
-    let room = utils.get_room_info(req, room_id);
+    let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_user;
 
     res.send(blacklist);
@@ -84,10 +84,10 @@ router.put('/:activity_id/blacklist/user', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
     let blocked_id = req.body.blocked_id;
 
-    let room = utils.get_room_info(req, room_id);
+    let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_user;
 
     if (blocked_id)
@@ -101,10 +101,10 @@ router.delete('/:activity_id/blacklist/user', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
     let blocked_id = req.body.blocked_id;
 
-    let room = utils.get_room_info(req, room_id);
+    let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_user;
     let index = blacklist.indexOf(blocked_id);
     if (index > -1)
@@ -118,9 +118,9 @@ router.get('/:activity_id/blacklist/word', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
 
-    let room = utils.get_room_info(req, room_id);
+    let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_word;
 
     res.send(blacklist);
@@ -130,10 +130,10 @@ router.put('/:activity_id/blacklist/word', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
     let blocked_word = req.body.blocked_word;
 
-    let room = utils.get_room_info(req, room_id);
+    let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_word;
     blacklist.push(blocked_word);
     room.activity.save();
@@ -145,10 +145,10 @@ router.delete('/:activity_id/blacklist/word', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
     let blocked_word = req.body.blocked_word;
 
-    let room = utils.get_room_info(req, room_id);
+    let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_word;
     let index = blacklist.indexOf(blocked_word);
     if (index > -1)
@@ -183,7 +183,7 @@ router.post('/:activity_id/upload/list', upload_list.single('list_image'), (req,
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let room_id = req.params.activity_id;
+    let activity_id = req.params.activity_id;
 
     return utils.upload_list_image(req, req.file.path)
         .then(() => {

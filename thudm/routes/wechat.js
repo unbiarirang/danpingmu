@@ -20,11 +20,11 @@ router.post('/', (req, res, next) => {
 
             utils.get_user_info(req)
                 .then(user_info => {
-                    let room_id = user_info.room_id;
-                    // User not belong to any activityroom_id;
-                    // if (!room_id) return;
-                    if (!room_id) room_id = '5bfaca2ac045082acf9c5a72';// FIXME: for test
-                    let room = utils.get_room_info(req, room_id);
+                    let activity_id = user_info.activity_id;
+                    // User not belong to any activityactivity_id;
+                    // if (!activity_id) return;
+                    if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72';// FIXME: for test
+                    let room = utils.get_room_info(req, activity_id);
                     let content = utils.get_wechat_input(req, 'content');
 
                     if (room.is_blocked_user(user_info.open_id)
@@ -36,7 +36,7 @@ router.post('/', (req, res, next) => {
                     let head_img_url = user_info.head_img_url;
 
                     let msg_obj = {
-                        "activity_id": room_id,
+                        "activity_id": activity_id,
                         "id": room.gen_id(req.app.get('redis')),
                         "type": "text",
                         "content": content,
@@ -47,14 +47,14 @@ router.post('/', (req, res, next) => {
 
                     let rsmq = req.app.get('rsmq');
                     rsmq.sendMessage({
-                            qname: room_id,
+                            qname: activity_id,
                             message: JSON.stringify(msg_obj)
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
                         });
 
-                    socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
+                    socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
                 })
                 .catch(err => {
                     console.error(err);
@@ -67,20 +67,20 @@ router.post('/', (req, res, next) => {
             // Send empty response
             res.send("");
 
-            let room_id, pic_url, msg_id;
+            let activity_id, pic_url, msg_id;
             utils.get_user_info(req)
                 .then(user_info => {
-                    room_id = user_info.room_id;
-                    // if (!room_id) return;
-                    if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                    activity_id = user_info.activity_id;
+                    // if (!activity_id) return;
+                    if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
 
                     pic_url = utils.get_wechat_input(req, 'picurl');
                     msg_id = utils.get_wechat_input(req, 'msgid');
                     let nickname = user_info.nickname;
                     let head_img_url = user_info.head_img_url;
-                    let room = utils.get_room_info(req, room_id);
+                    let room = utils.get_room_info(req, activity_id);
                     let msg_obj = {
-                        "activity_id": room_id,
+                        "activity_id": activity_id,
                         "id": room.gen_id(req.app.get('redis')),
                         "type": "image",
                         "content": msg_id, // Save image as the msg_id
@@ -88,21 +88,21 @@ router.post('/', (req, res, next) => {
                         "head_img_url": head_img_url,
                         "review_flag": false
                     };
-                    console.log('Send to room', room_id);
+                    console.log('Send to room', activity_id);
                     return msg_obj;
                 })
                 .then(msg_obj => {
-                    return utils.download_image(pic_url, msg_id, room_id)
+                    return utils.download_image(pic_url, msg_id, activity_id)
                                 .then(() => {
                                     return msg_obj;
                                 });
                 })
                 .then(msg_obj => {
-                    socketApi.displayMessage(room_id, JSON.stringify(msg_obj));
+                    socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
 
                     let rsmq = req.app.get('rsmq');
                     return rsmq.sendMessage({
-                            qname: room_id,
+                            qname: activity_id,
                             message: JSON.stringify(msg_obj)
                         })
                         .then(data => {
@@ -110,7 +110,7 @@ router.post('/', (req, res, next) => {
                         });
                 })
                 .then(() => {
-                    utils.delete_image(room_id);
+                    utils.delete_image(activity_id);
                 })
                 .catch(err => {
                     console.error(err);
@@ -129,9 +129,9 @@ router.post('/', (req, res, next) => {
 
             // User entered a specific room
             if (event === 'SCAN') {
-                let room_id = event_key;
-                utils.update_user_info(req, { room_id: room_id });
-                console.log('A user entered room', room_id);
+                let activity_id = event_key;
+                utils.update_user_info(req, { activity_id: activity_id });
+                console.log('A user entered room', activity_id);
                 data.content = "Welcome to DANPINGMU";
                 utils.get_reply_text(data)
                     .then(xml => {
@@ -139,11 +139,11 @@ router.post('/', (req, res, next) => {
                         res.send(xml);
                     });
             }
-            // FIXME: case of just subscribe room_id=undefined
+            // FIXME: case of just subscribe activity_id=undefined
             else if (event === 'subscribe') {
-                let room_id = event_key.split('_')[1];
-                utils.update_user_info(req, { room_id: room_id });
-                console.log('A user entered room', room_id);
+                let activity_id = event_key.split('_')[1];
+                utils.update_user_info(req, { activity_id: activity_id });
+                console.log('A user entered room', activity_id);
                 data.content = "Welcome to DANPINGMU";
                 utils.get_reply_text(data)
                     .then(xml => {
@@ -161,11 +161,11 @@ router.post('/', (req, res, next) => {
                             })
                             .then(user_info => {
                                 open_id = user_info.open_id;
-                                let room_id = user_info.room_id;
-                                //if (!room_id) return res.send("");
+                                let activity_id = user_info.activity_id;
+                                //if (!activity_id) return res.send("");
 
-                                if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
-                                let room = utils.get_room_info(req, room_id);
+                                if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                                let room = utils.get_room_info(req, activity_id);
                                 return utils.get_vote_info(room);
                             })
                             .then(votes => {
@@ -197,11 +197,11 @@ router.post('/', (req, res, next) => {
                                 return utils.get_user_info(req);
                             })
                             .then(user_info => {
-                                let room_id = user_info.room_id;
-                                //if (!room_id) return res.send("");
+                                let activity_id = user_info.activity_id;
+                                //if (!activity_id) return res.send("");
 
-                                if (!room_id) room_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
-                                let room = utils.get_room_info(req, room_id);
+                                if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                                let room = utils.get_room_info(req, activity_id);
                                 data.media_id = room.activity.list_media_id;
 
                                 return utils.get_reply_image(data);

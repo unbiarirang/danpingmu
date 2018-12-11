@@ -40,11 +40,11 @@ describe('GET /activity-list', () => {
     });
 });
 
-describe('GET /msglist/:room_id', () => {
+describe('GET /msglist/:activity_id', () => {
     test('It should return msglist page', (done) => {
-        const room_id = "5c03ba2fec64483fe182a7d2";
+        const activity_id = "5c03ba2fec64483fe182a7d2";
         return auth_session
-            .get('/msglist/' + room_id)
+            .get('/msglist/' + activity_id)
             .then(res => {
                 expect(res.statusCode).toBe(302);
                 done();
@@ -52,12 +52,12 @@ describe('GET /msglist/:room_id', () => {
     });
 });
 
-describe('GET /msglist/:room_id/page/:page_id', () => {
+describe('GET /msglist/:activity_id/page/:page_id', () => {
     test('It should return msglist page', (done) => {
-        const room_id = "5c03ba2fec64483fe182a7d2";
+        const activity_id = "5c03ba2fec64483fe182a7d2";
         const page_id = 1;
         return auth_session
-            .get('/msglist/' + room_id + '/page/' + page_id)
+            .get('/msglist/' + activity_id + '/page/' + page_id)
             .then(res => {
                 expect(res.statusCode).toBe(200);
                 done();
@@ -66,33 +66,33 @@ describe('GET /msglist/:room_id/page/:page_id', () => {
 });
 
 // FIXME: for test. create queue in create activity
-describe('GET /screen/:room_id', () => {
+describe('GET /screen/:activity_id', () => {
     test('It should return screen page', () => {
-        const room_id = "5c03ba2fec64483fe182a7d2";
+        const activity_id = "5c03ba2fec64483fe182a7d2";
         return auth_session
-            .get('/screen/' + room_id)
+            .get('/screen/' + activity_id)
             .then(res => {
                 expect(res.statusCode).toBe(200);
             });
     });
 });
 
-describe('GET /qrcode/:room_id', () => {
+describe('GET /qrcode/:activity_id', () => {
     test('It should return qrcode', () => {
-        const room_id = "5c03ba2fec64483fe182a7d2";
+        const activity_id = "5c03ba2fec64483fe182a7d2";
         return auth_session
-            .get('/qrcode/' + room_id)
+            .get('/qrcode/' + activity_id)
             .then(res => {
                 expect(res.statusCode).toBe(302);
             });
     });
 });
 
-describe('GET /ticket/:room_id', () => {
+describe('GET /ticket/:activity_id', () => {
     test('It should return ticket', () => {
-        const room_id = "5c03ba2fec64483fe182a7d2";
+        const activity_id = "5c03ba2fec64483fe182a7d2";
         return auth_session
-            .get('/ticket/' + room_id)
+            .get('/ticket/' + activity_id)
             .then(res => {
                 expect(res.statusCode).toBe(302);
             });

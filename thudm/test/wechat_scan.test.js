@@ -32,7 +32,7 @@ describe('User(both old and new subscriber) entered a activity', () => {
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
     const activity_id = '5bfaca2ac045082acf9c5a72';
 
-    test('It should return welcome message and record room_id', (done) => {
+    test('It should return welcome message and record activity_id', (done) => {
         return request(app)
             .post('/wechat?signature=123&timestamp=123&nonce=123&openid=' + open_id)
             .type('xml')
@@ -49,7 +49,7 @@ describe('User(both old and new subscriber) entered a activity', () => {
                     expect(res.text).toMatch('<MsgType><![CDATA[text]]></MsgType>\n    <Content><![CDATA[Welcome to DANPINGMU]]></Content>\n</xml>');
                     utils.get_user_info({ app: app, query: { openid: open_id } })
                         .then(user_info => {
-                            expect(user_info.room_id).toBe(activity_id);
+                            expect(user_info.activity_id).toBe(activity_id);
                             done();
                         });
                 }, 1000);

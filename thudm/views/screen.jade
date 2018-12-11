@@ -38,11 +38,11 @@ html(lang="zh-CN")
         const pic_limit = 30; // FIXME
         var dm_list = new Queue();
         var pic_list = new Queue();
-        var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
+        var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
         $(function() {
           var socket = io();
-          var data = {'room_id': room_id};
-          socket.emit('joinRoom', data);
+          var data = {'activity_id': activity_id};
+          socket.emit('joinActivity', data);
           console.log('rooom: ',data);
           socket.on('danmu', function(data) {
             console.log(data);
@@ -110,7 +110,7 @@ html(lang="zh-CN")
 
                 pic_list.pop();
                 console.log(msg_obj.content);
-                $('img.picture').attr('src','../images/activity/' + room_id + '/fromuser/' + msg_obj.content + '.png');
+                $('img.picture').attr('src','../images/activity/' + activity_id + '/fromuser/' + msg_obj.content + '.png');
               }
               else {
                  if(pic_cnt == 0 && first == 0){
@@ -123,7 +123,7 @@ html(lang="zh-CN")
                  }
                  console.log('pic_cnt',pic_cnt);
                  if(pic_free.size() > 0){
-                   $('img.picture').attr('src','../images/activity/' + room_id + '/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
+                   $('img.picture').attr('src','../images/activity/' + activity_id + '/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
                    pic_cnt--;
                    console.log('pic_free',pic_free.size());
                    if(pic_cnt == -1)

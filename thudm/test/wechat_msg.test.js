@@ -16,14 +16,14 @@ let log_output = "";
 const storeLog = input => (log_output += input);
 
 describe('User send a text type message', () => {
-    const room_id = '5c03ba2fec64483fe182a7d2';
+    const activity_id = '5c03ba2fec64483fe182a7d2';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 
     test('It should save the content to rsmq', (done) => {
         console.log = jest.fn(storeLog);
         utils.load_activities(app)
             .then(() => {
-                utils.update_user_info({ app: app, query: { openid: open_id } }, { room_id: room_id });
+                utils.update_user_info({ app: app, query: { openid: open_id } }, { activity_id: activity_id });
             })
             .then(() => {
                 return request(app)
@@ -49,12 +49,12 @@ describe('User send a text type message', () => {
 });
 
 describe('User send an image type message', () => {
-    const room_id = '5c03ba2fec64483fe182a7d2';
+    const activity_id = '5c03ba2fec64483fe182a7d2';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
     const msg_id = '1234567890'
 
     beforeAll(() => {
-        const dir_name = 'public/images/activity/' + room_id + '/fromuser';
+        const dir_name = 'public/images/activity/' + activity_id + '/fromuser';
         const file_list = fs.readdirSync(dir_name);
         file_list.forEach(file_name => {
             fs.unlink(dir_name + file_name, () => {});
@@ -64,7 +64,7 @@ describe('User send an image type message', () => {
     test('It should save the image in fromuser direcoty', (done) => {
         utils.load_activities(app)
             .then(() => {
-                utils.update_user_info({ app: app, query: { openid: open_id } }, { room_id: room_id });
+                utils.update_user_info({ app: app, query: { openid: open_id } }, { activity_id: activity_id });
             })
             .then(() => {
                 return request(app)
@@ -82,7 +82,7 @@ describe('User send an image type message', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    const dir_name = 'public/images/activity/' + room_id + '/fromuser';
+                    const dir_name = 'public/images/activity/' + activity_id + '/fromuser';
                     const file_list = fs.readdirSync(dir_name);
                     expect(file_list).toContain(msg_id + '.png');
                     done();
@@ -92,13 +92,13 @@ describe('User send an image type message', () => {
 });
 
 describe('User send an invalid type message', () => {
-    const room_id = '5c03ba2fec64483fe182a7d2';
+    const activity_id = '5c03ba2fec64483fe182a7d2';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 
     test('It should do nothing', (done) => {
         utils.load_activities(app)
             .then(() => {
-                utils.update_user_info({ app: app, query: { openid: open_id } }, { room_id: room_id });
+                utils.update_user_info({ app: app, query: { openid: open_id } }, { activity_id: activity_id });
             })
             .then(() => {
                 return request(app)

@@ -24,10 +24,10 @@ String.prototype.getNums = () => {
     return map_num.map(Number);
 };
 
-// In memory Activity model. room_id == activity_id
+// In memory Activity model.
 class Room {
     constructor(activity_id) {
-        this.room_id = activity_id;
+        this.activity_id = activity_id;
         // The following properties are initialized in init function
         this.activity = {}; // mongodb Activity instance
         this.generated_id = 0;
@@ -35,7 +35,7 @@ class Room {
 
     init(req) { // Asynchronous db process
         const redis = req.app.get('redis');
-        Activity.findById(this.room_id)
+        Activity.findById(this.activity_id)
             .then(act => {
                 if (!act)
                     throw new errors.NotExistError('No voting Activity exists.');
@@ -43,7 +43,7 @@ class Room {
                 this.activity = act;
             });
 
-        redis.hget("generated_id", this.room_id, (err, id) => {
+        redis.hget("generated_id", this.activity_id, (err, id) => {
             if (err) id = 0;
 
             console.log('generated_id: ', id);
@@ -53,10 +53,10 @@ class Room {
 
     destroy(redis) {
         let del_keys = [
-            'rsmq:' + this.room_id,
-            'rsmq:' + this.room_id + ':Q',
+            'rsmq:' + this.activity_id,
+            'rsmq:' + this.activity_id + ':Q',
         ];
-        Vote.find({ activity_id: this.room_id })
+        Vote.find({ activity_id: this.activity_id })
             .then(votes => {
                 votes.forEach(vote => {
                     del_keys.push('vote_' + vote._id.toString());
@@ -70,14 +70,14 @@ class Room {
                 console.log('flush redis');
             });
 
-        const dir_name = 'public/images/activity/' + this.room_id;
+        const dir_name = 'public/images/activity/' + this.activity_id;
         return fs.removeAsync(dir_name)
             .then(() => { console.log('rmdir'); });
     }
 
     gen_id(redis) {
         this.generated_id++;
-        redis.hset('generated_id', this.room_id, this.generated_id);
+        redis.hset('generated_id', this.activity_id, this.generated_id);
         return this.generated_id;
     }
 
@@ -248,8 +248,8 @@ const update_user_info = (req, options) => {
 }
 exports.update_user_info = update_user_info;
 
-const get_room_info = (req, room_id) => {
-    let room_info = req.app.get('cache').room_info.get(room_id);
+const get_room_info = (req, activity_id) => {
+    let room_info = req.app.get('cache').room_info.get(activity_id);
 
     if (!room_info)
         throw new errors.NotExistError('The activity is not exist or is over.');
@@ -258,8 +258,8 @@ const get_room_info = (req, room_id) => {
 };
 exports.get_room_info = get_room_info;
 
-const load_room_info = (req, room_id, room_info) => {
-    req.app.get('cache').room_info.set(room_id, room_info);
+const load_room_info = (req, activity_id, room_info) => {
+    req.app.get('cache').room_info.set(activity_id, room_info);
     console.log('load_room_info: ', room_info);
 }
 exports.load_room_info = load_room_info;
@@ -304,9 +304,9 @@ exports.request_random_nums = request_random_nums;
 
 // request-promise: STREAMING THE RESPONSE (e.g. .pipe(...)) is DISCOURAGED
 // Use request module instead
-const download_image = (pic_url, msg_id, room_id) => {
+const download_image = (pic_url, msg_id, activity_id) => {
     const file_name = 'public/images/activity/'
-                      + room_id + '/fromuser/'+ msg_id + '.png';
+                      + activity_id + '/fromuser/'+ msg_id + '.png';
 
     return new Promise((resolve, reject) => {
         request.head(pic_url, (err, res, body) => {
@@ -317,8 +317,8 @@ const download_image = (pic_url, msg_id, room_id) => {
 }
 exports.download_image = download_image;
 
-const delete_image = (room_id) => {
-    const dir_name = 'public/images/activity/' + room_id + '/fromuser';
+const delete_image = (activity_id) => {
+    const dir_name = 'public/images/activity/' + activity_id + '/fromuser';
     const file_list = fs.readdirSync(dir_name);
     if (file_list.length <= consts.MAX_FROMUSER_IMAGE_NUM)
         return;
@@ -390,7 +390,7 @@ exports.upload_list_image = upload_list_image;
 
 // Return ongoing vote events
 const get_vote_info = (room) => {
-    let activity_id = room.room_id;
+    let activity_id = room.activity_id;
     return Vote.find({ activity_id: activity_id })
         .then(votes => {
             let votes_ongoing = [];

@@ -37,14 +37,14 @@ router.get('/activity-list', (req, res, next) => {
         });
 });
 
-router.get('/msglist/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
-    res.redirect('/msglist/' + room_id + '/page/1');
+router.get('/msglist/:activity_id', (req, res, next) => {
+    let activity_id = req.params.activity_id;
+    res.redirect('/msglist/' + activity_id + '/page/1');
 });
 
-router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
+router.get('/msglist/:activity_id/page/:page_id', (req, res, next) => {
     let rsmq = req.app.get('rsmq');
-    let room_id = req.params.room_id;
+    let activity_id = req.params.activity_id;
     let page_id = req.params.page_id;
 
     let promise_chain = Promise.resolve();
@@ -52,7 +52,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
     let not_ret_promises = [];
 
     promise_chain = promise_chain.then(() => {
-            return rsmq.getQueueAttributes({ qname: room_id });
+            return rsmq.getQueueAttributes({ qname: activity_id });
         })
         .then(attr => {
             console.log('attr: ', attr);
@@ -64,7 +64,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
             // Pop messages before reqest min id
             while(totalrecv < request_min_id - 1) {
                 not_ret_promises.push(new Promise((resolve, reject) => {
-                        rsmq.popMessage({ qname: room_id })
+                        rsmq.popMessage({ qname: activity_id })
                             .then(data => {
                                 console.log("RSMQ pop data");
                                 let msg_obj = JSON.parse(data.message);
@@ -95,7 +95,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
                 if (msg_id <= totalrecv) {
                     console.log('from mongodb', msg_id);
                     ret_promises.push(new Promise((resolve, reject) => {
-                            Message.findOne({ activity_id: room_id, id: msg_id })
+                            Message.findOne({ activity_id: activity_id, id: msg_id })
                                 .then(msg => {
                                     console.log('Get from mongodb');
                                     if (!msg)
@@ -114,7 +114,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
                 else if (msg_id <= totalsent) {
                     console.log('from redis', msg_id);
                     ret_promises.push(new Promise((resolve, reject) => {
-                            rsmq.popMessage({ qname: room_id })
+                            rsmq.popMessage({ qname: activity_id })
                                 .then(data => {
                                     console.log("RSMQ pop data");
                                     let msg_obj = JSON.parse(data.message);
@@ -148,7 +148,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
             console.log(msg_list);
             let sendData = {};
             sendData.msg_list = msg_list;
-            sendData.room_id = room_id;
+            sendData.activity_id = activity_id;
 
             res.render('msglist', sendData);
         })
@@ -172,12 +172,12 @@ router.get('/create-activity', (req, res, next) =>{
     res.render('create-activity');
 });
 
-router.get('/screen/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
+router.get('/screen/:activity_id', (req, res, next) => {
+    let activity_id = req.params.activity_id;
     let rsmq = req.app.get('rsmq');
 
     // FIXME: for test. create queue in create activity
-    rsmq.createQueue({ qname: room_id })
+    rsmq.createQueue({ qname: activity_id })
         .then(done => {
             console.log("QUEUE created");
         })
@@ -186,31 +186,31 @@ router.get('/screen/:room_id', (req, res, next) => {
         })
         .finally(() => {
             let sendData = {};
-            sendData.room_id = room_id;
+            sendData.activity_id = activity_id;
 
-            console.log('screen room_id: ', room_id);
+            console.log('screen activity_id: ', activity_id);
             res.render('screen', sendData);
         });
 });
 
-router.get('/qrcode/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
+router.get('/qrcode/:activity_id', (req, res, next) => {
+    let activity_id = req.params.activity_id;
     let ticket = req.query.ticket;
 
     res.redirect('https://mp.weixin.qq.com/cgi-bin/showqrcode'
         + '?ticket=' + ticket);
 });
 
-router.get('/ticket/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
-    console.log('ticket room_id: ', room_id);
+router.get('/ticket/:activity_id', (req, res, next) => {
+    let activity_id = req.params.activity_id;
+    console.log('ticket activity_id: ', activity_id);
 
     let sendData = {};
 
     sendData.expire_seconds = consts.QRCODE_EXPIRE_SEC;
     sendData.action_name = 'QR_STR_SCENE';
     // QR_SCENE: scene_id (1~100000) QR_STR_SCENE: scene_str
-    sendData.action_info = {'scene': {'scene_str': room_id}};
+    sendData.action_info = {'scene': {'scene_str': activity_id}};
 
     utils.get_access_token(req)
         .then(access_token => {
@@ -228,7 +228,7 @@ router.get('/ticket/:room_id', (req, res, next) => {
             if (body.errcode)
                 throw new errors.WeChatResError(body.errmsg);
 
-            res.redirect('http://' + config.SERVER_IP + '/qrcode/' + room_id
+            res.redirect('http://' + config.SERVER_IP + '/qrcode/' + activity_id
                           + '?ticket=' + body.ticket);
         })
         .catch(err => {

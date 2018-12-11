@@ -93,14 +93,14 @@ html
 // socket.io
 script(src='/socket.io/socket.io.js')
 script.
-  var room_id = !{room_id != null? JSON.stringify(room_id): 'null'};
+  var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
   var msg_list = !{msg_list != null? JSON.stringify(msg_list): 'null'};
   
   $(function() {
     var socket = io();
-    var data = {'room_id': room_id};
-    socket.emit('joinRoom', data);
-    console.log('room_id: ', room_id);
+    var data = {'activity_id': activity_id};
+    socket.emit('joinActivity', data);
+    console.log('activity_id: ', activity_id);
     console.log('msg_list: ', msg_list);
     
     msg_list.forEach((msg) => {

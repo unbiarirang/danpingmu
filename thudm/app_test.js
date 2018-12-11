@@ -49,7 +49,7 @@ app.set('rsmq', rsmq);
 // Wechat cache. All activities share a user info cache
 app.set('cache', {
     user_info: new Map(),   // Key: open_id Value: user info
-    room_info: new Map()    // Key: room_id Valie: Room()
+    room_info: new Map()    // Key: activity_id Valie: Room()
 });
 
 // Load all ongoing activities.
@@ -60,10 +60,10 @@ new cron.CronJob('0 0 6 * * *', function() {
     console.log('CRON> Flush cache');
 
     app.get('cache').user_info.clear();
-    app.get('cache').room_info.forEach((room, room_id, map) => {
+    app.get('cache').room_info.forEach((room, activity_id, map) => {
         // A activity was finished
         if (room.activity.status === "OVER") {
-            map.delete(room_id);
+            map.delete(activity_id);
             // Remove the activity's image dir
             // 
         }
