@@ -75,9 +75,9 @@ describe('GET /vote/:vote_id/result', () => {
     });
 });
 
-// TODO: Lee 
 describe('GET /vote/:vote_id/user', () => {
     const vote_id = '5c04f7be1cab9d6c156f401c';
+    const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
 
     test('It should return vote information with the vote id for user', (done) => {
             request(app)
@@ -85,6 +85,17 @@ describe('GET /vote/:vote_id/user', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should fail to return vote information with the vote id for user', (done) => {
+            request(app)
+            .get('/vote/' + wrong_vote_id + '/user')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(204);
                     done();
                 }, 500);
             });
@@ -97,7 +108,7 @@ describe('GET /vote/:vote_id/votefor/:option_id', () => {
     const option_id = 1;
 
     test('It should vote successfully', (done) => {
-        request(app) 
+        request(app)
             .get('/vote/' + vote_id + '/votefor/' + option_id
                  + '?open_id=' + open_id)
             .then(res => {
@@ -109,7 +120,7 @@ describe('GET /vote/:vote_id/votefor/:option_id', () => {
     });
 
     test('It should fail to vote', (done) => {
-        request(app) 
+        request(app)
             .get('/vote/' + vote_id + '/votefor/' + option_id
                  + '?open_id=' + open_id)
             .then(res => {
@@ -147,6 +158,42 @@ describe('POST /vote', () => {
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
+            });
+    });
+
+    test('It should login first to create new Vote', (done) => {
+        return request(app)
+            .post('/vote')
+            .set('Accept', 'application/json')
+            .send({
+                title: test_title,
+                sub_title: "sub title",
+                option_num: 3,
+                options: [ "A", "B", "C" ],
+                pic_urls: [ "url1", "url2", "url3" ],
+                status: "ONGOING"
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should fail to create new Vote if there is no option', (done) => {
+        return admin_session
+            .post('/vote')
+            .set('Accept', 'application/json')
+            .send({
+                title: test_title,
+                sub_title: "sub title",
+                option_num: 0,
+                options: [],
+                pic_urls: [],
+                status: "ONGOING"
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(500);
+                done();
             });
     });
 

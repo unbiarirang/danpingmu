@@ -7,6 +7,7 @@ const utils = require('../common/utils');
 let admin_session = null;
 let test_session = null;
 let auth_session = null;
+
 const input_id = 'bbb';
 const input_pw = '12345678';
 const activity_id = '5c03ba2fec64483fe182a7d2';
@@ -34,12 +35,10 @@ const login = () => {
     });
 }
 
-
 describe('POST /auth/login/', () => {
     test_session = session(app);
 
     test('It should login success', (done) => {
-
         return test_session
             .post('/auth/login/')
             .type('form')
@@ -61,9 +60,8 @@ describe('POST /auth/login/', () => {
 });
 
 describe('GET /lottery/:lottery_id', () => {
-    const lottery_id = '5c089594778fb6bc06161989';
-
     test('It should return lottery information with the lottery id', (done) => {
+        const lottery_id = '5c089594778fb6bc06161989';
         return admin_session
             .get('/lottery/' + lottery_id)
             .then(res => {
@@ -76,10 +74,23 @@ describe('GET /lottery/:lottery_id', () => {
                 }, 500);
             });
     });
+
+    test('It should fail to return lottery information', (done) => {
+        const wrong_lottery_id = 'aaa89594778fb6bc06161989';
+        return admin_session
+            .get('/lottery/' + wrong_lottery_id)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(204);
+                    done();
+                }, 500);
+            });
+    });
 });
 
 describe('GET /lottery/:lottery_id/draw', () => {
     const lottery_id = '5c089594778fb6bc06161989';
+    const wrong_lottery_id = 'aaa89594778fb6bc06161989';
 
     test('No user participates in the lottery event', (done) => {
         login()
@@ -137,6 +148,20 @@ describe('GET /lottery/:lottery_id/draw', () => {
                     });
             });
     });
+
+    test('It should fail to draw the winner', (done) => {
+        login()
+            .then(() => {
+                admin_session
+                    .get('/lottery/' + wrong_lottery_id + '/draw')
+                    .then(res => {
+                        setTimeout(() => {
+                            expect(res.statusCode).toBe(204);
+                            done();
+                        }, 500);
+                    });
+            });
+    });
 });
 
 describe('POST /lottery', () => {
@@ -181,4 +206,5 @@ describe('POST /lottery', () => {
         models.Lottery.deleteOne({ title: test_title })
             .then(() => {});
     });
+
 });

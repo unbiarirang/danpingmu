@@ -158,24 +158,33 @@ router.delete('/:activity_id/blacklist/word', (req, res, next) => {
     res.send(blacklist);
 });
 
-const storage = multer.diskStorage({
+let storage_list = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, __dirname + '/../public/images/activity/' + req.params.activity_id);
     },
     limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
     filename: function (req, file, cb) {
-            cb(null, 'list.' + file.mimetype.split('/')[1]);
-        }
+        cb(null, 'list.' + file.mimetype.split('/')[1]);
+    }
 });
-const upload = multer({ storage: storage });
+let storage_bg = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, __dirname + '/../public/images/activity/' + req.params.activity_id);
+    },
+    limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
+    filename: function (req, file, cb) {
+        cb(null, 'bg.' + file.mimetype.split('/')[1]);
+    }
+});
+const upload_list = multer({ storage: storage_list });
+const upload_bg = multer({ storage: storage_bg });
 
-router.post('/:activity_id/upload', upload.single('list_image'), (req, res, next) => {
+router.post('/:activity_id/upload/list', upload_list.single('list_image'), (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let room_id = req.params.activity_id;
 
-    console.log(req.file);
     return utils.upload_list_image(req, req.file.path)
         .then(() => {
             res.sendStatus(200);
@@ -186,20 +195,11 @@ router.post('/:activity_id/upload', upload.single('list_image'), (req, res, next
         });
 });
 
-router.get('/activity-list', (req, res, next) => {
+router.post('/:activity_id/upload/bg', upload_bg.single('bg_image'), (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let admin_id = req.session.admin_id;
-
-    Activity.findById({ admin_id: admin_id })
-        .then(activities => {
-            return res.send(activities);
-        })
-        .catch(err => {
-            console.error(err);
-            next(err);
-        });
+    return res.send(req.file.path);
 });
 
 module.exports = router;

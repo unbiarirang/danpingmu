@@ -78,7 +78,6 @@ class Room {
     gen_id(redis) {
         this.generated_id++;
         redis.hset('generated_id', this.room_id, this.generated_id);
-        console.log('@@@@gen_id: ', this.generated_id);
         return this.generated_id;
     }
 
@@ -162,6 +161,7 @@ const get_access_token = (req) => {
     // access_token is valid
     if (req.app.get('access_token_expire') &&
         Date.now() / 1000 < req.app.get('access_token_expire')) {
+        console.log('access_token: ', req.app.get('access_token'));
         return Promise.resolve(req.app.get('access_token'));
     }
 
@@ -184,6 +184,7 @@ const get_access_token = (req) => {
             req.app.set('access_token_expire',
                 Date.now() / 1000 + res.expires_in
             );
+            console.log('access_token: ', res.access_token);
             return res.access_token;
         });
 };
@@ -366,21 +367,24 @@ exports.update_menu = update_menu;
 const upload_list_image = (req, file_path) => {
     return get_access_token(req)
         .then(access_token => {
-                let command = 'curl -F media=@'
-                            + file_path
-                            + ' http://file.api.weixin.qq.com/cgi-bin/material/add_material?access_token='
-                            + access_token;
+            let command = 'curl -F media=@'
+                        + file_path
+                        + ' http://file.api.weixin.qq.com/cgi-bin/material/add_material?access_token='
+                        + access_token;
 
-                exec(command, (err, res) => {
-                    if (err)
-                        throw new errors.UnknownError(err);
+            // FIXME: handle error!
+            return exec(command, (err, res) => {
+                if (err)
+                    throw new errors.UnknownError(err);
+                if (JSON.parse(res).errcode)
+                    throw new errors.WeChatResError(JSON.parse(res).errmsg);
 
-                    let activity_id = req.params.activity_id;
-                    let room_info = get_room_info(req, activity_id);
-                    room_info.activity.list_media_id = JSON.parse(res).media_id;
-                    room_info.activity.save();
-                });
+                let activity_id = req.params.activity_id;
+                let room_info = get_room_info(req, activity_id);
+                room_info.activity.list_media_id = JSON.parse(res).media_id;
+                room_info.activity.save();
             });
+        });
 }
 exports.upload_list_image = upload_list_image;
 

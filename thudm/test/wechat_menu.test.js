@@ -38,12 +38,16 @@ describe('User clicked "help" button', () => {
 describe('User clicked "activity list" button', () => {
     const room_id = '5c03ba2fec64483fe182a7d2';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
-    const media_id = 'gRWMDp80PcxSfueSb6v2U_LOgNQydADS2v-Mw0Xsdas';
+    let list_media_id;
 
     test('It should return response with the list image\'s media_id', (done) => {
         utils.load_activities(app)
             .then(() => {
                 utils.update_user_info({ app: app, query: { openid: open_id } }, { room_id: room_id });
+            })
+            .then(() => {
+                return models.Activity.findById(room_id)
+                    .then(room => { list_media_id = room.list_media_id; });
             })
             .then(() => {
                 return request(app)
@@ -60,7 +64,7 @@ describe('User clicked "activity list" button', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch('<MsgType><![CDATA[image]]></MsgType>\n    <Image><MediaId><![CDATA[' + media_id + ']]></MediaId></Image>\n</xml>');
+                    expect(res.text).toMatch('<MsgType><![CDATA[image]]></MsgType>\n    <Image><MediaId><![CDATA[' + list_media_id + ']]></MediaId></Image>\n</xml>');
                     done();
                 }, 1000);
             });

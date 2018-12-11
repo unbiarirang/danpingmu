@@ -38,8 +38,11 @@ router.get('/:lottery_id/draw', (req, res, next) => {
     sendData.users = JSON.stringify([...users]);
 
     Lottery.findById(lottery_id)
-        .then(data => {
-            let winner_num = data.winner_num;
+        .then(lottery => {
+            if (!lottery)
+                throw new errors.NotExistError('No lottery activity exists.');
+
+            let winner_num = lottery.winner_num;
             let max_num = users.size;
             let min_num = 1;
 

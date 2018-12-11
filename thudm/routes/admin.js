@@ -9,6 +9,7 @@ const errors = require('../common/errors');
 const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Message = models.Message;
+const Activity = models.Activity;
 
 const auth_router = require('./auth');
 const activity_router = require('./activity');
@@ -19,6 +20,22 @@ router.use('/auth', auth_router);
 router.use('/activity', activity_router);
 router.use('/vote', vote_router);
 router.use('/lottery', lottery_router);
+
+router.get('/activity-list', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let admin_id = req.session.admin_id;
+
+    Activity.find({ admin_id: admin_id })
+        .then(activities => {
+            return res.send(activities);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
 
 router.get('/msglist/:room_id', (req, res, next) => {
     let room_id = req.params.room_id;

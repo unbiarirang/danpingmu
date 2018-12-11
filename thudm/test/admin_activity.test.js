@@ -200,3 +200,37 @@ describe('DELETE /activity/:activity_id/blacklist/word', () => {
             });
     });
 });
+
+describe('POST /activity/:activity_id/upload/list', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const file_name = 'public/images/list.png'; // dummy image
+
+    test('It should upload a list image', (done) => {
+        return auth_session
+            .post('/activity/' + activity_id + '/upload/list')
+            .attach('list_image', file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('POST /activity/:activity_id/upload/bg', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const file_name = 'public/images/list.png'; // dummy image
+
+    test('It should upload a background image', (done) => {
+        return auth_session
+            .post('/activity/' + activity_id + '/upload/bg')
+            .attach('bg_image', file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});

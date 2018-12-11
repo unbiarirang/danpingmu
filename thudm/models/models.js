@@ -29,7 +29,7 @@ const vote_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
-    option_num:{ type: Number, required: true },
+    option_num:{ type: Number, min: 1, required: true },
     options: { type: [String], required: true },
     pic_urls: [String],
     status: { type: String, enum: STATUS , default: 'READY' },

@@ -6,7 +6,7 @@ const models = require('../models/models');
 let test_session = null;
 let auth_session = null;
 
-beforeEach(() => {
+beforeAll (() => {
     test_session = session(app);
 });
 
@@ -24,6 +24,18 @@ describe('POST /auth/login/', () => {
                     auth_session = test_session;
                     done();
                 }, 500);
+            });
+    });
+});
+
+describe('GET /activity-list', () => {
+    test('It should return all activities the admin has', (done) => {
+        return auth_session
+            .get('/activity-list/')
+            .then(res => {
+                expect(Array.isArray(JSON.parse(res.text))).toBe(true);
+                expect(res.statusCode).toBe(200);
+                done();
             });
     });
 });

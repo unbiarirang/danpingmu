@@ -21,7 +21,7 @@ exports.UnknownError = UnknownError;
 
 class NotExistError extends BaseError {
     constructor(message) {
-        super(1, message || 'Data not exist.', 404);
+        super(1, message || 'Data not exist.', 204);
     }
 }
 exports.NotExistError = NotExistError;
