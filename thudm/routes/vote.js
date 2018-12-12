@@ -5,12 +5,28 @@ const errors = require('../common/errors');
 const models = require('../models/models');
 const Vote = models.Vote;
 
-// Admin get vote info
-router.get('/:vote_id', (req, res, next) => {
+router.get('/list', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    const vote_id = req.params.vote_id;
+    let activity_id = req.session.activity_id;
+
+    Vote.find({ activity_id: activity_id })
+        .then(votes => {
+            console.log(votes);
+            return res.render('list', { items: votes });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+router.get('/detail', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    const vote_id = req.session.vote_id;
     Vote.findById(vote_id)
         .then(vote => {
             if (!vote)
@@ -24,14 +40,18 @@ router.get('/:vote_id', (req, res, next) => {
         });
 });
 
+router.get('/create', (req, res, next) =>{
+    res.render('create');
+});
+
 // Admin get vote result
-router.get('/:vote_id/result', (req, res, next) => {
+router.get('/result', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-    
-    const vote_id = req.params.vote_id;
+
+    const vote_id = req.session.vote_id;
     const redis = req.app.get('redis');
-    const key = 'vote_' + req.params.vote_id;
+    const key = 'vote_' + vote_id;
     let sendData = {};
     redis.hgetallAsync(key)
         .then(data => {
@@ -54,6 +74,15 @@ router.get('/:vote_id/result', (req, res, next) => {
             console.error(err);
             next(err);
         });
+});
+
+// Admin get vote result
+router.get('/:vote_id/result', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+    
+    req.session.vote_id = req.params.vote_id;
+    return res.redirect('result');
 });
 
 // User get vote information
@@ -103,6 +132,16 @@ router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
             next(err);
         });
 });
+
+// Admin get vote info
+router.get('/:vote_id', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    req.session.vote_id = req.params.vote_id;
+    return res.redirect('detail');
+});
+
 
 // Admin create vote activity
 router.post('/', (req, res, next) => {

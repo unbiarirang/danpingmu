@@ -6,11 +6,28 @@ const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Lottery = models.Lottery;
 
-router.get('/:lottery_id', (req, res, next) => {
+router.get('/list', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let lottery_id = req.params.lottery_id;
+    let activity_id = req.session.activity_id;
+
+    Lottery.find({ activity_id: activity_id })
+        .then(lotteries => {
+            console.log(lotteries);
+            return res.render('list', { items: lotteries });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+router.get('/detail', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let lottery_id = req.session.lottery_id;
 
     Lottery.findById(lottery_id)
         .then(lottery => {
@@ -25,11 +42,13 @@ router.get('/:lottery_id', (req, res, next) => {
         });
 });
 
-// Draw for winners // FIXME: temporary
+router.get('/create', (req, res, next) =>{
+    res.render('create');
+});
+
 router.get('/:lottery_id/draw', (req, res, next) => {
-    // FIXME: for test
-    //if (!req.session.login)
-    //    throw new errors.NotLoggedInError();
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
 
     let lottery_id = req.params.lottery_id;
 
@@ -64,12 +83,20 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         });
 });
 
+router.get('/:lottery_id', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    req.session.lottery_id = req.params.lottery_id;
+    return res.redirect('detail');
+});
+
 router.post('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let lottery = new Lottery();
-    //lottery.activity_id = req.session.activity_id;
+    lottery.activity_id = req.session.activity_id;
     lottery.activity_id = 1; //FIXME: for test
     lottery.title = req.body.title;
     lottery.sub_title = req.body.sub_title;

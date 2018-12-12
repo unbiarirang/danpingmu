@@ -379,7 +379,7 @@ const upload_list_image = (req, file_path) => {
                 if (JSON.parse(res).errcode)
                     throw new errors.WeChatResError(JSON.parse(res).errmsg);
 
-                let activity_id = req.params.activity_id;
+                let activity_id = req.session.activity_id;
                 let room_info = get_room_info(req, activity_id);
                 room_info.activity.list_media_id = JSON.parse(res).media_id;
                 room_info.activity.save();

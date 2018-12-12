@@ -40,9 +40,20 @@ describe('POST /auth/login/', () => {
 describe('GET /vote/:vote_id', () => {
     const vote_id = '5c04f7be1cab9d6c156f401c';
 
-    test('It should return vote information with the vote id', (done) => {
+    test('It should redirect to /vote/detail', (done) => {
         return admin_session
             .get('/vote/' + vote_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+});
+
+describe('GET /vote/detail', () => {
+    test('It should return vote information with the vote id', (done) => {
+        return admin_session
+            .get('/vote/detail')
             .then(res => {
                 setTimeout(() => {
                     expect(res.text).toMatch('activity_id');
@@ -57,12 +68,36 @@ describe('GET /vote/:vote_id', () => {
     });
 });
 
+describe('GET /vote/list', () => {
+    test('It should return vote list that the activity has', (done) => {
+        return admin_session
+            .get('/vote/list')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode === 200 ||
+                           res.statusCode === 304).toBeTruthy();
+                    done();
+                }, 500);
+            });
+    });
+});
+
 describe('GET /vote/:vote_id/result', () => {
     const vote_id = '5c04f7be1cab9d6c156f401c';
-
-    test('It should return vote result with the vote id', (done) => {
+    test('It should redirect to /vote/result', (done) => {
         return admin_session
             .get('/vote/' + vote_id + '/result')
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+});
+
+describe('GET /vote/result', () => {
+    test('It should return vote result with the vote id', (done) => {
+        return admin_session
+            .get('/vote/result')
             .then(res => {
                 setTimeout(() => {
                     expect(res.text).toMatch('result');
@@ -132,8 +167,8 @@ describe('GET /vote/:vote_id/votefor/:option_id', () => {
     });
 
     afterAll(() => {
-        app.get('redis').del('voteuser_' + vote_id).then(()=>{});
-        app.get('redis').del('vote_' + vote_id).then(()=>{});
+        app.get('redis').delAsync('voteuser_' + vote_id).then(()=>{});
+        app.get('redis').delAsync('vote_' + vote_id).then(()=>{});
     });
 });
 

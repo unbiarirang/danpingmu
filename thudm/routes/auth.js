@@ -4,6 +4,7 @@ const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
+const Activity = models.Activity;
 const crypto = require('crypto');
 
 router.get('/login', (req, res, next) => {
@@ -21,15 +22,17 @@ router.post('/login', (req, res, next) => {
         .then(user => {
             if (!user)
                 throw new errors.NotExistError('Wrong id or password.');
-            var salt = user.salt;
+
+            let salt = user.salt;
             crypto.pbkdf2(input_pw, salt, 10000, 50, 'sha512', (err, key) => {
-                if (user.password === key.toString('base64')) {
-                    req.session.login = true;
-                    req.session.admin_id = input_id;
-                    res.redirect("../activity-list");
-                }
-                //else
-                //    throw new errors.NotExistError('Wrong id or password.');
+                if (user.password !== key.toString('base64'))
+                    throw new errors.NotExistError('Wrong id or password.');
+
+                // Login succeed, Creaste a new admin session
+                req.session.login = true;
+                req.session.admin_id = input_id;
+
+                res.redirect("../activity/list");
             });
         })
         .catch(err => {
@@ -53,7 +56,7 @@ router.post('/signup', (req, res, next) => {
             if (user)
                 throw new errors.DuplicatedError('The id already exists');
 
-            var salt = crypto.randomBytes(64);
+            let salt = crypto.randomBytes(64);
             console.log('salt_new: ', salt.toString('base64'));
             crypto.pbkdf2(input_pw, salt.toString('base64'), 10000, 50, 'sha512', (err, key) => {
                 user = new User();

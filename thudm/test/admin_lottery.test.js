@@ -59,29 +59,49 @@ describe('POST /auth/login/', () => {
     });
 });
 
-describe('GET /lottery/:lottery_id', () => {
-    test('It should return lottery information with the lottery id', (done) => {
+describe('GET /lottery/:wrong_lottery_id and /lottery/detail', () => {
+    test('It should redirect to /lottery/detail', (done) => {
+        const wrong_lottery_id = 'aaa89594778fb6bc06161989';
+        return admin_session
+            .get('/lottery/' + wrong_lottery_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+
+    test('It should fail to return lottery information', (done) => {
+        return admin_session
+            .get('/lottery/detail')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(204);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('GET /lottery/:lottery_id and /lottery/detail', () => {
+    test('It should redirect to /lottery/detail', (done) => {
         const lottery_id = '5c089594778fb6bc06161989';
         return admin_session
             .get('/lottery/' + lottery_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+
+    test('It should return lottery information with the lottery id', (done) => {
+        return admin_session
+            .get('/lottery/detail')
             .then(res => {
                 setTimeout(() => {
                     expect(res.text).toMatch('activity_id');
                     expect(res.text).toMatch('title');
                     expect(res.text).toMatch('winner_num');
                     expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-
-    test('It should fail to return lottery information', (done) => {
-        const wrong_lottery_id = 'aaa89594778fb6bc06161989';
-        return admin_session
-            .get('/lottery/' + wrong_lottery_id)
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(204);
                     done();
                 }, 500);
             });
