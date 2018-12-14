@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const STATUS = ['READY', 'ONGOING', 'OVER'];
+const MSG_TYPE = ['text', 'image'];
 
 const user_schema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
@@ -30,7 +31,7 @@ const vote_schema = new mongoose.Schema({
     sub_title: String,
     option_num:{ type: Number, min: 1, required: true },
     options: { type: [String], required: true },
-    pic_urls: [String],
+    pic_urls: { type: [String], required: true },
     status: { type: String, enum: STATUS , default: 'READY' },
 });
 exports.Vote = mongoose.model('Vote', vote_schema);
@@ -45,8 +46,8 @@ exports.Lottery = mongoose.model('Lottery', lottery_schema);
 
 const message_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
-    id: { type: String, required: true },
-    type: { type: String ,required: true },
+    id: { type: String, min: 1, required: true },
+    type: { type: String, enum: MSG_TYPE, required: true },
     content: { type: String, required: true },
     nickname: { type: String, required: true },
     head_img_url: { type: String, required: true },

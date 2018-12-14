@@ -4,6 +4,8 @@ html
     script(src='/js/ajax.js')
     script(type='text/javascript').
       var candidate = !{candidate != null? JSON.stringify(candidate): 'null'};
+      var title = !{title!= null? JSON.stringify(title): 'null'};
+      console.log('title: ', title);
       var winner = new Array; 
       $(document).ready(function(){
         console.log(candidate.title);

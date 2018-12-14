@@ -11,7 +11,11 @@ router.get('/login', (req, res, next) => {
     console.log('+++req.session:', req.session);
     console.log('+++req.session.id:', req.session.id);
     console.log('+++req.sessionID:', req.sessionID);
-    res.render('login');
+    let sendData = {
+        login: req.session.login ? true : false
+    };
+    console.log('sendData', sendData);
+    res.render('login', sendData);
 });
 
 router.post('/login', (req, res, next) => {
@@ -32,6 +36,8 @@ router.post('/login', (req, res, next) => {
                 req.session.login = true;
                 req.session.admin_id = input_id;
 
+                //let sendData = { login: true };
+                //res.send(sendData);
                 res.redirect("../activity/list");
             });
         })
@@ -42,8 +48,6 @@ router.post('/login', (req, res, next) => {
 });
 
 router.get('/signup', (req, res, next) => {
-    console.log('+++req.session:', req.session);
-    console.log('+++req.session.id:', req.session.id);
     res.render('signup');
 });
 
@@ -70,13 +74,23 @@ router.post('/signup', (req, res, next) => {
             });
         })
         .then(() => {
+            //let sendData = { signup: true };
+            //res.send(sendData);
             res.redirect('login');
         })
         .catch(err => {
             console.error(err);
-            //res.render('signup', { err: err });
             next(err);
         });
+});
+
+router.get('/logout', (req, res, next) => {
+    req.session = null;
+
+    let sendData = {
+        login: false
+    };
+    res.render('login', sendData);
 });
 
 router.get('/find', (req, res, next) => {

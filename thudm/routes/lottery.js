@@ -11,12 +11,11 @@ router.get('/list', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-    console.log('@@@activity_id:',activity_id);
 
     Lottery.find({ activity_id: activity_id })
         .then(lotteries => {
             console.log(lotteries);
-            return res.render('list', { items: lotteries });
+            return res.send(lotteries);
         })
         .catch(err => {
             console.error(err);
@@ -35,7 +34,7 @@ router.get('/detail', (req, res, next) => {
             if (!lottery)
                 throw new errors.NotExistError('No lottery activity exists.');
 
-            return res.send(lottery);
+            return res.render('list', lottery);
         })
         .catch(err => {
             console.error(err);
@@ -52,24 +51,25 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let lottery_id = req.params.lottery_id;
-
     let sendData = {};
-    let users = req.app.get('cache').user_info; // get all users in the activity
-    sendData.users = JSON.stringify([...users]);
 
     Lottery.findById(lottery_id)
         .then(lottery => {
             if (!lottery)
                 throw new errors.NotExistError('No lottery activity exists.');
 
+            // get all users in the activity
+            let users = req.app.get('cache').user_info;
+            sendData.users = JSON.stringify([...users].filter(user => user.activity_id === lottery.activity_id));
+
             let winner_num = lottery.winner_num;
             let max_num = users.size;
             let min_num = 1;
 
             if (max_num === 0)
-                return;
-            if (max_num === 1)
-                return [1];
+                return [];
+            if (max_num <= winner_num)
+                return Array.from(Array(max_num).keys()).map(e => e + 1);
 
             return utils.request_random_nums(winner_num, min_num, max_num)
         })

@@ -152,6 +152,7 @@ describe('GET /lottery/create', () => {
 
 describe('GET /lottery/:lottery_id/draw', () => {
     const lottery_id = '5c089594778fb6bc06161989';
+    const lottery_id_draw_2 = '5c13e3f82e42b62b621dfffd';
     const wrong_lottery_id = 'aaa89594778fb6bc06161989';
 
     test('No user participates in the lottery event', (done) => {
@@ -172,7 +173,8 @@ describe('GET /lottery/:lottery_id/draw', () => {
         app.get('cache').user_info.set('testopenid1', {
             open_id: 'testopenid1',
             head_img_url: 'testheadimgurl1',
-            nickname: 'testnickname1'
+            nickname: 'testnickname1',
+            activity_id: activity_id
         });
         login()
             .then(() => {
@@ -187,16 +189,38 @@ describe('GET /lottery/:lottery_id/draw', () => {
             });
     });
 
+    test('One user participates in the lottery event but draw more than one winner', (done) => {
+        app.get('cache').user_info.set('testopenid1', {
+            open_id: 'testopenid1',
+            head_img_url: 'testheadimgurl1',
+            nickname: 'testnickname1',
+            activity_id: activity_id
+        });
+        login()
+            .then(() => {
+                admin_session
+                    .get('/lottery/' + lottery_id_draw_2 + '/draw')
+                    .then(res => {
+                        setTimeout(() => {
+                            expect(res.statusCode).toBe(200);
+                            done();
+                        }, 500);
+                    });
+            });
+    });
+
     test('More than one users participate in the lottery event', (done) => {
         app.get('cache').user_info.set('testopenid1', {
             open_id: 'testopenid1',
             head_img_url: 'testheadimgurl1',
-            nickname: 'testnickname1'
+            nickname: 'testnickname1',
+            activity_id: activity_id
         });
         app.get('cache').user_info.set('testopenid2', {
             open_id: 'testopenid2',
             head_img_url: 'testheadimgurl2',
-            nickname: 'testnickname2'
+            nickname: 'testnickname2',
+            activity_id: activity_id
         });
         login()
             .then(() => {

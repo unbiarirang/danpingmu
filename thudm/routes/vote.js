@@ -14,8 +14,8 @@ router.get('/list', (req, res, next) => {
 
     Vote.find({ activity_id: activity_id })
         .then(votes => {
-            console.log(votes);
-            return res.render('list', { items: votes });
+            let sendData = { items: votes };
+            return res.render('list', sendData);
         })
         .catch(err => {
             console.error(err);
@@ -56,7 +56,6 @@ router.get('/result', (req, res, next) => {
     let sendData = {};
     redis.hgetallAsync(key)
         .then(data => {
-            console.log('data: ', data);
             sendData.result = data;
         })
         .then(() => {
@@ -68,7 +67,7 @@ router.get('/result', (req, res, next) => {
                     sendData.title= vote.title;
                     sendData.options = vote.options;
                     sendData.pic_urls = vote.pic_urls;
-                    return res.render('result', { candidate: sendData });
+                    return res.render('result', sendData);
                 });
         })
         .catch(err => {
@@ -106,7 +105,7 @@ router.get('/:vote_id/user', (req, res, next) => {
 });
 
 // User vote for one option
-router.get('/:vote_id/votefor/:option_id', (req, res, next) => {
+router.post('/:vote_id/votefor/:option_id', (req, res, next) => {
     const redis = req.app.get('redis');
     const open_id = req.query.open_id; // FIXME: front should send open_id query string
     //const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
@@ -154,7 +153,6 @@ const updateVote = (vote, req) => {
     vote.option_num = req.body.option_num;
     vote.options = req.body.options;
     vote.pic_urls = req.body.pic_urls;
-    vote.status = req.body.status;
     return vote.save();
 }
 
@@ -179,8 +177,8 @@ router.put('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-
     let room = utils.get_room_info(req, activity_id);
+
     updateVote(room.activity, req)
         .then(vote => {
             return res.send(vote);

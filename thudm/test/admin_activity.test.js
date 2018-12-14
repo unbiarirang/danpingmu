@@ -2,7 +2,6 @@ const request = require('supertest');
 const session = require('supertest-session');
 const app = require('../app_test');
 const models = require('../models/models');
-const utils = require('../common/utils');
 const errors = require('../common/errors');
 const fs = require('fs-extra');
 
@@ -95,104 +94,12 @@ describe('GET /activity/:activity_id and GET /activity/detail', () => {
     });
 });
 
-describe('GET /activity/blacklist/user', () => {
-    test('It should get user blacklist', (done) => {
+describe('GET /activity/list', () => {
+    test('It should return activity list that the admin has', (done) => {
         return admin_session
-            .get('/activity/blacklist/user')
+            .get('/activity/list')
             .then(res => {
                 setTimeout(() => {
-                    expect(Array.isArray(JSON.parse(res.text))).toBe(true);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('PUT /activity/blacklist/user', () => {
-    const open_id = 'testopenid';
-
-    test('It should append a user to the user blacklist', (done) => {
-        return admin_session
-            .put('/activity/blacklist/user')
-            .send({
-                blocked_id: open_id
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.text).toMatch(open_id);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('DELETE /activity/blacklist/user', () => {
-    const open_id = 'testopenid';
-
-    test('It should delete a user from the user blacklist', (done) => {
-        return admin_session
-            .delete('/activity/blacklist/user')
-            .send({
-                blocked_id: open_id
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.text).not.toMatch(open_id);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /activity/blacklist/word', () => {
-
-    test('It should get word blacklist', (done) => {
-        return admin_session
-            .get('/activity/blacklist/word')
-            .then(res => {
-                setTimeout(() => {
-                    expect(Array.isArray(JSON.parse(res.text))).toBe(true);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('PUT /activity/blacklist/word', () => {
-    const word = 'xxx';
-
-    test('It should append a user to the word blacklist', (done) => {
-        return admin_session
-            .put('/activity/blacklist/word')
-            .send({
-                blocked_word: word
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.text).toMatch(word);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('DELETE /activity/blacklist/word', () => {
-    const word = 'xxx';
-
-    test('It should delete a word from the word blacklist', (done) => {
-        return admin_session
-            .delete('/activity/blacklist/word')
-            .send({
-                blocked_word: word
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.text).not.toMatch(word);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -276,115 +183,6 @@ describe('POST /activity/upload/bg', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(500);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /activity/msglist', () => {
-    test('It should redirect to /activity/msglist/page/1', (done) => {
-        return admin_session
-            .get('/activity/msglist')
-            .then(res => {
-                expect(res.statusCode).toBe(302);
-                done();
-            });
-    });
-
-    test('It needs login to return msglist page', (done) => {
-        return request(app)
-            .get('/activity/msglist')
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-                done();
-            });
-    });
-});
-
-describe('GET /activity/msglist/page/:page_id', () => {
-    test('It should return msglist page', (done) => {
-        const page_id = 1;
-        return admin_session
-            .get('/activity/msglist/page/' + page_id)
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /activity/screen', () => {
-    test('It should return screen page', (done) => {
-        return admin_session
-            .get('/activity/screen')
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /activity/qrcode', () => {
-    test('It should return qrcode', () => {
-        return admin_session
-            .get('/activity/qrcode')
-            .then(res => {
-                expect(res.statusCode).toBe(302);
-            });
-    });
-
-    test('It needs login to return qrcode', () => {
-        return request(app)
-            .get('/activity/qrcode')
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-            });
-    });
-});
-
-
-describe('GET /activity/ticket', () => {
-    test('It should return ticket', () => {
-        return admin_session
-            .get('/activity/ticket')
-            .then(res => {
-                expect(res.statusCode).toBe(302);
-            });
-    });
-
-    test('It needs login to return ticket', () => {
-        return request(app)
-            .get('/activity/ticket')
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-            });
-    });
-
-    const retNull = () => { return Promise.resolve(null); };
-
-    test('It should fail to return ticket', () => {
-        utils.get_access_token = retNull;
-        return admin_session
-            .get('/activity/ticket')
-            .then(res => {
-                expect(res.text).toMatch('invalid credential, access_token is invalid or not latest');
-                expect(res.statusCode).toBe(500);
-            });
-    });
-});
-
-describe('GET /activity/list', () => {
-    test('It should return activity list that the admin has', (done) => {
-        return admin_session
-            .get('/activity/list')
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
             });
