@@ -2,24 +2,24 @@ doctype html
 html(lang='en')
   head
     meta(charset='utf-8')
-    link(rel='icon', type='image/png', href='assets/img/favicon.ico')
+    link(rel='icon', type='image/png', href='/assets/img/favicon.ico')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     title Light Bootstrap Dashboard by Creative Tim
     meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
     meta(name='viewport', content='width=device-width')
     // Bootstrap core CSS
-    link(href='assets/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/assets/css/bootstrap.min.css', rel='stylesheet')
     // Animation library for notifications
-    link(href='assets/css/animate.min.css', rel='stylesheet')
+    link(href='/assets/css/animate.min.css', rel='stylesheet')
     // Light Bootstrap Table core CSS
-    link(href='assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
+    link(href='/assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
     // Fonts and icons
     link(href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
-    link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
-    link(href='assets/css/pe-icon-7-stroke.css', rel='stylesheet')
+    //link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
+    link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
   body
     .wrapper
-      .sidebar(data-color='purple', data-image='assets/img/eye.jpg')
+      .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
         //
           Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
           Tip 2: you can also add an image using data-image tag
@@ -29,13 +29,29 @@ html(lang='en')
               | 弹屏目
           ul.nav
             li
-              a(href='/activity')
-                i.pe-7s-graph
-                p 活动列表
+              a(href='/activity/screen',target="_blank")
+                i.pe-7s-chat
+                p 弹幕墙
+            li
+              a(href='/activity/msglist')
+                i.pe-7s-note2
+                p 弹幕审核
+            li
+              a(href='/vote/list')
+                i.pe-7s-drawer
+                p 投票
+            li
+              a(href='/lottery/list')
+                i.pe-7s-medal
+                p 抽奖
+            li
+              a(href='/blacklist')
+                i.pe-7s-bookmarks
+                p 黑名单/过滤词
             li.active
-              a(href='/create-activity')
-                i.pe-7s-magic-wand
-                p 创建节目
+              a(href='/activity/detail')
+                i.pe-7s-config
+                p 房间信息
       .main-panel
         nav.navbar.navbar-default.navbar-fixed
           .container-fluid
@@ -56,7 +72,6 @@ html(lang='en')
                   .header
                     h4.title 创建活动
                   .content
-                    form
                       .row
                         .col-md-5
                           .form-group
@@ -70,7 +85,9 @@ html(lang='en')
                       .row
                         .col-md-9
                             label 背景图片
-                            input.form-control(type='file' id = 'bg_image')
+                            form(action='/activity/upload/bg',method='POST',enctype='multipart/form-data')
+                              input.form-control(type='file',id = 'bg_image', name = 'bg_image')
+                              input.form-control(type='submit',value='Upload Image')
                       .row
                         .col-md-12
                           .form-group
@@ -99,7 +116,7 @@ html(lang='en')
                                 #C8.SetColor(style='background:#ff8000;')
                               #9.ColorBox(style='left:200px;')
                                 #C9.SetColor(style='background:#408080;')
-                     #create.button.btn.btn-info.btn-fill(type='submit') 创建
+                      #create.button.btn.btn-info.btn-fill(type='submit') 创建
                       .clearfix
               .col-md-4
                   #bg.example
@@ -139,9 +156,12 @@ html(lang='en')
       })
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
-          var formData = new FormData(filePath);
+          var formData = new FormData();
+          console.log(document.getElementById("bg_image").files[0]);
+          formData = document.getElementById("bg_image").files[0];
+          console.log(formData);
           $.ajax({
-              url:'/activity',
+              url:'/activity/upload/bg',
               type:'post',
               data: formData,
               dataType: 'json',
@@ -149,7 +169,7 @@ html(lang='en')
               cache: false,
               contentType: false,
               processData: false,
-              success: function(data){        
+              success: function(data){
               },
               error: function(data){
               }

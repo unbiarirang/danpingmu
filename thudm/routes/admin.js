@@ -47,7 +47,6 @@ router.get('/msglist', (req, res, next) => {
 router.get('/msglist/page/:page_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-
     let rsmq = req.app.get('rsmq');
     let activity_id = req.session.activity_id;
     let page_id = req.params.page_id;

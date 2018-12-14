@@ -163,12 +163,21 @@ router.put('/', (req, res, next) => {
         });
 });
 
-router.get('/:activity_id', (req, res, next) => {
+router.get('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    req.session.activity_id = req.params.activity_id;
-    return res.redirect('detail');
+    let admin_id = req.session.admin_id;
+
+    Activity.find({ admin_id: admin_id })
+        .then(activities => {
+            console.log(activities);
+            return res.render('activity-list',{activities: activities});
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 module.exports = router;

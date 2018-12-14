@@ -29,12 +29,12 @@ html
               | 弹屏目
           ul.nav
             li.active
-              a(href='/activity-list')
+              a(href='/activity')
                 i.pe-7s-graph
                 p 活动列表
             li
               a(href='/create-activity')
-                i.pe-7s-user
+                i.pe-7s-magic-wand
                 p 创建节目
       .main-panel
         nav.navbar.navbar-default.navbar-fixed
@@ -61,9 +61,9 @@ html
                         tr
                           th ID
                           th TITLE
-                          th STARTTIME
-                          th ENDTIME
+                          th SUBTITLE
                           th STATUS
+                          th JOIN
                       tbody
     // Core JS Files
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
@@ -76,12 +76,22 @@ html
     // Light Bootstrap Table DEMO methods, don't include it in your project!
     script(src='/assets/js/demo.js')
     script(type='text/javascript').
-      $(document).ready(function(){
-      $.notify({
-      icon: 'pe-7s-gift',
-      message: "Welcome to <b>Light Bootstrap Dashboard</b> - a beautiful freebie for every web developer."
-      },{
-      type: 'info',
-      timer: 4000
-      });
+     $(document).ready(function(){
+        var cnt = 0;
+        var activities = !{activities != null? JSON.stringify(activities): 'null'}; 
+        console.log(activities);
+        activities.forEach((act) =>{
+          $('tbody').append("<tr id=" + cnt + "></tr>");
+          $('#' + cnt).append($("<td>").text(cnt));
+          $('#' + cnt).append($("<td>").text(act.title));
+          $('#' + cnt).append($("<td>").text(act.sub_title));
+          $('#' + cnt).append($("<td id = tr" + cnt + '>').text(act.status));
+          $('#' + cnt).append($("<td><a href = /msglist/" + act._id + '>进入</a>'));
+          console.log(act._id);
+          if(act.sub_title == 'OVER')
+              $('#tr' + cnt).css({'color':'red'});
+          else
+              $('#tr' + cnt).css({'color':'green'});
+          cnt++;
+        }); 
       });
