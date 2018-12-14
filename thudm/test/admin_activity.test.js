@@ -2,16 +2,14 @@ const request = require('supertest');
 const session = require('supertest-session');
 const app = require('../app_test');
 const models = require('../models/models');
+const utils = require('../common/utils');
+const errors = require('../common/errors');
 const fs = require('fs-extra');
 
-let test_session = null;
-let auth_session = null;
-
-beforeEach(() => {
-    test_session = session(app);
-});
+let admin_session = null;
 
 describe('POST /auth/login/', () => {
+    let test_session = session(app);
     test('It should login success', (done) => {
         const input_id = 'bbb';
         const input_pw = '12345678';
@@ -22,31 +20,68 @@ describe('POST /auth/login/', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(302);
-                    auth_session = test_session;
+                    admin_session = test_session;
                     done();
                 }, 500);
             });
     });
 });
 
-describe('GET /activity/:activity_id', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
+describe('GET /activity/:wrong_activity_id and GET /activity/detail', () => {
+    test('It should redirect to /activity/detail', (done) => {
+        const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
+        return admin_session
+            .get('/activity/' + wrong_activity_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
 
-    test('It should get activity information with the activity id', (done) => {
-        return auth_session
-            .get('/activity/' + activity_id)
+    test('It should fail to return activity information with the activity id', (done) => {
+        return admin_session
+            .get('/activity/detail')
             .then(res => {
                 setTimeout(() => {
-                    expect(res.statusCode).toBe(302);
+                    expect(res.statusCode).toBe(204);
                     done();
                 }, 500);
             });
     });
 });
 
-describe('GET /activity/detail', () => {
+describe('GET /activity/:activity_id and GET /activity/detail', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+
+    test('It needs login to get activity detail', (done) => {
+        return request(app)
+            .get('/activity/' + activity_id)
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should redirect to /activity/detail', (done) => {
+        return admin_session
+            .get('/activity/' + activity_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+
+    test('It needs login to get activity information with the activity id', (done) => {
+        return request(app)
+            .get('/activity/detail')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
     test('It should get activity information with the activity id', (done) => {
-        return auth_session
+        return admin_session
             .get('/activity/detail')
             .then(res => {
                 setTimeout(() => {
@@ -62,7 +97,7 @@ describe('GET /activity/detail', () => {
 
 describe('GET /activity/blacklist/user', () => {
     test('It should get user blacklist', (done) => {
-        return auth_session
+        return admin_session
             .get('/activity/blacklist/user')
             .then(res => {
                 setTimeout(() => {
@@ -78,7 +113,7 @@ describe('PUT /activity/blacklist/user', () => {
     const open_id = 'testopenid';
 
     test('It should append a user to the user blacklist', (done) => {
-        return auth_session
+        return admin_session
             .put('/activity/blacklist/user')
             .send({
                 blocked_id: open_id
@@ -97,7 +132,7 @@ describe('DELETE /activity/blacklist/user', () => {
     const open_id = 'testopenid';
 
     test('It should delete a user from the user blacklist', (done) => {
-        return auth_session
+        return admin_session
             .delete('/activity/blacklist/user')
             .send({
                 blocked_id: open_id
@@ -115,7 +150,7 @@ describe('DELETE /activity/blacklist/user', () => {
 describe('GET /activity/blacklist/word', () => {
 
     test('It should get word blacklist', (done) => {
-        return auth_session
+        return admin_session
             .get('/activity/blacklist/word')
             .then(res => {
                 setTimeout(() => {
@@ -131,7 +166,7 @@ describe('PUT /activity/blacklist/word', () => {
     const word = 'xxx';
 
     test('It should append a user to the word blacklist', (done) => {
-        return auth_session
+        return admin_session
             .put('/activity/blacklist/word')
             .send({
                 blocked_word: word
@@ -150,7 +185,7 @@ describe('DELETE /activity/blacklist/word', () => {
     const word = 'xxx';
 
     test('It should delete a word from the word blacklist', (done) => {
-        return auth_session
+        return admin_session
             .delete('/activity/blacklist/word')
             .send({
                 blocked_word: word
@@ -165,27 +200,52 @@ describe('DELETE /activity/blacklist/word', () => {
     });
 });
 
-//describe('POST /activity/upload/list', () => {
-//    const file_name = 'public/images/list.png'; // dummy image
-//
-//    test('It should upload a list image', (done) => {
-//        return auth_session
-//            .post('/activity/upload/list')
-//            .attach('list_image', file_name)
-//            .then(res => {
-//                setTimeout(() => {
-//                    expect(res.statusCode).toBe(200);
-//                    done();
-//                }, 500);
-//            });
-//    });
-//});
+describe('POST /activity/upload/list', () => {
+    const file_name = 'public/images/list.png'; // dummy image
+
+    test('It should upload a list image', (done) => {
+        return admin_session
+            .post('/activity/upload/list')
+            .attach('list_image', file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('Attach field should be list_image', (done) => {
+        const wrong_field = 'listimage';
+        return admin_session
+            .post('/activity/upload/list')
+            .attach(wrong_field, file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should have activity_id in the session', (done) => {
+        return request(app)
+            .post('/activity/upload/list')
+            .attach('list_image', file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+});
 
 describe('POST /activity/upload/bg', () => {
     const file_name = 'public/images/list.png'; // dummy image
 
     test('It should upload a background image', (done) => {
-        return auth_session
+        return admin_session
             .post('/activity/upload/bg')
             .attach('bg_image', file_name)
             .then(res => {
@@ -195,14 +255,48 @@ describe('POST /activity/upload/bg', () => {
                 }, 500);
             });
     });
+
+    test('Attach field should be bg_image', (done) => {
+        const wrong_field = 'bgimage';
+        return admin_session
+            .post('/activity/upload/bg')
+            .attach(wrong_field, file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should have activity_id in the session', (done) => {
+        return request(app)
+            .post('/activity/upload/bg')
+            .attach('bg_image', file_name)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
 });
 
 describe('GET /activity/msglist', () => {
-    test('It should return msglist page', (done) => {
-        return auth_session
+    test('It should redirect to /activity/msglist/page/1', (done) => {
+        return admin_session
             .get('/activity/msglist')
             .then(res => {
                 expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+
+    test('It needs login to return msglist page', (done) => {
+        return request(app)
+            .get('/activity/msglist')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
                 done();
             });
     });
@@ -211,7 +305,7 @@ describe('GET /activity/msglist', () => {
 describe('GET /activity/msglist/page/:page_id', () => {
     test('It should return msglist page', (done) => {
         const page_id = 1;
-        return auth_session
+        return admin_session
             .get('/activity/msglist/page/' + page_id)
             .then(res => {
                 setTimeout(() => {
@@ -222,10 +316,9 @@ describe('GET /activity/msglist/page/:page_id', () => {
     });
 });
 
-// FIXME: for test. create queue in create activity
 describe('GET /activity/screen', () => {
     test('It should return screen page', (done) => {
-        return auth_session
+        return admin_session
             .get('/activity/screen')
             .then(res => {
                 setTimeout(() => {
@@ -238,27 +331,56 @@ describe('GET /activity/screen', () => {
 
 describe('GET /activity/qrcode', () => {
     test('It should return qrcode', () => {
-        return auth_session
+        return admin_session
             .get('/activity/qrcode')
             .then(res => {
                 expect(res.statusCode).toBe(302);
             });
     });
+
+    test('It needs login to return qrcode', () => {
+        return request(app)
+            .get('/activity/qrcode')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+            });
+    });
 });
+
 
 describe('GET /activity/ticket', () => {
     test('It should return ticket', () => {
-        return auth_session
+        return admin_session
             .get('/activity/ticket')
             .then(res => {
                 expect(res.statusCode).toBe(302);
+            });
+    });
+
+    test('It needs login to return ticket', () => {
+        return request(app)
+            .get('/activity/ticket')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+            });
+    });
+
+    const retNull = () => { return Promise.resolve(null); };
+
+    test('It should fail to return ticket', () => {
+        utils.get_access_token = retNull;
+        return admin_session
+            .get('/activity/ticket')
+            .then(res => {
+                expect(res.text).toMatch('invalid credential, access_token is invalid or not latest');
+                expect(res.statusCode).toBe(500);
             });
     });
 });
 
 describe('GET /activity/list', () => {
     test('It should return activity list that the admin has', (done) => {
-        return auth_session
+        return admin_session
             .get('/activity/list')
             .then(res => {
                 setTimeout(() => {
@@ -271,7 +393,7 @@ describe('GET /activity/list', () => {
 
 describe('GET /activity/create', () => {
     test('It should return create activity page', (done) => {
-        return auth_session
+        return admin_session
             .get('/activity/create')
             .then(res => {
                 expect(res.statusCode).toBe(200);
@@ -280,27 +402,109 @@ describe('GET /activity/create', () => {
     });
 });
 
-describe('POST /activity', () => {
+describe('POST /activity and PUT /activity', () => {
     const test_title = 'test activity';
+    const sub_title = 'sub title';
+    const changed_sub_title = 'changed sub title';
 
     test('It should create new Activity', (done) => {
-        return auth_session
+        return admin_session
             .post('/activity')
-            .type('form')
             .send({
                 title: test_title,
-                sub_title: 'sub title',
+                sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
-                banned_words_url: 'some.url',
                 bg_img_url: 'some.url',
-                list_media_id: 'test media id'
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.statusCode).toBe(302);
+                    expect(res.text).toMatch(test_title);
+                    expect(res.text).toMatch(sub_title);
+                    expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
+            });
+    });
+
+    test('All required fields should be filled', (done) => {
+        return admin_session
+            .post('/activity')
+            .send({
+                title: test_title,
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It needs login to create new Activity', (done) => {
+        const sub_title = 'sub title';
+        return request(app)
+            .post('/activity')
+            .send({
+                title: test_title,
+                sub_title: sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should update the Activity', (done) => {
+        return admin_session
+            .put('/activity')
+            .send({
+                title: test_title,
+                sub_title: changed_sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).toMatch(changed_sub_title);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('All required fields should be filled', (done) => {
+        return admin_session
+            .put('/activity')
+            .send({
+                title: test_title,
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It needs login to update the Activity', (done) => {
+        const sub_title = 'sub title';
+        return request(app)
+            .put('/activity')
+            .send({
+                title: test_title,
+                sub_title: sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
             });
     });
 

@@ -22,6 +22,32 @@ describe('GET /auth/login/', () => {
 });
 
 describe('POST /auth/login/', () => {
+    test('It should fail to login', (done) => {
+        const input_id = 'wrongid';
+        const input_pw = '12345678';
+        return test_session
+            .post('/auth/login/')
+            .type('form')
+            .send({ input_id: input_id, input_pw: input_pw })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should fail to login', (done) => {
+        const input_id = 'bbb';
+        const input_pw = 'wrongpw';
+        return test_session
+            .post('/auth/login/')
+            .type('form')
+            .send({ input_id: input_id, input_pw: input_pw })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
     test('It should succeed login', (done) => {
         const input_id = 'bbb';
         const input_pw = '12345678';

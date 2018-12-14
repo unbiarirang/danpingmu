@@ -57,80 +57,74 @@ router.get('/screen', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-    let rsmq = req.app.get('rsmq');
 
-    // FIXME: for test. create queue in create activity
-    rsmq.createQueue({ qname: activity_id })
-        .then(done => {
-            console.log("QUEUE created");
-        })
-        .catch(err => {
-            console.error(err);
-        })
-        .finally(() => {
-            let sendData = {};
-            sendData.activity_id = activity_id;
+    let sendData = {};
+    sendData.activity_id = activity_id;
 
-            console.log('screen activity_id: ', activity_id);
-            res.render('screen', sendData);
-        });
+    console.log('screen activity_id: ', activity_id);
+    res.render('screen', sendData);
 });
 
 const createActivity = (req) => {
     let act = new Activity();
+    return updateActivity(act, req);
+}
+const updateActivity = (act, req) => {
     act.admin_id = req.session.admin_id;
     act.title = req.body.title;
     act.sub_title = req.body.sub_title;
     act.bullet_color_num = req.body.bullet_color_num;
     act.bullet_colors = req.body.bullet_colors;
-    act.banned_words_url = req.body.banned_words_url;
     act.bg_img_url = req.body.bg_img_url;
-router.get('/screen', (req, res, next) => {
-    if (!req.session.login)
-        throw new errors.NotLoggedInError();
-
-    let activity_id = req.session.activity_id;
-    let rsmq = req.app.get('rsmq');
-
-    // FIXME: for test. create queue in create activity
-    rsmq.createQueue({ qname: activity_id })
-        .then(done => {
-            console.log("QUEUE created");
-        })
-        .catch(err => {
-            console.error(err);
-        })
-        .finally(() => {
-            let sendData = {};
-            sendData.activity_id = activity_id;
-
-            console.log('screen activity_id: ', activity_id);
-            res.render('screen', sendData);
-        });
-});
-
     act.list_media_id = req.body.list_media_id;
     return act.save();
 }
+
+// Create activity
 router.post('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     createActivity(req)
         .then(act => {
-            req.session.activity_id = act._id.toString();
-            utils.load_activity(req, req.session.activity_id);
+            let activity_id = act._id.toString();
+            req.session.activity_id = activity_id;
+            utils.load_activity(req, activity_id);
+
+            let rsmq = req.app.get('rsmq');
+            rsmq.createQueue({ qname: activity_id })
+                .then(done => {
+                    console.log("QUEUE created");
+                });
 
             // Create the activity's image directory
             // mkdir public/images/activity/:activity_id/fromuser
-            fs.mkdirAsync('public/images/activity/' + act._id)
+            fs.mkdirAsync('public/images/activity/' + activity_id)
                 .then(() => {
-                    return fs.mkdirAsync('public/images/activity/' + act._id + '/fromuser');
+                    return fs.mkdirAsync('public/images/activity/' + activity_id + '/fromuser');
                 })
                 .then(() => {
                     console.log('mkdir');
-                    return res.redirect('detail');
+                    return res.send(act);
                 });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+// Update activity
+router.put('/', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+
+    let room = utils.get_room_info(req, activity_id);
+    updateActivity(room.activity, req)
+        .then(act => {
+            return res.send(act);
         })
         .catch(err => {
             console.error(err);
@@ -169,7 +163,8 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
             let totalsent = attr.totalsent;
 
             // Pop messages before reqest min id
-            while(totalrecv < request_min_id - 1) {
+            while(totalrecv < request_min_id - 1
+                  && totalrecv < totalsent) {
                 not_ret_promises.push(new Promise((resolve, reject) => {
                         rsmq.popMessage({ qname: activity_id })
                             .then(data => {
@@ -182,7 +177,7 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
                                 return resolve(msg_obj);
                             })
                             .catch(err => {
-                                console.log(err);
+                                console.error(err);
                             });
                     })
                 );
@@ -385,7 +380,9 @@ router.post('/upload/list', upload_list.single('list_image'), (req, res, next) =
     let activity_id = req.session.activity_id;
 
     return utils.upload_list_image(req, req.file.path)
-        .then(() => {
+        .then(err => {
+            if (err && err.error) throw err.error;
+
             res.sendStatus(200);
         })
         .catch(err => {

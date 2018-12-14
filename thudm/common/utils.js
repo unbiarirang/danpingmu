@@ -38,7 +38,7 @@ class Room {
         Activity.findById(this.activity_id)
             .then(act => {
                 if (!act)
-                    throw new errors.NotExistError('No voting Activity exists.');
+                    throw new errors.NotExistError('Activity does not exists.');
 
                 this.activity = act;
             });
@@ -375,9 +375,9 @@ const upload_list_image = (req, file_path) => {
             // FIXME: handle error!
             return exec(command, (err, res) => {
                 if (err)
-                    throw new errors.UnknownError(err);
+                    return { error: new errors.UnknownError(err) };
                 if (JSON.parse(res).errcode)
-                    throw new errors.WeChatResError(JSON.parse(res).errmsg);
+                    return { error: new errors.WeChatResError(JSON.parse(res).errmsg) };
 
                 let activity_id = req.session.activity_id;
                 let room_info = get_room_info(req, activity_id);

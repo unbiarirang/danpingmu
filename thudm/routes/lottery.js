@@ -11,6 +11,7 @@ router.get('/list', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
+    console.log('@@@activity_id:',activity_id);
 
     Lottery.find({ activity_id: activity_id })
         .then(lotteries => {
@@ -91,19 +92,44 @@ router.get('/:lottery_id', (req, res, next) => {
     return res.redirect('detail');
 });
 
+const createLottery = (req) => {
+    let lottery = new Lottery();
+    return updateLottery(lottery, req);
+}
+const updateLottery = (lottery, req) => {
+    lottery.activity_id = req.session.activity_id;
+    lottery.title = req.body.title;
+    lottery.sub_title = req.body.sub_title;
+    lottery.winner_num = req.body.winner_num;
+    return lottery.save();
+}
+
+// Create lottery activity
 router.post('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let lottery = new Lottery();
-    lottery.activity_id = req.session.activity_id;
-    lottery.activity_id = 1; //FIXME: for test
-    lottery.title = req.body.title;
-    lottery.sub_title = req.body.sub_title;
-    lottery.winner_num = req.body.winner_num;
-    lottery.save()
-        .then(() => {
-            return res.json({ result: 1 });
+    createLottery(req)
+        .then(lottery => {
+            return res.send(lottery);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+// Update lottery activity
+router.put('/', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let room = utils.get_room_info(req, activity_id);
+
+    updateLottery(room.activity, req)
+        .then(lottery => {
+            return res.send(lottery);
         })
         .catch(err => {
             console.error(err);

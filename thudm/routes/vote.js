@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const assert = require('assert');
 const errors = require('../common/errors');
+const utils = require('../common/utils');
 const models = require('../models/models');
 const Vote = models.Vote;
 
@@ -142,24 +143,47 @@ router.get('/:vote_id', (req, res, next) => {
     return res.redirect('detail');
 });
 
-
-// Admin create vote activity
-router.post('/', (req, res, next) => {
-    if (!req.session.login)
-        throw new errors.NotLoggedInError();
-
+const createVote = (req) => {
     let vote = new Vote();
+    return updateVote(vote, req);
+}
+const updateVote = (vote, req) => {
     vote.activity_id = req.session.activity_id;
-    //vote.activity_id = '5c03ba2fec64483fe182a7d2' // FIXME: for test
     vote.title = req.body.title;
     vote.sub_title = req.body.sub_title;
     vote.option_num = req.body.option_num;
     vote.options = req.body.options;
     vote.pic_urls = req.body.pic_urls;
     vote.status = req.body.status;
-    vote.save()
-        .then(() => {
-            return res.json({ result: 1 });
+    return vote.save();
+}
+
+// Create vote activity
+router.post('/', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    createVote(req)
+        .then(vote => {
+            return res.send(vote);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+// Update vote activity
+router.put('/', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+
+    let room = utils.get_room_info(req, activity_id);
+    updateVote(room.activity, req)
+        .then(vote => {
+            return res.send(vote);
         })
         .catch(err => {
             console.error(err);

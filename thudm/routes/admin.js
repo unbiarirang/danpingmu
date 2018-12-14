@@ -1,6 +1,5 @@
 const express = require('express');
 const rp = require('request-promise');
-const promise = require('bluebird');
 const router = express.Router();
 const utils = require('../common/utils');
 const consts = require('../common/consts');
@@ -22,8 +21,7 @@ router.use('/lottery', lottery_router);
 
 router.get('/', (req, res, next) => {
     console.log(req.session.id);
-    res.render('index');
-    return Promise.resolve(res);
+    return res.render('index');
 });
 
 module.exports = router;

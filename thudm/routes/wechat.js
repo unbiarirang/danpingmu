@@ -224,7 +224,7 @@ router.post('/', (req, res, next) => {
                 res.send("");
             }
 
-            // Store or refresh user info in cache
+            // Store or refresh user info into cache
             utils.request_user_info(req)
                 .catch(err => {
                     console.error(err);

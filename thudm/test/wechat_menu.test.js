@@ -30,7 +30,7 @@ describe('User clicked "help" button', () => {
                 setTimeout(() => {
                     expect(res.text).toMatch('<MsgType><![CDATA[text]]></MsgType>\n    <Content><![CDATA[Welcome to DANPINGMU]]></Content>\n</xml>');
                     done();
-                }, 1000);
+                }, 500);
             });
     });
 });
@@ -66,7 +66,7 @@ describe('User clicked "activity list" button', () => {
                 setTimeout(() => {
                     expect(res.text).toMatch('<MsgType><![CDATA[image]]></MsgType>\n    <Image><MediaId><![CDATA[' + list_media_id + ']]></MediaId></Image>\n</xml>');
                     done();
-                }, 1000);
+                }, 500);
             });
     });
 });
@@ -101,7 +101,39 @@ describe('User clicked "vote" button', () => {
                         expect(item_count).toBe(votes.length);
                         done();
                     });
-                }, 1000);
+                }, 500);
+            });
+    });
+});
+
+describe('User sends an event that is not "SCANN", "CLICK" or "subscribe"', () => {
+    const activity_id = '5c03ba2fec64483fe182a7d2';
+    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
+    const some_other_event = 'EVENT';
+
+    test('It should return nothing', (done) => {
+        utils.load_activities(app)
+            .then(() => {
+                utils.update_user_info({ app: app, query: { openid: open_id } }, { activity_id: activity_id });
+            })
+            .then(() => {
+                return request(app)
+                    .post('/wechat?signature=123&timestamp=123&nonce=123&openid=' + open_id)
+                    .type('xml')
+                    .send('<xml>' +
+                        '<ToUserName>testname</ToUserName>' +
+                        '<FromUserName>testname</FromUserName>' +
+                        '<CreateTime>1348831860</CreateTime>' +
+                        '<MsgType>event</MsgType>' +
+                        '<Event>' + some_other_event + '</Event>' +
+                        '<EventKey>KEY_HELP</EventKey>' +
+                        '</xml>');
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).toBe('');
+                    done();
+                }, 500);
             });
     });
 });

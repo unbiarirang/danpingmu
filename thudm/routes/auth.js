@@ -21,12 +21,12 @@ router.post('/login', (req, res, next) => {
     User.findOne({ id: input_id })
         .then(user => {
             if (!user)
-                throw new errors.NotExistError('Wrong id or password.');
+                throw new errors.NotLoggedInError('Wrong id or password.');
 
             let salt = user.salt;
             crypto.pbkdf2(input_pw, salt, 10000, 50, 'sha512', (err, key) => {
                 if (user.password !== key.toString('base64'))
-                    throw new errors.NotExistError('Wrong id or password.');
+                    return next(new errors.NotLoggedInError('Wrong id or password.'));
 
                 // Login succeed, Creaste a new admin session
                 req.session.login = true;
@@ -36,6 +36,7 @@ router.post('/login', (req, res, next) => {
             });
         })
         .catch(err => {
+            console.error(err);
             next(err);
         });
 });
@@ -80,10 +81,6 @@ router.post('/signup', (req, res, next) => {
 
 router.get('/find', (req, res, next) => {
     res.send('/auth/find => render find id/password page');
-});
-
-router.get('/', (req, res, next) => {
-    res.send('/auth');
 });
 
 module.exports = router;
