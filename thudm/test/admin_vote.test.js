@@ -4,14 +4,15 @@ const app = require('../app_test');
 const models = require('../models/models'); 
 
 let admin_session = null;
+const activity_id = '5c03ba2fec64483fe182a7d2';
+const vote_id = '5c04f7be1cab9d6c156f401c';
 
-describe('POST /auth/login/', () => {
+describe.only('POST /auth/login/', () => {
     let test_session = session(app);
 
     test('It should login success', (done) => {
         const input_id = 'bbb';
         const input_pw = '12345678';
-        const activity_id = '5c03ba2fec64483fe182a7d2';
 
         return test_session
             .post('/auth/login/')
@@ -31,18 +32,8 @@ describe('POST /auth/login/', () => {
     });
 });
 
-describe('GET /vote/:vote_id and GET /vote/detail', () => {
-    const vote_id = '5c04f7be1cab9d6c156f401c';
+describe('GET /vote/:wrong_activity_id and GET /vote/detail', () => {
     const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
-
-    test('It needs login to redirect to /vote/detail', (done) => {
-        return request(app)
-            .get('/vote/' + vote_id)
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-                done();
-            });
-    });
 
     test('It should redirect to /vote/detail', (done) => {
         return admin_session
@@ -61,6 +52,17 @@ describe('GET /vote/:vote_id and GET /vote/detail', () => {
                     expect(res.statusCode).toBe(204);
                     done();
                 }, 500);
+            });
+    });
+});
+
+describe.only('GET /vote/:vote_id and GET /vote/detail', () => {
+    test('It needs login to redirect to /vote/detail', (done) => {
+        return request(app)
+            .get('/vote/' + vote_id)
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
             });
     });
 
@@ -243,14 +245,14 @@ describe('GET /vote/:vote_id/user', () => {
     });
 });
 
-describe('GET /vote/:vote_id/votefor/:option_id', () => {
+describe('POST /vote/:vote_id/votefor/:option_id', () => {
     const vote_id = '5c04f7be1cab9d6c156f401c';
     const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
     const option_id = 1;
 
     test('It should vote successfully', (done) => {
         request(app)
-            .get('/vote/' + vote_id + '/votefor/' + option_id
+            .post('/vote/' + vote_id + '/votefor/' + option_id
                  + '?open_id=' + open_id)
             .then(res => {
                 setTimeout(() => {
@@ -262,7 +264,7 @@ describe('GET /vote/:vote_id/votefor/:option_id', () => {
 
     test('It should fail to vote', (done) => {
         request(app)
-            .get('/vote/' + vote_id + '/votefor/' + option_id
+            .post('/vote/' + vote_id + '/votefor/' + option_id
                  + '?open_id=' + open_id)
             .then(res => {
                 setTimeout(() => {
@@ -275,6 +277,51 @@ describe('GET /vote/:vote_id/votefor/:option_id', () => {
     afterAll(() => {
         app.get('redis').delAsync('voteuser_' + vote_id).then(()=>{});
         app.get('redis').delAsync('vote_' + vote_id).then(()=>{});
+    });
+});
+
+describe.only('POST /vote/upload/candidate', () => {
+    const src_path = 'public/images/list.png'; // dummy image
+    const candidate_no = 1;
+    const dest_path = '/images/activity/' + activity_id + '/' + vote_id
+                    + '_candidate' + candidate_no + '.png';
+
+    test('It should upload a vote candidate image', (done) => {
+        return admin_session
+            .post('/vote/upload/candidate?no=' + candidate_no)
+            .attach('candidate_image', src_path)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    expect(res.text).toBe(dest_path);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('Attach field should be candidate_image', (done) => {
+        const wrong_field = 'candidateimage';
+        return admin_session
+            .post('/vote/upload/candidate')
+            .attach(wrong_field, src_path)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should have activity_id in the session', (done) => {
+        return request(app)
+            .post('/vote/upload/candidate')
+            .attach('candidate_image', src_path)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
     });
 });
 

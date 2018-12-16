@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 require('bluebird').promisifyAll(fs);
 const rp = require('request-promise');
 const util = require('util');
+const multer = require('multer');
 const exec = require('child_process').exec;
 const request = require('request');
 const consts = require('./consts');
@@ -457,3 +458,28 @@ const get_url = (path) => {
     return 'http://' + config.SERVER_DOMAIN + path;
 }
 exports.get_url = get_url;
+
+const get_url_ip = (path) => {
+    return 'http://' + config.SERVER_IP + path;
+}
+exports.get_url_ip = get_url_ip;
+
+const get_multer = (file_name) => {
+    const path = '/../public' + consts.STORE_IMG_PATH;
+    return multer({
+        storage: multer.diskStorage({
+            destination: function (req, file, cb) {
+                cb(null, __dirname + path + '/' + req.session.activity_id);
+            },
+            limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
+            filename: function (req, file, cb) {
+                if (req.session.vote_id && req.query.no)
+                    file_name = req.session.vote_id + '_' + file_name + req.query.no;
+
+                cb(null, file_name + '.' + file.mimetype.split('/')[1]);
+                req.profile_num = null;
+            }
+        })
+    });
+};
+exports.get_multer = get_multer;

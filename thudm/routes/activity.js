@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const rp = require('request-promise');
 const fs = require('fs');
-const multer = require('multer');
 const promise = require('bluebird');
 promise.promisifyAll(fs);
 const errors = require('../common/errors');
@@ -46,27 +45,7 @@ router.get('/detail', (req, res, next) => {
         });
 });
 
-let storage_list = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, __dirname + '/../public/images/activity/' + req.session.activity_id);
-    },
-    limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
-    filename: function (req, file, cb) {
-        cb(null, 'list.' + file.mimetype.split('/')[1]);
-    }
-});
-let storage_bg = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, __dirname + '/../public/images/activity/' + req.session.activity_id);
-    },
-    limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
-    filename: function (req, file, cb) {
-        cb(null, 'bg.' + file.mimetype.split('/')[1]);
-    }
-});
-const upload_list = multer({ storage: storage_list });
-const upload_bg = multer({ storage: storage_bg });
-
+const upload_list = utils.get_multer('list');
 router.post('/upload/list', upload_list.single('list_image'), (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
@@ -77,7 +56,9 @@ router.post('/upload/list', upload_list.single('list_image'), (req, res, next) =
         .then(err => {
             if (err && err.error) throw err.error;
 
-            res.send(req.file.path);
+            let path = req.file.path
+            path = path.slice(path.indexOf('/images'));
+            res.send(path);
         })
         .catch(err => {
             console.error(err);
@@ -85,15 +66,26 @@ router.post('/upload/list', upload_list.single('list_image'), (req, res, next) =
         });
 });
 
+const upload_bg = utils.get_multer('bg');
 router.post('/upload/bg', upload_bg.single('bg_image'), (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-    console.log('req-----------------------',req);
-    return res.send(req.file.path);
+
+    let path = req.file.path
+    path = path.slice(path.indexOf('/images'));
+    return res.send(path);
 });
 
 router.get('/create', (req, res, next) =>{
     res.render('create');
+});
+
+router.get('/:activity_id', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    req.session.activity_id = req.params.activity_id;
+    return res.redirect('detail');
 });
 
 const createActivity = (req) => {

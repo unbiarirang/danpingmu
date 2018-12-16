@@ -90,13 +90,14 @@ describe('GET /msglist/page/:page_id', () => {
     });
 });
 
-describe('GET /blacklist/user', () => {
-    test('It should get user blacklist', (done) => {
+describe('GET /blacklist', () => {
+    test('It should get user and word blacklist', (done) => {
         return admin_session
-            .get('/blacklist/user')
+            .get('/blacklist')
             .then(res => {
                 setTimeout(() => {
-                    expect(Array.isArray(JSON.parse(res.text))).toBe(true);
+                    expect(Object.keys(JSON.parse(res.text))).toContain('blacklist_user');
+                    expect(Object.keys(JSON.parse(res.text))).toContain('blacklist_word');
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -104,12 +105,11 @@ describe('GET /blacklist/user', () => {
     });
 });
 
-describe('PUT /blacklist/user', () => {
-    const open_id = 'testopenid';
-
+describe('PUT /blacklist', () => {
     test('It should append a user to the user blacklist', (done) => {
+        const open_id = 'testopenid';
         return admin_session
-            .put('/blacklist/user')
+            .put('/blacklist')
             .send({
                 blocked_id: open_id
             })
@@ -121,48 +121,12 @@ describe('PUT /blacklist/user', () => {
                 }, 500);
             });
     });
-});
 
-describe('DELETE /blacklist/user', () => {
-    const open_id = 'testopenid';
-
-    test('It should delete a user from the user blacklist', (done) => {
-        return admin_session
-            .delete('/blacklist/user')
-            .send({
-                blocked_id: open_id
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.text).not.toMatch(open_id);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /blacklist/word', () => {
-
-    test('It should get word blacklist', (done) => {
-        return admin_session
-            .get('/blacklist/word')
-            .then(res => {
-                setTimeout(() => {
-                    expect(Array.isArray(JSON.parse(res.text))).toBe(true);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('PUT /blacklist/word', () => {
-    const word = 'xxx';
 
     test('It should append a user to the word blacklist', (done) => {
+        const word = 'xxx';
         return admin_session
-            .put('/blacklist/word')
+            .put('/blacklist')
             .send({
                 blocked_word: word
             })
@@ -176,12 +140,27 @@ describe('PUT /blacklist/word', () => {
     });
 });
 
-describe('DELETE /blacklist/word', () => {
-    const word = 'xxx';
+describe('DELETE /blacklist', () => {
+    test('It should delete a user from the user blacklist', (done) => {
+    const open_id = 'testopenid';
+        return admin_session
+            .delete('/blacklist')
+            .send({
+                blocked_id: open_id
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.text).not.toMatch(open_id);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
 
     test('It should delete a word from the word blacklist', (done) => {
+        const word = 'xxx';
         return admin_session
-            .delete('/blacklist/word')
+            .delete('/blacklist')
             .send({
                 blocked_word: word
             })

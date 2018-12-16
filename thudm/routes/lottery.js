@@ -51,19 +51,25 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let lottery_id = req.params.lottery_id;
+    let lottery = null;
+    let users = null;
     let sendData = {};
 
     Lottery.findById(lottery_id)
-        .then(lottery => {
-            if (!lottery)
+        .then(_lottery => {
+            if (!_lottery)
                 throw new errors.NotExistError('No lottery activity exists.');
 
+            lottery = _lottery;
+
             // get all users in the activity
-            let users = req.app.get('cache').user_info;
-            sendData.users = JSON.stringify([...users].filter(user => user.activity_id === lottery.activity_id));
+            users = req.app.get('cache').user_info;
+            users = [...users].filter(e =>
+                e[1].activity_id === lottery.activity_id
+            );
 
             let winner_num = lottery.winner_num;
-            let max_num = users.size;
+            let max_num = users.length;
             let min_num = 1;
 
             if (max_num === 0)
@@ -74,8 +80,17 @@ router.get('/:lottery_id/draw', (req, res, next) => {
             return utils.request_random_nums(winner_num, min_num, max_num)
         })
         .then(data => {
-            sendData.data = data;
-            console.log('sendData: ', sendData);
+            let result = data.map(num => users[num - 1][1]);
+            console.log('@@@result: ', result);
+            lottery.result = result.map(user => user.open_id);
+            console.log('@@@lottery.result: ', lottery.result);
+            lottery.status = 'OVER';
+            lottery.save();
+
+            //sendData.data = data;
+            sendData.result = result;
+            sendData.users = JSON.stringify(users);
+
             res.render('lottery', sendData);
         })
         .catch(err => {
