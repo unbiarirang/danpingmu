@@ -41,6 +41,8 @@ const lottery_schema = new mongoose.Schema({
     title: { type: String, required: true },
     sub_title: String,
     winner_num: { type: Number, min: 1, required: true },
+    status: { type: String, enum: STATUS , default: 'READY' },
+    result: [String],
 });
 exports.Lottery = mongoose.model('Lottery', lottery_schema);
 

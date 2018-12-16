@@ -6,8 +6,10 @@ const errors = require('../common/errors');
 const fs = require('fs-extra');
 
 let admin_session = null;
+const activity_id = '5c03ba2fec64483fe182a7d2';
 
-describe('POST /auth/login/', () => {
+
+describe.only('POST /auth/login/', () => {
     let test_session = session(app);
     test('It should login success', (done) => {
         const input_id = 'bbb';
@@ -49,9 +51,7 @@ describe('GET /activity/:wrong_activity_id and GET /activity/detail', () => {
     });
 });
 
-describe('GET /activity/:activity_id and GET /activity/detail', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-
+describe.only('GET /activity/:activity_id and GET /activity/detail', () => {
     test('It needs login to get activity detail', (done) => {
         return request(app)
             .get('/activity/' + activity_id)
@@ -108,15 +108,17 @@ describe('GET /activity/list', () => {
 });
 
 describe('POST /activity/upload/list', () => {
-    const file_name = 'public/images/list.png'; // dummy image
+    const src_path = 'public/images/list.png'; // dummy image
+    const dest_path = '/images/activity/' + activity_id + '/list.png';
 
     test('It should upload a list image', (done) => {
         return admin_session
             .post('/activity/upload/list')
-            .attach('list_image', file_name)
+            .attach('list_image', src_path)
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
+                    expect(res.text).toBe(dest_path);
                     done();
                 }, 500);
             });
@@ -126,7 +128,7 @@ describe('POST /activity/upload/list', () => {
         const wrong_field = 'listimage';
         return admin_session
             .post('/activity/upload/list')
-            .attach(wrong_field, file_name)
+            .attach(wrong_field, src_path)
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(500);
@@ -138,7 +140,7 @@ describe('POST /activity/upload/list', () => {
     test('It should have activity_id in the session', (done) => {
         return request(app)
             .post('/activity/upload/list')
-            .attach('list_image', file_name)
+            .attach('list_image', src_path)
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(500);
@@ -148,16 +150,18 @@ describe('POST /activity/upload/list', () => {
     });
 });
 
-describe('POST /activity/upload/bg', () => {
-    const file_name = 'public/images/list.png'; // dummy image
+describe.only('POST /activity/upload/bg', () => {
+    const src_path = 'public/images/list.png'; // dummy image
+    const dest_path = '/images/activity/' + activity_id + '/bg.png';
 
     test('It should upload a background image', (done) => {
         return admin_session
             .post('/activity/upload/bg')
-            .attach('bg_image', file_name)
+            .attach('bg_image', src_path)
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
+                    expect(res.text).toBe(dest_path);
                     done();
                 }, 500);
             });
@@ -167,7 +171,7 @@ describe('POST /activity/upload/bg', () => {
         const wrong_field = 'bgimage';
         return admin_session
             .post('/activity/upload/bg')
-            .attach(wrong_field, file_name)
+            .attach(wrong_field, src_path)
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(500);
@@ -179,7 +183,7 @@ describe('POST /activity/upload/bg', () => {
     test('It should have activity_id in the session', (done) => {
         return request(app)
             .post('/activity/upload/bg')
-            .attach('bg_image', file_name)
+            .attach('bg_image', src_path)
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(500);

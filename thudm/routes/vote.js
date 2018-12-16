@@ -133,6 +133,16 @@ router.post('/:vote_id/votefor/:option_id', (req, res, next) => {
         });
 });
 
+const upload_candidate = utils.get_multer('candidate');
+router.post('/upload/candidate', upload_candidate.single('candidate_image'), (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let path = req.file.path
+    path = path.slice(path.indexOf('/images'));
+    return res.send(path);
+});
+
 // Admin get vote info
 router.get('/:vote_id', (req, res, next) => {
     if (!req.session.login)

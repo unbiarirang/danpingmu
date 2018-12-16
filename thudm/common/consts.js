@@ -4,7 +4,8 @@ module.exports = Object.freeze({
     MSG_PER_PAGE_NUM            : 15,
     QRCODE_EXPIRE_SEC           : 3*60*60,          // 3 hours
     SESSION_EXPIRE_MSEC         : 3*24*60*60*1000,  // 3 days
-    MAX_IMG_SIZE                : 5000000,          // 5 MB
+    MAX_IMG_SIZE                : 2*1024*1024,      // 2 MB
+    STORE_IMG_PATH              : '/images/activity',
     WECHAT_MENU                 : {
         "button": [
             {

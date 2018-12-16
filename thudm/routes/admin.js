@@ -165,95 +165,66 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
     return promise_chain;
 });
 
-router.get('/blacklist/user', (req, res, next) => {
+router.get('/blacklist', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-
     let room = utils.get_room_info(req, activity_id);
-    let blacklist = room.activity.blacklist_user;
 
-    res.send(blacklist);
+    res.send({
+        blacklist_user: room.activity.blacklist_user,
+        blacklist_word: room.activity.blacklist_word
+    });
 });
 
-router.put('/blacklist/user', (req, res, next) => {
+router.put('/blacklist', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
     let blocked_id = req.body.blocked_id;
+    let blocked_word = req.body.blocked_word;
 
     let room = utils.get_room_info(req, activity_id);
-    let blacklist = room.activity.blacklist_user;
 
     if (blocked_id)
-        blacklist.push(blocked_id);
-
+        room.activity.blacklist_user.push(blocked_id);
+    if (blocked_word)
+        room.activity.blacklist_word.push(blocked_word);
     room.activity.save();
-    res.send(blacklist);
+
+    res.send({
+        blacklist_user: room.activity.blacklist_user,
+        blacklist_word: room.activity.blacklist_word
+    });
 });
 
-router.delete('/blacklist/user', (req, res, next) => {
+router.delete('/blacklist', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
     let blocked_id = req.body.blocked_id;
-
-    let room = utils.get_room_info(req, activity_id);
-    let blacklist = room.activity.blacklist_user;
-    let index = blacklist.indexOf(blocked_id);
-
-    if (index > -1)
-        blacklist.splice(index, 1);
-
-    room.activity.save();
-    res.send(blacklist);
-});
-
-router.get('/blacklist/word', (req, res, next) => {
-    if (!req.session.login)
-        throw new errors.NotLoggedInError();
-
-    let activity_id = req.session.activity_id;
-
-    let room = utils.get_room_info(req, activity_id);
-    let blacklist = room.activity.blacklist_word;
-
-    res.send(blacklist);
-});
-
-router.put('/blacklist/word', (req, res, next) => {
-    if (!req.session.login)
-        throw new errors.NotLoggedInError();
-
-    let activity_id = req.session.activity_id;
     let blocked_word = req.body.blocked_word;
 
     let room = utils.get_room_info(req, activity_id);
-    let blacklist = room.activity.blacklist_word;
-    blacklist.push(blocked_word);
-    room.activity.save();
 
-    res.send(blacklist);
-});
+    let blacklist_user = room.activity.blacklist_user;
+    let blacklist_word = room.activity.blacklist_word;
 
-router.delete('/blacklist/word', (req, res, next) => {
-    if (!req.session.login)
-        throw new errors.NotLoggedInError();
-
-    let activity_id = req.session.activity_id;
-    let blocked_word = req.body.blocked_word;
-
-    let room = utils.get_room_info(req, activity_id);
-    let blacklist = room.activity.blacklist_word;
-    let index = blacklist.indexOf(blocked_word);
-    if (index > -1)
-        blacklist.splice(index, 1);
+    let index = blacklist_user.indexOf(blocked_id);
+    if (index >= 0)
+        blacklist_user.splice(index, 1);
+    index = blacklist_word.indexOf(blocked_word);
+    if (index >= 0)
+        blacklist_word.splice(index, 1);
 
     room.activity.save();
-    res.send(blacklist);
+    res.send({
+        blacklist_user: room.activity.blacklist_user,
+        blacklist_word: room.activity.blacklist_word
+    });
 });
 
 router.get('/ticket', (req, res, next) => {
@@ -286,7 +257,7 @@ router.get('/ticket', (req, res, next) => {
             if (body.errcode)
                 throw new errors.WeChatResError(body.errmsg);
 
-            res.redirect(utils.get_url('/qrcode/?ticket='
+            res.redirect(utils.get_url_ip('/qrcode?ticket='
                          + body.ticket));
         })
         .catch(err => {
