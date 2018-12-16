@@ -15,7 +15,7 @@ router.get('/list', (req, res, next) => {
     Lottery.find({ activity_id: activity_id })
         .then(lotteries => {
             console.log(lotteries);
-            return res.send(lotteries);
+            return res.render('lotterylist',{items: lotteries});
         })
         .catch(err => {
             console.error(err);
@@ -43,7 +43,7 @@ router.get('/detail', (req, res, next) => {
 });
 
 router.get('/create', (req, res, next) =>{
-    res.render('create');
+    res.render('drawlottery');
 });
 
 router.get('/:lottery_id/draw', (req, res, next) => {

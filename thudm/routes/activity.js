@@ -38,7 +38,7 @@ router.get('/detail', (req, res, next) => {
             if (!act)
                 throw new errors.NotExistError('Activity does not exist.');
 
-            return res.send(act);
+            return res.render('detail',{item: act});
         })
         .catch(err => {
             console.error(err);
@@ -88,7 +88,7 @@ router.post('/upload/list', upload_list.single('list_image'), (req, res, next) =
 router.post('/upload/bg', upload_bg.single('bg_image'), (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-
+    console.log('req-----------------------',req);
     return res.send(req.file.path);
 });
 
@@ -163,21 +163,12 @@ router.put('/', (req, res, next) => {
         });
 });
 
-router.get('/', (req, res, next) => {
+router.get('/:activity_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-
-    let admin_id = req.session.admin_id;
-
-    Activity.find({ admin_id: admin_id })
-        .then(activities => {
-            console.log(activities);
-            return res.render('activity-list',{activities: activities});
-        })
-        .catch(err => {
-            console.error(err);
-            next(err);
-        });
+    
+    req.session.activity_id = req.params.activity_id;
+    return res.redirect('detail');
 });
 
 module.exports = router;

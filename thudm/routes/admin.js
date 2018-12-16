@@ -164,7 +164,7 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
     return promise_chain;
 });
 
-router.get('/blacklist/user', (req, res, next) => {
+router.get('/blacklist', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
@@ -173,7 +173,7 @@ router.get('/blacklist/user', (req, res, next) => {
     let room = utils.get_room_info(req, activity_id);
     let blacklist = room.activity.blacklist_user;
 
-    res.send(blacklist);
+    res.render('blacklist',blacklist);
 });
 
 router.put('/blacklist/user', (req, res, next) => {
@@ -285,8 +285,8 @@ router.get('/ticket', (req, res, next) => {
             if (body.errcode)
                 throw new errors.WeChatResError(body.errmsg);
 
-            res.redirect(utils.get_url('/qrcode/?ticket='
-                         + body.ticket));
+            res.redirect('/qrcode/?ticket='
+                         + body.ticket);
         })
         .catch(err => {
             console.error(err);

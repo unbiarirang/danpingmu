@@ -2,24 +2,24 @@ doctype html
 html(lang='en')
   head
     meta(charset='utf-8')
-    link(rel='icon', type='image/png', href='assets/img/favicon.ico')
+    link(rel='icon', type='image/png', href='/assets/img/favicon.ico')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     title Light Bootstrap Dashboard by Creative Tim
     meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
     meta(name='viewport', content='width=device-width')
     // Bootstrap core CSS
-    link(href='assets/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/assets/css/bootstrap.min.css', rel='stylesheet')
     // Animation library for notifications
-    link(href='assets/css/animate.min.css', rel='stylesheet')
+    link(href='/assets/css/animate.min.css', rel='stylesheet')
     // Light Bootstrap Table core CSS
-    link(href='assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
+    link(href='/assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
     // Fonts and icons
     link(href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
     link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
-    link(href='assets/css/pe-icon-7-stroke.css', rel='stylesheet')
+    link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
   body
     .wrapper
-      .sidebar(data-color='purple', data-image='assets/img/eye.jpg')
+      .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
         //
           Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
           Tip 2: you can also add an image using data-image tag
@@ -29,11 +29,11 @@ html(lang='en')
               | 弹屏目
           ul.nav
             li
-              a(href='/activity')
+              a(href='/activity/list')
                 i.pe-7s-graph
                 p 活动列表
             li.active
-              a(href='/create-activity')
+              a(href='/activity/create')
                 i.pe-7s-magic-wand
                 p 创建节目
       .main-panel
@@ -160,13 +160,13 @@ html(lang='en')
       $(function(){
         $('#create').click(function(){
           var ActBackground = $('#bg_image').val();
-          var ActTitle = $('#Title');
-          var ActSubTitle = $('#SubTitle'); 
+          var ActTitle = $('#Title').val();
+          var ActSubTitle = $('#SubTitle').val(); 
           var ColorNum = 0;
           var ColorSelected = new Array();
           if(ActTitle == "" || ActSubTitle == "" ||ActBackground == ""){
             alert("输入栏不能有空!");
-            return;
+            //return;
           }
           for(var i = 0; i < 10; i++){
             if(ColorList[i] == 1){
@@ -175,13 +175,14 @@ html(lang='en')
             }
           }
           console.log(ActTitle,ActSubTitle,ActBackground);
+          ColorSelected = JSON.stringify(ColorSelected);
           $.ajax({
             type:"post",
-            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colores": ColorSelected},
+            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colors": ColorSelected},
             datatype:"json",
             url:"/activity",
             success: function(data){
-               window.location = '/activity-list'; 
+               window.location = '/activity/list'; 
             },
             error: function(data){
                alert("创建失败，请重试!");          

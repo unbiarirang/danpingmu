@@ -29,11 +29,11 @@ html
               | 弹屏目
           ul.nav
             li.active
-              a(href='/activity')
+              a(href='/activity/list')
                 i.pe-7s-graph
                 p 活动列表
             li
-              a(href='/create-activity')
+              a(href='/activity/create')
                 i.pe-7s-magic-wand
                 p 创建节目
       .main-panel
@@ -76,22 +76,25 @@ html
     // Light Bootstrap Table DEMO methods, don't include it in your project!
     script(src='/assets/js/demo.js')
     script(type='text/javascript').
+     var activities = !{items != null? JSON.stringify(items): 'null'}; 
      $(document).ready(function(){
         var cnt = 0;
-        var activities = !{activities != null? JSON.stringify(activities): 'null'}; 
         console.log(activities);
         activities.forEach((act) =>{
-          $('tbody').append("<tr id=" + cnt + "></tr>");
-          $('#' + cnt).append($("<td>").text(cnt));
-          $('#' + cnt).append($("<td>").text(act.title));
-          $('#' + cnt).append($("<td>").text(act.sub_title));
-          $('#' + cnt).append($("<td id = tr" + cnt + '>').text(act.status));
-          $('#' + cnt).append($("<td><a href = /msglist/" + act._id + '>进入</a>'));
+          $('tbody').append("<tr id=tr" + cnt + "></tr>");
+          $('#tr' + cnt).append($("<td>").text(cnt));
+          $('#tr' + cnt).append($("<td>").text(act.title));
+          $('#tr' + cnt).append($("<td>").text(act.sub_title));
+          $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
+          $('#tr' + cnt).append($("<td><button class=join id=" + cnt + '>进入</button></td>'));
           console.log(act._id);
           if(act.sub_title == 'OVER')
-              $('#tr' + cnt).css({'color':'red'});
+              $('#td' + cnt).css({'color':'red'});
           else
-              $('#tr' + cnt).css({'color':'green'});
+              $('#td' + cnt).css({'color':'green'});
           cnt++;
         }); 
       });
+      $(document).on('click','.join',function(){
+          window.location = '/activity/' + activities[$(this).attr('id')]._id;
+      })

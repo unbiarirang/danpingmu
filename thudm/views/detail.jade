@@ -1,76 +1,14 @@
-doctype html
-html(lang='en')
-  head
-    meta(charset='utf-8')
-    link(rel='icon', type='image/png', href='/assets/img/favicon.ico')
-    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
-    title Light Bootstrap Dashboard by Creative Tim
-    meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
-    meta(name='viewport', content='width=device-width')
-    // Bootstrap core CSS
-    link(href='/assets/css/bootstrap.min.css', rel='stylesheet')
-    // Animation library for notifications
-    link(href='/assets/css/animate.min.css', rel='stylesheet')
-    // Light Bootstrap Table core CSS
-    link(href='/assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
-    // Fonts and icons
-    link(href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
-    //link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
-    link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
-  body
-    .wrapper
-      .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
-        //
-          Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
-          Tip 2: you can also add an image using data-image tag
-        .sidebar-wrapper
-          .logo
-            .simple-text
-              | 弹屏目
-          ul.nav
-            li
-              a(href='/activity/screen',target="_blank")
-                i.pe-7s-chat
-                p 弹幕墙
-            li
-              a(href='/activity/msglist')
-                i.pe-7s-note2
-                p 弹幕审核
-            li
-              a(href='/vote/list')
-                i.pe-7s-drawer
-                p 投票
-            li
-              a(href='/lottery/list')
-                i.pe-7s-medal
-                p 抽奖
-            li
-              a(href='/blacklist')
-                i.pe-7s-bookmarks
-                p 黑名单/过滤词
-            li.active
-              a(href='/activity/detail')
-                i.pe-7s-config
-                p 房间信息
-      .main-panel
-        nav.navbar.navbar-default.navbar-fixed
-          .container-fluid
-            .collapse.navbar-collapse
-              ul.nav.navbar-nav.navbar-right
-                li
-                  a(href='')
-                    p Home
-                li
-                  a(href='#')
-                    p Log out
-                li.separator.hidden-lg.hidden-md
-        .content
+extends layout.jade
+block contents
+        #M5.content
           .container-fluid
             .row
               .col-md-8
                 .card
                   .header
-                    h4.title 创建活动
+                    h4.title 房间信息
+                     span(style="float:right")
+                      button.btn.btn-danger.btn-fill 结束活动
                   .content
                       .row
                         .col-md-5
@@ -84,10 +22,9 @@ html(lang='en')
                             input.form-control(type='text' id = 'SubTitle')
                       .row
                         .col-md-9
-                            label 背景图片
-                            form(action='/activity/upload/bg',method='POST',enctype='multipart/form-data')
+                            label 背景图片( 不能超过2MB )
+                            form(action='/activity/upload/bg',method='POST',enctype='multipart/form-data',id="uploadfile")
                               input.form-control(type='file',id = 'bg_image', name = 'bg_image')
-                              input.form-control(type='submit',value='Upload Image')
                       .row
                         .col-md-12
                           .form-group
@@ -125,7 +62,7 @@ html(lang='en')
                       .info
                         .name Anonymous
                         #show.content Hello World!
-    // Core JS Files
+block script
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
     script(src='/assets/js/bootstrap.min.js', type='text/javascript')
     // Charts Plugin
@@ -154,37 +91,61 @@ html(lang='en')
           }
         });
       })
+      $(document).ready(function(){
+        $('#M' + $('.content').attr('id')).attr('class','active');
+      })
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
-          var formData = new FormData();
-          console.log(document.getElementById("bg_image").files[0]);
-          formData = document.getElementById("bg_image").files[0];
-          console.log(formData);
+          var formData = new FormData($("#uploadfile")[0]);
           $.ajax({
               url:'/activity/upload/bg',
               type:'post',
               data: formData,
-              dataType: 'json',
-              async: false,
               cache: false,
               contentType: false,
               processData: false,
               success: function(data){
+                 console.log(data);
+                 $(document).ready(function(){
+                   $.notify({
+            	       icon: 'pe-7s-smile',
+            	       message: "上传成功！"
+                   },{
+                       type: 'success',
+                       timer: 20000,
+                       placement:{
+                         from:'top',
+                         align:'center'
+                       }
+                   });
+                 });
               },
               error: function(data){
               }
           });
+          $(document).ready(function(){
+            $.notify({
+               icon: 'pe-7s-smile',
+               message: "图片上传中，请稍等"
+            },{
+                type: 'warning',
+                timer: 20000,
+                placement:{
+                  from:'top',
+                  align:'center'
+                }
+            });
+          });
           $('#bg').css('background-image','url(' + filePath + ')');
       })
-
+      
       $(function(){
         $('#create').click(function(){
-          var ActBackground = $('#bg_image').val();
           var ActTitle = $('#Title');
           var ActSubTitle = $('#SubTitle'); 
           var ColorNum = 0;
           var ColorSelected = new Array();
-          if(ActTitle == "" || ActSubTitle == "" ||ActBackground == ""){
+          if(ActTitle == "" || ActSubTitle == ""){
             alert("输入栏不能有空!");
             return;
           }

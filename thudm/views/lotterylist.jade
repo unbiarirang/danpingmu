@@ -1,84 +1,25 @@
-doctype html
-html
-  head
-    meta(charset='utf-8')
-    link(rel='icon', type='image/png', href='assets/img/favicon.ico')
-    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
-    title Light Bootstrap Dashboard by Creative Tim
-    meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
-    meta(name='viewport', content='width=device-width')
-    // Bootstrap core CSS
-    link(href='/assets/css/bootstrap.min.css', rel='stylesheet')
-    // Animation library for notifications
-    link(href='/assets/css/animate.min.css', rel='stylesheet')
-    // Light Bootstrap Table core CSS
-    link(href='/assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
-    // Fonts and icons
-    link(href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
-    link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
-    link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
-  body
-    .wrapper
-      .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
-        //
-          Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
-          Tip 2: you can also add an image using data-image tag
-        .sidebar-wrapper
-          .logo
-            .simple-text
-              | 弹屏目
-          ul.nav
-            li
-              a(href='/activity/screen',target='_blank')
-                i.pe-7s-user
-                p 弹幕墙
-            li.active
-              a(href='/activity/msglist')
-                i.pe-7s-graph
-                p 弹幕审核
-            li
-              a(href='/vote/create')
-                i.pe-7s-user
-                p 投票
-            li
-              a(href='/lottery/create')
-                i.pe-7s-user
-                p 抽奖
-            li
-              a(href='/activity/detail')
-                i.pe-7s-user
-                p 活动信息
-      .main-panel
-        nav.navbar.navbar-default.navbar-fixed
-          .container-fluid
-            .collapse.navbar-collapse
-              ul.nav.navbar-nav.navbar-right
-                li
-                  a(href='')
-                    p Home
-                li
-                  a(href='#')
-                    p Log out
-                li.separator.hidden-lg.hidden-md
-        .content
+extends layout.jade
+block contents
+         #M3.content
           .container-fluid
             .row
               .col-md-12
                 .card.card-plain
                   .header
-                    h4.title 活动列表
+                    h4.title 抽奖列表
+                     span(style="float:right")
+                      button.btn.btn-info.btn-fill(type='submit' id='make')创建
                   .content.table-responsive.table-full-width
                     table.table.table-hover
                       thead
                         tr  
-                          th
-                            input#all.check(type='checkbox')
-                            | NO
+                          th 序号
                           th 昵称
                           th 内容
                           th 状态
+                          th 操作
                       tbody
-    // Core JS Files
+block script
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
     script(src='/assets/js/bootstrap.min.js', type='text/javascript')
     // Charts Plugin
@@ -88,80 +29,30 @@ html
     script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
     // Light Bootstrap Table DEMO methods, don't include it in your project!
     script(type='text/javascript').
-      $(document).ready(function(){
-      $.notify({
-      icon: 'pe-7s-gift',
-      message: "Welcome to <b>Light Bootstrap Dashboard</b> - a beautiful freebie for every web developer."
-      },{
-      type: 'info',
-      timer: 4000
-      });
-      });
+     var activities = !{items != null? JSON.stringify(items): 'null'}; 
+     $(document).ready(function(){
+        var cnt = 0;
+        activities.forEach((act) =>{
+          $('tbody').append("<tr id=tr" + cnt + "></tr>");
+          $('#tr' + cnt).append($("<td>").text(cnt));
+          $('#tr' + cnt).append($("<td>").text(act.title));
+          $('#tr' + cnt).append($("<td>").text(act.sub_title));
+          $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
+          $('#tr' + cnt).append($("<td><button class='join btn btn-info btn-fill' id=" + cnt + '>编辑</button>&nbsp<button class="btn btn-success btn-fill">开始</button></td>'));
+          console.log(act._id);
+          if(act.sub_title == 'OVER')
+              $('#td' + cnt).css({'color':'red'});
+          else
+              $('#td' + cnt).css({'color':'green'});
+          cnt++;
+        }); 
+          $('#M' + $('.content').attr('id')).attr('class','active');
+        });
 
-
-
-// socket.io
-script(src='/socket.io/socket.io.js')
-script.
-  var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
-  var msg_list = !{msg_list != null? JSON.stringify(msg_list): 'null'};
-  
-  $(function() {
-    var socket = io();
-    var data = {'activity_id': activity_id};
-    socket.emit('joinActivity', data);
-    console.log('activity_id: ', activity_id);
-    console.log('msg_list: ', msg_list);
-    
-    msg_list.forEach((msg) => {
-       if(msg == null)
-         return;
-       $('tbody').append("<tr id=list" + msg.id + "></tr>");
-       $('#list' + msg.id).append("<td><input type='checkbox' class = check id =" + msg.id + '>' + msg.id);
-       $('#list' + msg.id).append($("<td>").text(msg.nickname));
-       $('#list' + msg.id).append($("<td>").text(msg.content));
-       //$('#list' + msg.id).append($("<td>").text(msg.review_flag));
-       if(msg.review_flag == false)       
-          $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:orange;'>WAITING</a></td>");
-       else
-          $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:GREEN;'>PERMITTED</a></td>"); 
-   });
-
-    for (let msg of msg_list) {
-      socket.emit('passReview', msg);
-    }
-
-    socket.on('review', function(data) {
-      console.log('on review: ', data);
-      msg_obj = JSON.parse(data.msg);
-      $("#messages").append($('<li>').text(msg_obj.content));
-      socket.emit('passReview', data);
-    });
-  });
-  $(document).on('click','input.check',function(){
-    if(this.id == 'all'){
-      if(this.checked == 1){
-         $("input[type='checkbox']").each(function(){
-           this.checked = 1;
-         });
-      }
-      else{
-        $("input[type='checkbox']").each(function(){
-          this.checked = 0;
-        })
-      } 
-    }
-    else{
-      if(this.checked == 0)
-        this.checked = 0;
-      else
-        this.checked = 1;
-    }
-  });
-  $(document).on('click','a.admit',function(){
-    if(this.text == 'WAITING'){
-     $(this).text('PERMITTED');
-     $(this).css('color','green');
-    }
-  })
+      $(document).on('click','.join',function(){
+          window.location = '/activity/' + activities[$(this).attr('id')]._id;
+      })
+      $(document).on('click','#make',function(){
+          window.location = '/lottery/create';
+      })
   

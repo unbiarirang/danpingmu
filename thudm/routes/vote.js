@@ -15,7 +15,7 @@ router.get('/list', (req, res, next) => {
     Vote.find({ activity_id: activity_id })
         .then(votes => {
             let sendData = { items: votes };
-            return res.render('list', sendData);
+            return res.render('votelist', sendData);
         })
         .catch(err => {
             console.error(err);
@@ -42,7 +42,7 @@ router.get('/detail', (req, res, next) => {
 });
 
 router.get('/create', (req, res, next) =>{
-    res.render('create');
+    res.render('create-vote');
 });
 
 // Admin get vote result
