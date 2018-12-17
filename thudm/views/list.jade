@@ -59,11 +59,11 @@ html
                     table.table.table-hover
                       thead
                         tr
-                          th ID
-                          th TITLE
-                          th SUBTITLE
-                          th STATUS
-                          th JOIN
+                          th 序号
+                          th 活动主题
+                          th 活动说明
+                          th 状态
+                          th 操作
                       tbody
     // Core JS Files
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
@@ -83,10 +83,10 @@ html
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td>").text(cnt));
-          $('#tr' + cnt).append($("<td>").text(act.title));
+          $('#tr' + cnt).append("<td><a href=/activity/" + activities[cnt]._id + ">" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append($("<td><button class=join id=" + cnt + '>进入</button></td>'));
+          $('#tr' + cnt).append($("<td><button class='button btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>'));
           console.log(act._id);
           if(act.sub_title == 'OVER')
               $('#td' + cnt).css({'color':'red'});

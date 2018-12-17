@@ -54,9 +54,8 @@ html(lang='en')
               .col-md-8
                 .card
                   .header
-                    h4.title 创建活动
+                    h4.title 房间信息
                   .content
-                    form
                       .row
                         .col-md-5
                           .form-group
@@ -69,8 +68,9 @@ html(lang='en')
                             input.form-control(type='text' id = 'SubTitle')
                       .row
                         .col-md-9
-                            label 背景图片
-                            input.form-control(type='file' id = 'bg_image')
+                            label 背景图片( 不能超过2MB )
+                            form(action='/activity/upload/bg',method='POST',enctype='multipart/form-data',id="uploadfile")
+                              input.form-control(type='file',id = 'bg_image', name = 'bg_image')
                       .row
                         .col-md-12
                           .form-group
@@ -99,7 +99,7 @@ html(lang='en')
                                 #C8.SetColor(style='background:#ff8000;')
                               #9.ColorBox(style='left:200px;')
                                 #C9.SetColor(style='background:#408080;')
-                     #create.button.btn.btn-info.btn-fill(type='submit') 创建
+                      #create.button.btn.btn-info.btn-fill(type='submit') 创建
                       .clearfix
               .col-md-4
                   #bg.example
@@ -108,7 +108,7 @@ html(lang='en')
                       .info
                         .name Anonymous
                         #show.content Hello World!
-    // Core JS Files
+block script
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
     script(src='/assets/js/bootstrap.min.js', type='text/javascript')
     // Charts Plugin
@@ -137,36 +137,63 @@ html(lang='en')
           }
         });
       })
+      $(document).ready(function(){
+        $('#M' + $('.content').attr('id')).attr('class','active');
+      })
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
-          var formData = new FormData(filePath);
+          var formData = new FormData($("#uploadfile")[0]);
           $.ajax({
-              url:'/activity',
+              url:'/activity/upload/bg',
               type:'post',
               data: formData,
-              dataType: 'json',
-              async: false,
               cache: false,
               contentType: false,
               processData: false,
-              success: function(data){        
+              success: function(data){
+                 console.log(data);
+                 $(document).ready(function(){
+                   $.notify({
+            	       icon: 'pe-7s-smile',
+            	       message: "上传成功！"
+                   },{
+                       type: 'success',
+                       timer: 20000,
+                       placement:{
+                         from:'top',
+                         align:'center'
+                       }
+                   });
+                 });
+                $('#bg').css('background-image','url(' + data + ')');
               },
               error: function(data){
               }
           });
-          $('#bg').css('background-image','url(' + filePath + ')');
+          $(document).ready(function(){
+            $.notify({
+               icon: 'pe-7s-smile',
+               message: "图片上传中，请稍等"
+            },{
+                type: 'warning',
+                timer: 20000,
+                placement:{
+                  from:'top',
+                  align:'center'
+                }
+            });
+          });
       })
-
+      
       $(function(){
         $('#create').click(function(){
-          var ActBackground = $('#bg_image').val();
-          var ActTitle = $('#Title').val();
-          var ActSubTitle = $('#SubTitle').val(); 
+          var ActTitle = $('#Title');
+          var ActSubTitle = $('#SubTitle'); 
           var ColorNum = 0;
           var ColorSelected = new Array();
-          if(ActTitle == "" || ActSubTitle == "" ||ActBackground == ""){
+          if(ActTitle == "" || ActSubTitle == ""){
             alert("输入栏不能有空!");
-            //return;
+            return;
           }
           for(var i = 0; i < 10; i++){
             if(ColorList[i] == 1){
@@ -175,14 +202,13 @@ html(lang='en')
             }
           }
           console.log(ActTitle,ActSubTitle,ActBackground);
-          ColorSelected = JSON.stringify(ColorSelected);
           $.ajax({
             type:"post",
-            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colors": ColorSelected},
+            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colores": ColorSelected},
             datatype:"json",
             url:"/activity",
             success: function(data){
-               window.location = '/activity/list'; 
+               window.location = '/activity-list'; 
             },
             error: function(data){
                alert("创建失败，请重试!");          

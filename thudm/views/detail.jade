@@ -119,6 +119,7 @@ block script
                        }
                    });
                  });
+                $('#bg').css('background-image','url(' + data + ')');
               },
               error: function(data){
               }
@@ -136,7 +137,6 @@ block script
                 }
             });
           });
-          $('#bg').css('background-image','url(' + filePath + ')');
       })
       
       $(function(){

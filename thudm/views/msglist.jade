@@ -17,6 +17,7 @@ block contents
                           th 昵称
                           th 内容
                           th 状态
+                          th 审核
                       tbody
 block script
   script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
@@ -50,13 +51,14 @@ block script
          $('#list' + msg.id).append("<td><input type='checkbox' class = check id =" + msg.id + '>' + msg.id);
          $('#list' + msg.id).append($("<td>").text(msg.nickname));
          $('#list' + msg.id).append($("<td>").text(msg.content));
+
          //$('#list' + msg.id).append($("<td>").text(msg.review_flag));
          if(msg.review_flag == false)       
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:orange;'>WAITING</a></td>");
          else
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:GREEN;'>PERMITTED</a></td>"); 
+         $('#list' + msg.id).append("<td><button class='join btn btn-warning btn-fill'>通过</button></td>"); 
      });
-  
       for (let msg of msg_list) {
         socket.emit('passReview', msg);
       }

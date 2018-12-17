@@ -38,7 +38,7 @@ block script
           $('#tr' + cnt).append($("<td>").text(act.title));
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append($("<td><button class='join btn btn-info btn-fill' id=" + cnt + '>编辑</button>&nbsp<button class="btn btn-success btn-fill">开始</button></td>'));
+          $('#tr' + cnt).append($("<td><button class='join btn btn-success btn-fill' id=" + cnt + '>开始</button></td>'));
           console.log(act._id);
           if(act.sub_title == 'OVER')
               $('#td' + cnt).css({'color':'red'});

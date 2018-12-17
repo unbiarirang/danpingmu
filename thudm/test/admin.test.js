@@ -216,8 +216,8 @@ describe('GET /ticket', () => {
         return admin_session
             .get('/ticket')
             .then(res => {
-                expect(res.text).toMatch('invalid credential, access_token is invalid or not latest');
                 expect(res.statusCode).toBe(500);
+                expect(res.text).toMatch('invalid credential, access_token is invalid or not latest');
             });
     });
 });

@@ -8,17 +8,16 @@ block contents
                   .header
                     h4.title 创建投票
                   .content
-                    form
                       .row
                         .col-md-5
                           .form-group
                             label 投票主题
-                            input.form-control(type='text')
+                            input.form-control(type='text' id = 'title')
                       .row
                         .col-md-9
                           .form-group
                             label 投票说明
-                            input.form-control(type='text')
+                            input.form-control(type='text' id = 'subtitle')
                       .row
                         .col-md-9
                           label 候选人:
@@ -27,14 +26,14 @@ block contents
                           .AllCandy
                             #CandyArray0.CandyArray
 
-                      button.btn.btn-info.btn-fill(type='submit') 创建
+                      button.btn.btn-info.btn-fill(id='create') 创建
                       .clearfix
               .col-md-4
                 .card.card-user
                   .image
                   .content
                     .author
-                      img.avatar.border-gray(src='/assets/img/faces/face-0.jpg', alt='...')
+                      img.avatar.border-gray(id='sample' src='/assets/img/faces/face-0.jpg', alt='...')
                     .row
                       .col-md-9
                         .form-group
@@ -44,7 +43,8 @@ block contents
                       .col-md-9
                         .form-group
                           label 头像
-                          input(type='file' id = 'Name')
+                          form(action='/vote/upload/candidate',method='post',enctype='multipart/form-data',id='upload')
+                           input.form-control(type='file' id = 'candidate_image' name = 'candidate_image')
                           //input#GetProfile.form-control(type='text')
                         button#AddCandy.btn.btn-info.btn-fill(type='submit') 添加候选人
 
@@ -62,6 +62,7 @@ block script
       var CandyName = new Array();
       var CandyNum = 0;
       var ArrayNum = 0;
+      var NumberAdded = 0;
       $(document).ready(function(){
         $('#M' + $('.content').attr('id')).attr('class','active');
         $('#AddCandy').click(function(){
@@ -69,19 +70,62 @@ block script
           var Profile = "/assets/img/faces/face-0.jpg";
           if($('#GetName').val() != '' )
             Name = $('#GetName').val();
-          if($('#GetProfile').val() != undefined )
-            Profile = $('#GetProfile').val();
+            
+          Profile = $('#sample').attr('src');
+          console.log(Profile);
  
-          $('#CandyArray0').append('<div class = Candidates id = Candy'+ CandyNum +'></div>');
-          $('#Candy' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
+          $('#CandyArray0').append('<div class = Candidates id = '+ CandyNum +'></div>');
+          $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
           $('#pic' + CandyNum).css("background-image","url(" + Profile +")");
-          $('#Candy' + CandyNum).append('<div class = Name>' + Name + '</div>');
-          $('#Candy' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
+          $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
+          $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
           CandyNum++;
         });
         $(document).on('click','a.DeleteCandy',function(){
-            $('#Candy' + this.id).remove();
-            console.log('haha');
+            $('#' + this.id).remove();
+        });
+      });
+      $('#candidate_image').on('change',function(){
+         var formData = new FormData($('#upload')[0]);
+         console.log(formData);
+         $.ajax({
+           url: '/vote/upload/candidate?no=' + NumberAdded,
+           type: 'post',
+           data: formData,
+           contentType: false,
+           processData: false,
+           async: false,
+           success:function(data){
+             console.log(data);
+             $('#sample').attr('src', data);
+             NumberAdded++;
+           },
+           error:{
+           }
+         });
+      });
+      $(document).on('click','#create',function(){
+        var title = $('#title').val();
+        var subtitle = $('#subtitle').val();
+        var list = new Array();
+        $('.Candidates').each(function(){
+          console.log(this.id);
+          list.push($('#name' + this.id).text());
+        });
+        list = JSON.stringify(list);
+        $.ajax({
+          url: '/vote',
+          type: 'post',
+          data:{'title': title, 'sub_title': subtitle, 'option_num': list.length, 'option':list},
+          contentType: false,
+          processData: false,
+          async: false,
+          success:function(data){
+            window.location = '/vote/list';
+          },
+          error:function(data){
+          
+          }
         });
       });
     

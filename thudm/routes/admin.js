@@ -171,7 +171,7 @@ router.get('/blacklist', (req, res, next) => {
     let activity_id = req.session.activity_id;
     let room = utils.get_room_info(req, activity_id);
 
-    res.send({
+    res.render('blacklist', {
         blacklist_user: room.activity.blacklist_user,
         blacklist_word: room.activity.blacklist_word
     });
