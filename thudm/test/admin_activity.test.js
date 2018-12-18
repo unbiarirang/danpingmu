@@ -8,8 +8,7 @@ const fs = require('fs-extra');
 let admin_session = null;
 const activity_id = '5c03ba2fec64483fe182a7d2';
 
-
-describe.only('POST /auth/login/', () => {
+describe('POST /auth/login/', () => {
     let test_session = session(app);
     test('It should login success', (done) => {
         const input_id = 'bbb';
@@ -51,7 +50,7 @@ describe('GET /activity/:wrong_activity_id and GET /activity/detail', () => {
     });
 });
 
-describe.only('GET /activity/:activity_id and GET /activity/detail', () => {
+describe('GET /activity/:activity_id and GET /activity/detail', () => {
     test('It needs login to get activity detail', (done) => {
         return request(app)
             .get('/activity/' + activity_id)
@@ -150,7 +149,7 @@ describe('POST /activity/upload/list', () => {
     });
 });
 
-describe.only('POST /activity/upload/bg', () => {
+describe('POST /activity/upload/bg', () => {
     const src_path = 'public/images/list.png'; // dummy image
     const dest_path = '/images/activity/' + activity_id + '/bg.png';
 
@@ -205,7 +204,7 @@ describe('GET /activity/create', () => {
 });
 
 describe('POST /activity and PUT /activity', () => {
-    const test_title = 'test activity';
+    const title = 'test activity';
     const sub_title = 'sub title';
     const changed_sub_title = 'changed sub title';
 
@@ -213,16 +212,24 @@ describe('POST /activity and PUT /activity', () => {
         return admin_session
             .post('/activity')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(test_title);
-                    expect(res.text).toMatch(sub_title);
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('bullet_color_num');
+                    expect(keys).toContain('bullet_colors');
+                    expect(keys).toContain('blacklist_user');
+                    expect(keys).toContain('blacklist_word');
+                    expect(keys).toContain('status');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(sub_title);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -233,7 +240,7 @@ describe('POST /activity and PUT /activity', () => {
         return admin_session
             .post('/activity')
             .send({
-                title: test_title,
+                title: title,
             })
             .then(res => {
                 setTimeout(() => {
@@ -248,7 +255,7 @@ describe('POST /activity and PUT /activity', () => {
         return request(app)
             .post('/activity')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
@@ -264,7 +271,7 @@ describe('POST /activity and PUT /activity', () => {
         return admin_session
             .put('/activity')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: changed_sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
@@ -272,7 +279,17 @@ describe('POST /activity and PUT /activity', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(changed_sub_title);
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('bullet_color_num');
+                    expect(keys).toContain('bullet_colors');
+                    expect(keys).toContain('blacklist_user');
+                    expect(keys).toContain('blacklist_word');
+                    expect(keys).toContain('status');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(changed_sub_title);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -283,7 +300,7 @@ describe('POST /activity and PUT /activity', () => {
         return admin_session
             .put('/activity')
             .send({
-                title: test_title,
+                title: title,
             })
             .then(res => {
                 setTimeout(() => {
@@ -298,7 +315,7 @@ describe('POST /activity and PUT /activity', () => {
         return request(app)
             .put('/activity')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
@@ -322,7 +339,7 @@ describe('POST /activity and PUT /activity', () => {
     });
 
     afterAll(() => {
-        models.Activity.deleteOne({ title: test_title })
+        models.Activity.deleteOne({ title: title })
             .then(() => {});
     });
 });

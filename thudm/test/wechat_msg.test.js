@@ -3,13 +3,14 @@ const fs = require('fs');
 const app = require('../app_test');
 const utils = require('../common/utils');
 
+const activity_id = '5c03ba2fec64483fe182a7d2';
+const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
+const wrong_open_id = 'aaa2M1c89iwXQ4RG7pdEOzfa55sc';
+
 let log_output = "";
 const storeLog = input => (log_output += input);
 
 describe('User send a text type message', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
-
     test('It should save the content to rsmq', (done) => {
         console.log = jest.fn(storeLog);
         utils.load_activities(app)
@@ -40,8 +41,6 @@ describe('User send a text type message', () => {
 });
 
 describe('User send an image type message', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
     const msg_id = '1234567890'
 
     beforeAll(() => {
@@ -84,9 +83,6 @@ describe('User send an image type message', () => {
 });
 
 describe('User send an invalid type message', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
-
     test('It should do nothing', (done) => {
         utils.load_activities(app)
             .then(() => {
@@ -108,7 +104,6 @@ describe('User send an invalid type message', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
-                    expect(res.text).toBe('');
                     done();
                 }, 500);
             });
@@ -116,9 +111,6 @@ describe('User send an invalid type message', () => {
 });
 
 describe('Illegal user send a text type message', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const wrong_open_id = 'aaa2M1c89iwXQ4RG7pdEOzfa55sc';
-
     test('It should do nothing', (done) => {
         console.log = jest.fn(storeLog);
         utils.load_activities(app)
@@ -141,7 +133,6 @@ describe('Illegal user send a text type message', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
-                    expect(res.text).toBe('');
                     done();
                 }, 500);
             });

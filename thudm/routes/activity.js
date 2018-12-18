@@ -73,6 +73,12 @@ router.post('/upload/bg', upload_bg.single('bg_image'), (req, res, next) => {
 
     let path = req.file.path
     path = path.slice(path.indexOf('/images'));
+
+    let activity_id = req.session.activity_id;
+    let room = utils.get_room_info(req, activity_id);
+    room.activity.bg_url_img = path;
+    room.activity.save();
+
     return res.send(path);
 });
 

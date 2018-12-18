@@ -4,10 +4,10 @@ const app = require('../app_test');
 const utils = require('../common/utils');
 const models = require('../models/models');
 
-describe('User clicked "help" button', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
+const activity_id = '5c03ba2fec64483fe182a7d2';
+const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 
+describe('User clicked "help" button', () => {
     test('It should return help message', (done) => {
         utils.load_activities(app)
             .then(() => {
@@ -35,9 +35,7 @@ describe('User clicked "help" button', () => {
     });
 });
 
-describe('User clicked "activity list" button', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
+describe('User clicked "program list" button', () => {
     let list_media_id;
 
     test('It should return response with the list image\'s media_id', (done) => {
@@ -72,9 +70,6 @@ describe('User clicked "activity list" button', () => {
 });
 
 describe('User clicked "vote" button', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
-
     test('It should return all ongoing vote events', (done) => {
         utils.load_activities(app)
             .then(() => {
@@ -95,21 +90,20 @@ describe('User clicked "vote" button', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    models.Vote.find()
+                    models.Vote.find({ status: 'ONGOING' })
                         .then(votes => {
-                        let item_count = res.text.match(/<item>/g).length;
-                        expect(item_count).toBe(votes.length);
-                        done();
-                    });
+                            let item_count = res.text.match(/<item>/g).length;
+                            let len = votes ? votes.length : 0;
+                            expect(item_count).toBe(len);
+                            done();
+                        });
                 }, 500);
             });
     });
 });
 
-describe('User sends an event that is not "SCANN", "CLICK" or "subscribe"', () => {
-    const activity_id = '5c03ba2fec64483fe182a7d2';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
-    const some_other_event = 'EVENT';
+describe('User sends an event that is not "SCAN", "CLICK" or "subscribe"', () => {
+    const wrong_event = 'EVENT';
 
     test('It should return nothing', (done) => {
         utils.load_activities(app)
@@ -125,12 +119,13 @@ describe('User sends an event that is not "SCANN", "CLICK" or "subscribe"', () =
                         '<FromUserName>testname</FromUserName>' +
                         '<CreateTime>1348831860</CreateTime>' +
                         '<MsgType>event</MsgType>' +
-                        '<Event>' + some_other_event + '</Event>' +
+                        '<Event>' + wrong_event + '</Event>' +
                         '<EventKey>KEY_HELP</EventKey>' +
                         '</xml>');
             })
             .then(res => {
                 setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
                     expect(res.text).toBe('');
                     done();
                 }, 500);

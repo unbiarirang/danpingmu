@@ -5,9 +5,11 @@ const models = require('../models/models');
 
 let admin_session = null;
 const activity_id = '5c03ba2fec64483fe182a7d2';
-const vote_id = '5c04f7be1cab9d6c156f401c';
+const vote_id = '5c178473e61537c162809395'
+const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
+const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 
-describe.only('POST /auth/login/', () => {
+describe('POST /auth/login/', () => {
     let test_session = session(app);
 
     test('It should login success', (done) => {
@@ -33,7 +35,6 @@ describe.only('POST /auth/login/', () => {
 });
 
 describe('GET /vote/:wrong_activity_id and GET /vote/detail', () => {
-    const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
 
     test('It should redirect to /vote/detail', (done) => {
         return admin_session
@@ -56,7 +57,7 @@ describe('GET /vote/:wrong_activity_id and GET /vote/detail', () => {
     });
 });
 
-describe.only('GET /vote/:vote_id and GET /vote/detail', () => {
+describe('GET /vote/:vote_id and GET /vote/detail', () => {
     test('It needs login to redirect to /vote/detail', (done) => {
         return request(app)
             .get('/vote/' + vote_id)
@@ -84,24 +85,6 @@ describe.only('GET /vote/:vote_id and GET /vote/detail', () => {
             });
     });
 
-    test('It should return vote information with the vote id', (done) => {
-        return admin_session
-            .get('/vote/detail')
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.text).toMatch('activity_id');
-                    expect(res.text).toMatch('title');
-                    expect(res.text).toMatch('option_num');
-                    expect(res.text).toMatch('options');
-                    expect(res.text).toMatch('status');
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /vote/detail', () => {
     test('It should return vote information with the vote id', (done) => {
         return admin_session
             .get('/vote/detail')
@@ -153,9 +136,6 @@ describe('GET /vote/create', () => {
 });
 
 describe('GET /vote/:vote_id/result and GET /vote/result', () => {
-    const vote_id = '5c04f7be1cab9d6c156f401c';
-    const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
-
     test('It needs login to redirect to /vote/result', (done) => {
         return request(app)
             .get('/vote/' + vote_id + '/result')
@@ -219,9 +199,6 @@ describe('GET /vote/:vote_id/result and GET /vote/result', () => {
 });
 
 describe('GET /vote/:vote_id/user', () => {
-    const vote_id = '5c04f7be1cab9d6c156f401c';
-    const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
-
     test('It should return vote information with the vote id for user', (done) => {
             request(app)
             .get('/vote/' + vote_id + '/user')
@@ -246,8 +223,6 @@ describe('GET /vote/:vote_id/user', () => {
 });
 
 describe('POST /vote/:vote_id/votefor/:option_id', () => {
-    const vote_id = '5c04f7be1cab9d6c156f401c';
-    const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
     const option_id = 1;
 
     test('It should vote successfully', (done) => {
@@ -280,15 +255,15 @@ describe('POST /vote/:vote_id/votefor/:option_id', () => {
     });
 });
 
-describe.only('POST /vote/upload/candidate', () => {
+describe('POST /vote/upload/candidate', () => {
     const src_path = 'public/images/list.png'; // dummy image
-    const candidate_no = 1;
+    const candidate_id = 1;
     const dest_path = '/images/activity/' + activity_id + '/' + vote_id
-                    + '_candidate' + candidate_no + '.png';
+                    + '_candidate' + candidate_id + '.png';
 
     test('It should upload a vote candidate image', (done) => {
         return admin_session
-            .post('/vote/upload/candidate?no=' + candidate_no)
+            .post('/vote/upload/candidate?id=' + candidate_id)
             .attach('candidate_image', src_path)
             .then(res => {
                 setTimeout(() => {
@@ -312,7 +287,7 @@ describe.only('POST /vote/upload/candidate', () => {
             });
     });
 
-    test('It should have activity_id in the session', (done) => {
+    test('It should have activity_id and vote_id in the session', (done) => {
         return request(app)
             .post('/vote/upload/candidate')
             .attach('candidate_image', src_path)
@@ -326,7 +301,8 @@ describe.only('POST /vote/upload/candidate', () => {
 });
 
 describe('POST /vote and PUT /vote', () => {
-    const test_title = 'test vote';
+    const title = 'test vote';
+    const changed_sub_title = 'changed_sub_title';
 
     test('It should create new Vote', (done) => {
         const sub_title = 'sub_title';
@@ -334,7 +310,7 @@ describe('POST /vote and PUT /vote', () => {
             .post('/vote')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: sub_title,
                 option_num: 3,
                 options: [ "A", "B", "C" ],
@@ -343,7 +319,7 @@ describe('POST /vote and PUT /vote', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(test_title);
+                    expect(res.text).toMatch(title);
                     expect(res.text).toMatch(sub_title);
                     expect(res.statusCode).toBe(200);
                     done();
@@ -356,12 +332,11 @@ describe('POST /vote and PUT /vote', () => {
             .post('/vote')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: "sub title",
                 option_num: 3,
                 options: [ "A", "B", "C" ],
-                pic_urls: [ "url1", "url2", "url3" ],
-                status: "ONGOING"
+                pic_urls: [ "url1", "url2", "url3" ]
             })
             .then(res => {
                 expect(res.statusCode).toBe(401);
@@ -374,12 +349,11 @@ describe('POST /vote and PUT /vote', () => {
             .post('/vote')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: "sub title",
                 option_num: 0,
                 options: [],
-                pic_urls: [],
-                status: "ONGOING"
+                pic_urls: []
             })
             .then(res => {
                 expect(res.statusCode).toBe(500);
@@ -388,17 +362,15 @@ describe('POST /vote and PUT /vote', () => {
     });
 
     test('It should update the Vote', (done) => {
-        const changed_sub_title = 'changed_sub_title';
         return admin_session
             .put('/vote')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: changed_sub_title,
                 option_num: 3,
                 options: [ "A", "B", "C" ],
-                pic_urls: [ "url1", "url2", "url3" ],
-                status: "ONGOING"
+                pic_urls: [ "url1", "url2", "url3" ]
             })
             .then(res => {
                 setTimeout(() => {
@@ -410,17 +382,15 @@ describe('POST /vote and PUT /vote', () => {
     });
 
     test('It needs login to update the Vote', (done) => {
-        const changed_sub_title = 'changed_sub_title';
         return request(app)
             .put('/vote')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: changed_sub_title,
                 option_num: 3,
                 options: [ "A", "B", "C" ],
                 pic_urls: [ "url1", "url2", "url3" ],
-                status: "ONGOING"
             })
             .then(res => {
                 expect(res.statusCode).toBe(401);
@@ -428,18 +398,14 @@ describe('POST /vote and PUT /vote', () => {
             });
     });
 
-    test('The type of the fields should be correct', (done) => {
-        const wrong_type_sub_title = { sub_title: "wrong" };
+    test('It should fail to update Vote if there is no options', (done) => {
         return admin_session
             .put('/vote')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
-                sub_title: wrong_type_sub_title,
-                option_num: 3,
-                options: [ "A", "B", "C" ],
-                pic_urls: [ "url1", "url2", "url3" ],
-                status: "ONGOING"
+                title: title,
+                sub_title: changed_sub_title,
+                option_num: 0
             })
             .then(res => {
                 expect(res.statusCode).toBe(500);
@@ -448,7 +414,7 @@ describe('POST /vote and PUT /vote', () => {
     });
 
     afterAll(() => {
-        models.Vote.deleteOne({ title: test_title })
+        models.Vote.deleteOne({ title: title })
             .then(() => {});
     });
 });

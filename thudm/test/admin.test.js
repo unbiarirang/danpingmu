@@ -54,6 +54,17 @@ describe('GET /screen', () => {
                 }, 500);
             });
     });
+
+    test('It needs login to return screen page', (done) => {
+        return request(app)
+            .get('/screen')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(401);
+                    done();
+                }, 500);
+            });
+    });
 });
 
 describe('GET /msglist', () => {
@@ -79,6 +90,18 @@ describe('GET /msglist', () => {
 describe('GET /msglist/page/:page_id', () => {
     test('It should return msglist page', (done) => {
         const page_id = 1;
+        return admin_session
+            .get('/msglist/page/' + page_id)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should return empty msglist page with a large page_id', (done) => {
+        const page_id = 100;
         return admin_session
             .get('/msglist/page/' + page_id)
             .then(res => {
@@ -115,7 +138,7 @@ describe('PUT /blacklist', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(open_id);
+                    expect(JSON.parse(res.text).blacklist_user).toContain(open_id);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -123,7 +146,7 @@ describe('PUT /blacklist', () => {
     });
 
 
-    test('It should append a user to the word blacklist', (done) => {
+    test('It should append a word to the word blacklist', (done) => {
         const word = 'xxx';
         return admin_session
             .put('/blacklist')
@@ -132,7 +155,7 @@ describe('PUT /blacklist', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(word);
+                    expect(JSON.parse(res.text).blacklist_word).toContain(word);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -150,7 +173,7 @@ describe('DELETE /blacklist', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).not.toMatch(open_id);
+                    expect(JSON.parse(res.text).blacklist_user).not.toContain(open_id);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -166,7 +189,7 @@ describe('DELETE /blacklist', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).not.toMatch(word);
+                    expect(JSON.parse(res.text).blacklist_word).not.toContain(word);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);

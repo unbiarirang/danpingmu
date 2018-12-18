@@ -9,6 +9,9 @@ let admin_session = null;
 const input_id = 'bbb';
 const input_pw = '12345678';
 const activity_id = '5c03ba2fec64483fe182a7d2';
+const lottery_id = '5c089594778fb6bc06161989';
+const lottery_id_draw_2 = '5c13e3f82e42b62b621dfffd';
+const wrong_lottery_id = 'aaa89594778fb6bc06161989';
 
 const login = () => {
     let test_session = session(app);
@@ -57,7 +60,6 @@ describe('POST /auth/login/', () => {
 
 describe('GET /lottery/:wrong_lottery_id and GET /lottery/detail', () => {
     test('It should redirect to /lottery/detail', (done) => {
-        const wrong_lottery_id = 'aaa89594778fb6bc06161989';
         return admin_session
             .get('/lottery/' + wrong_lottery_id)
             .then(res => {
@@ -80,7 +82,6 @@ describe('GET /lottery/:wrong_lottery_id and GET /lottery/detail', () => {
 
 describe('GET /lottery/:lottery_id and GET /lottery/detail', () => {
     test('It should redirect to /lottery/detail', (done) => {
-        const lottery_id = '5c089594778fb6bc06161989';
         return admin_session
             .get('/lottery/' + lottery_id)
             .then(res => {
@@ -90,7 +91,6 @@ describe('GET /lottery/:lottery_id and GET /lottery/detail', () => {
     });
 
     test('It needs login to redirect to /lottery/detail', (done) => {
-        const lottery_id = '5c089594778fb6bc06161989';
         return request(app)
             .get('/lottery/' + lottery_id)
             .then(res => {
@@ -149,10 +149,6 @@ describe('GET /lottery/create', () => {
 });
 
 describe('GET /lottery/:lottery_id/draw', () => {
-    const lottery_id = '5c089594778fb6bc06161989';
-    const lottery_id_draw_2 = '5c13e3f82e42b62b621dfffd';
-    const wrong_lottery_id = 'aaa89594778fb6bc06161989';
-
     test('No user participates in the lottery event', (done) => {
         login()
             .then(() => {
@@ -260,21 +256,24 @@ describe('GET /lottery/:lottery_id/draw', () => {
 });
 
 describe('POST /lottery and PUT /lottery', () => {
-    const test_title = 'test lottery';
+    const title = 'test lottery';
+    const sub_title = 'sub title';
+    const changed_sub_title = 'changed sub title';
+    const wrong_type_winner_num = 'num';
+    const wrong_type_winner_num2 = 3.5;
 
     test('It should create new Lottery', (done) => {
-        const sub_title = 'sub title';
         return admin_session
             .post('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: sub_title,
                 winner_num: 1
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(test_title);
+                    expect(res.text).toMatch(title);
                     expect(res.text).toMatch(sub_title);
                     expect(res.statusCode).toBe(200);
                     done();
@@ -287,7 +286,7 @@ describe('POST /lottery and PUT /lottery', () => {
             .post('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: 'testsubtitle',
                 winner_num: 0
             })
@@ -300,14 +299,13 @@ describe('POST /lottery and PUT /lottery', () => {
     });
 
     test('The type of the fields should be correct', (done) => {
-        const wrong_type_sub_title = { sub_title: "wrong" };
         return admin_session
             .post('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
-                sub_title: wrong_type_sub_title,
-                winner_num: 1
+                title: title,
+                sub_title: sub_title,
+                winner_num: wrong_type_winner_num
             })
             .then(res => {
                 setTimeout(() => {
@@ -317,14 +315,29 @@ describe('POST /lottery and PUT /lottery', () => {
             });
     });
 
+    test('The type of the fields should be correct 2', (done) => {
+        return admin_session
+            .post('/lottery')
+            .set('Accept', 'application/json')
+            .send({
+                title: title,
+                sub_title: sub_title,
+                winner_num: wrong_type_winner_num2
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
 
     test('It needs login to create new Lottery', (done) => {
-        const sub_title = 'sub title';
         return request(app)
             .post('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: sub_title,
                 winner_num: 1
             })
@@ -337,12 +350,11 @@ describe('POST /lottery and PUT /lottery', () => {
     });
 
     test('It should update the Lottery', (done) => {
-        const changed_sub_title = 'changed sub title';
         return admin_session
             .put('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: changed_sub_title,
                 winner_num: 1
             })
@@ -356,14 +368,13 @@ describe('POST /lottery and PUT /lottery', () => {
     });
 
     test('The type of the fields should be correct', (done) => {
-        const wrong_type_sub_title = { sub_title: "wrong" };
         return admin_session
             .put('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
-                sub_title: wrong_type_sub_title,
-                winner_num: 1
+                title: title,
+                sub_title: changed_sub_title,
+                winner_num: wrong_type_winner_num
             })
             .then(res => {
                 setTimeout(() => {
@@ -374,12 +385,11 @@ describe('POST /lottery and PUT /lottery', () => {
     });
 
     test('It needs login to update the Lottery', (done) => {
-        const changed_sub_title = 'changed sub title';
         return request(app)
             .put('/lottery')
             .set('Accept', 'application/json')
             .send({
-                title: test_title,
+                title: title,
                 sub_title: changed_sub_title,
                 winner_num: 1
             })
@@ -392,8 +402,7 @@ describe('POST /lottery and PUT /lottery', () => {
     });
 
     afterAll(() => {
-        models.Lottery.deleteOne({ title: test_title })
+        models.Lottery.deleteOne({ title: title })
             .then(() => {});
     });
-
 });

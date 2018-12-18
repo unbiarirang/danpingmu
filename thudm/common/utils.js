@@ -473,8 +473,8 @@ const get_multer = (file_name) => {
             },
             limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
             filename: function (req, file, cb) {
-                if (req.session.vote_id && req.query.no)
-                    file_name = req.session.vote_id + '_' + file_name + req.query.no;
+                if (req.session.vote_id && req.query.id)
+                    file_name = req.session.vote_id + '_' + file_name + req.query.id;
 
                 cb(null, file_name + '.' + file.mimetype.split('/')[1]);
                 req.profile_num = null;

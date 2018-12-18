@@ -7,6 +7,7 @@ const errors = require('../common/errors');
 const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Message = models.Message;
+const Activity = models.Activity;
 
 const auth_router = require('./auth');
 const activity_router = require('./activity');
@@ -29,11 +30,21 @@ router.get('/screen', (req, res, next) => {
 
     let activity_id = req.session.activity_id;
 
-    let sendData = {};
-    sendData.activity_id = activity_id;
+    Activity.findById(activity_id)
+        .then(activity => {
+            if (!activity)
+                throw new errors.NotExistError('Activity does not exist.');
 
-    console.log('screen activity_id: ', activity_id);
-    res.render('screen', sendData);
+            let sendData = {};
+            sendData.activity_id = activity_id;
+
+            console.log('screen activity_id: ', activity_id);
+            res.render('screen', sendData);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 router.get('/msglist', (req, res, next) => {
@@ -55,6 +66,8 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
     let ret_promises = [];
     let not_ret_promises = [];
 
+    let totalsent = null;
+
     promise_chain = promise_chain.then(() => {
             return rsmq.getQueueAttributes({ qname: activity_id });
         })
@@ -63,7 +76,7 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
             const request_min_id = consts.MSG_PER_PAGE_NUM * (page_id - 1) + 1;
             const request_max_id = consts.MSG_PER_PAGE_NUM * page_id;
             let totalrecv = attr.totalrecv;
-            let totalsent = attr.totalsent;
+            totalsent = attr.totalsent;
 
             // Pop messages before reqest min id
             while(totalrecv < request_min_id - 1
@@ -153,6 +166,7 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
             console.log(msg_list);
             let sendData = {};
             sendData.msg_list = msg_list;
+            sendData.msg_total_num = totalsent;
             sendData.activity_id = activity_id;
 
             res.render('msglist', sendData);

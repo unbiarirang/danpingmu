@@ -21,6 +21,7 @@ describe('User subscribed the service account', () => {
                 '</xml>')
             .then(res => {
                 setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
                     expect(res.text).toMatch('<MsgType><![CDATA[text]]></MsgType>\n    <Content><![CDATA[Welcome to DANPINGMU]]></Content>\n</xml>');
                     done();
                 }, 1000);
@@ -46,6 +47,7 @@ describe('User(both old and new subscriber) entered a activity', () => {
                 '</xml>')
             .then(res => {
                 setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
                     expect(res.text).toMatch('<MsgType><![CDATA[text]]></MsgType>\n    <Content><![CDATA[Welcome to DANPINGMU]]></Content>\n</xml>');
                     utils.get_user_info({ app: app, query: { openid: open_id } })
                         .then(user_info => {

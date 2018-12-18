@@ -3,12 +3,13 @@ const session = require('supertest-session');
 const app = require('../app_test');
 const models = require('../models/models');
 
-let test_session = null;
+let test_session = session(app);
 let auth_session = null;
 
-beforeAll (() => {
-    test_session = session(app);
-});
+const input_id = 'bbb';
+const input_pw = '12345678';
+const wrong_input_id = 'wrongid';
+const wrong_input_pw = 'wrongpw';
 
 describe('GET /auth/login/', () => {
     test('It should return login page', (done) => {
@@ -22,26 +23,22 @@ describe('GET /auth/login/', () => {
 });
 
 describe('POST /auth/login/', () => {
-    test('It should fail to login', (done) => {
-        const input_id = 'wrongid';
-        const input_pw = '12345678';
+    test('It should fail to login with wrong admin id', (done) => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: wrong_input_id, input_pw: input_pw })
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
             });
     });
 
-    test('It should fail to login', (done) => {
-        const input_id = 'bbb';
-        const input_pw = 'wrongpw';
+    test('It should fail to login with wrong password', (done) => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: input_id, input_pw: wrong_input_pw })
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -49,8 +46,6 @@ describe('POST /auth/login/', () => {
     });
 
     test('It should succeed login', (done) => {
-        const input_id = 'bbb';
-        const input_pw = '12345678';
         return test_session
             .post('/auth/login/')
             .type('form')
@@ -75,41 +70,45 @@ describe('GET /auth/signup/', () => {
 });
 
 describe('POST /auth/signup/', () => {
-    const input_id = 'testadminid';
-    const input_pw = 'testadminpw';
-    const input_email = 'test@email.com';
+    const new_input_id = 'testadminid';
+    const new_input_pw = 'testadminpw';
+    const new_input_email = 'test@email.com';
 
     beforeAll(() => {
-        models.User.deleteOne({ id: input_id })
+        models.User.deleteOne({ id: new_input_id })
             .then(res => { console.log(res); });
     });
 
-    test('It should succeed and fail to signup', (done) => {
+    test('It should succeed and fail to signup at the second time', (done) => {
         return test_session
             .post('/auth/signup/')
             .type('form')
             .send({
-                input_id: input_id,
-                input_pw: input_pw,
-                input_email: input_email
+                input_id: new_input_id,
+                input_pw: new_input_pw,
+                input_email: new_input_email
             })
             .then(res => {
-                expect(res.statusCode).toBe(302);
-            })
-            .then(() => {
                 setTimeout(() => {
-                    return test_session
-                        .post('/auth/signup/')
-                        .type('form')
-                        .send({
-                            input_id: input_id,
-                            input_pw: input_pw,
-                            input_email: input_email
-                        })
-                        .then(res => {
-                            expect(res.statusCode).toBe(403);
-                            done();
-                        });
+                    expect(res.statusCode).toBe(302);
+                    done();
+                }, 500);
+            })
+    });
+
+    test('It should succeed and fail to signup at the second time', (done) => {
+        return test_session
+            .post('/auth/signup/')
+            .type('form')
+            .send({
+                input_id: new_input_id,
+                input_pw: new_input_pw,
+                input_email: new_input_email
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(403);
+                    done();
                 }, 500);
             });
     });

@@ -141,7 +141,27 @@ router.post('/upload/candidate', upload_candidate.single('candidate_image'), (re
 
     let path = req.file.path
     path = path.slice(path.indexOf('/images'));
-    return res.send(path);
+
+    let vote_id = req.session.vote_id;
+    let candidate_id = req.query.id;
+
+    Vote.findById(vote_id)
+        .then(vote => {
+            if (!vote)
+                throw new errors.NotExistError('No voting Activity exists.');
+
+            vote.pic_urls[candidate_id - 1] = path;
+            console.log('vote.pic_urls: ', vote.pic_urls);
+            vote.save();
+        })
+        .then(result => {
+            console.log('@@@result: ', result);
+            return res.send(path);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 // Admin get vote info
@@ -163,7 +183,7 @@ const updateVote = (vote, req) => {
     vote.sub_title = req.body.sub_title;
     vote.option_num = req.body.option_num;
     vote.options = req.body.options;
-    vote.pic_urls = req.body.pic_urls;
+    vote.pic_urls = [];
     return vote.save();
 }
 
@@ -187,10 +207,15 @@ router.put('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let activity_id = req.session.activity_id;
-    let room = utils.get_room_info(req, activity_id);
+    let vote_id = req.session.vote_id;
 
-    updateVote(room.activity, req)
+    Vote.findById(vote_id)
+        .then(vote => {
+            if (!vote)
+                throw new errors.NotExistError('No voting Activity exists.');
+
+            return updateVote(vote, req);
+        })
         .then(vote => {
             return res.send(vote);
         })
