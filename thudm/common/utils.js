@@ -91,7 +91,10 @@ class Room {
         fs.removeAsync(dir_name)
             .then(() => { console.log('rmdir'); });
 
-        // Unload
+        // Delete list image from wechat server
+        delete_list_image(req, this.activity.list_media_id);
+
+        // Unload activity
         this.unload(req);
     }
 
@@ -387,20 +390,53 @@ const upload_list_image = (req, file_path) => {
                         + access_token;
 
             // FIXME: handle error!
-            return exec(command, (err, res) => {
-                if (err)
-                    return { error: new errors.UnknownError(err) };
-                if (JSON.parse(res).errcode)
-                    return { error: new errors.WeChatResError(JSON.parse(res).errmsg) };
+            return new Promise((resolve, reject) => {
+                exec(command, (err, res) => {
+                    if (err)
+                        return reject(new errors.UnknowError(err));
+                    if (JSON.parse(res).errcode)
+                        return reject(new errors.WeChatResError(JSON.parse(res).errmsg));
 
-                let activity_id = req.session.activity_id;
-                let room = get_room_info(req, activity_id);
-                room.activity.list_media_id = JSON.parse(res).media_id;
-                room.activity.save();
+                    let activity_id = req.session.activity_id;
+                    let room = get_room_info(req, activity_id);
+                    room.activity.list_media_id = JSON.parse(res).media_id;
+                    resolve(room.activity.save());
+                });
+            })
+            .catch(err => {
+                return err;
             });
         });
 }
 exports.upload_list_image = upload_list_image;
+
+const delete_list_image = (req, media_id) => {
+    return get_access_token(req)
+        .then(access_token => {
+            console.log('@@@@@media_id: ', media_id);
+            let options = {
+                method: 'POST',
+                uri: 'https://api.weixin.qq.com/cgi-bin/material/del_material',
+                body: { media_id: media_id },
+                qs: {
+                    access_token: access_token,
+                },
+                json: true
+            };
+
+            return rp(options)
+                .then(res => {
+                    // Error from wechat
+                    if (res && res.errcode)
+                        throw new errors.WeChatResError(res.errmsg);
+
+                    console.log('@@@@@@@delete list image completed');
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        });
+}
 
 // Return ongoing vote events
 const get_vote_info = (room) => {
@@ -482,12 +518,13 @@ const get_multer = (file_name) => {
     return multer({
         storage: multer.diskStorage({
             destination: function (req, file, cb) {
-                cb(null, __dirname + path + '/' + req.session.activity_id);
+                cb(null, __dirname + path);
             },
             limits: { fileSize: consts.MAX_IMG_SIZE, files: 1 },
             filename: function (req, file, cb) {
-                if (req.session.vote_id && req.query.id)
-                    file_name = req.session.vote_id + '_' + file_name + req.query.id;
+                file_name = req.session.admin_id + '_' + file_name;
+                if (req.query.id)
+                    file_name += '_' + req.query.id;
 
                 cb(null, file_name + '.' + file.mimetype.split('/')[1]);
             }

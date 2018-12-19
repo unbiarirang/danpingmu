@@ -2,6 +2,7 @@ const request = require('supertest');
 const session = require('supertest-session');
 const app = require('../app_test');
 const models = require('../models/models'); 
+const consts = require('../common/consts');
 
 let admin_session = null;
 const activity_id = '5c03ba2fec64483fe182a7d2';
@@ -9,6 +10,7 @@ const vote_id = '5c1880cd5af1b8404b4d63ae';
 const vote_id_ready = '5c19fdb997519755f9bf296f';
 const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
 const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
+const admin_id = 'bbb';
 
 describe('POST /auth/login/', () => {
     let test_session = session(app);
@@ -270,9 +272,9 @@ describe('POST /vote/:vote_id/votefor/:option_id', () => {
 describe('POST /vote/upload/candidate', () => {
     const src_path = 'public/images/list.png'; // dummy image
     const candidate_id = 1;
-    const dest_path = '/images/activity/' + activity_id + '/' + vote_id
-                    + '_candidate' + candidate_id + '.png';
-    console.log('dest_path:', dest_path);
+    const dest_path = consts.STORE_IMG_PATH
+                      + '/' + admin_id + '_candidate_'
+                      + candidate_id + '.png';
 
     test('It should upload a vote candidate image', (done) => {
         return admin_session
@@ -300,13 +302,13 @@ describe('POST /vote/upload/candidate', () => {
             });
     });
 
-    test('It should have activity_id and vote_id in the session', (done) => {
+    test('It needs login to upload candidate image', (done) => {
         return request(app)
             .post('/vote/upload/candidate')
             .attach('candidate_image', src_path)
             .then(res => {
                 setTimeout(() => {
-                    expect(res.statusCode).toBe(500);
+                    expect(res.statusCode).toBe(401);
                     done();
                 }, 500);
             });

@@ -149,6 +149,22 @@ describe('GET /lottery/create', () => {
 });
 
 describe('GET /lottery/:lottery_id/draw', () => {
+    beforeEach(done => {
+        models.Lottery.findById(lottery_id)
+            .then(lottery => {
+                lottery.status = 'READY';
+                lottery.save();
+            })
+            .then(() => {
+                models.Lottery.findById(lottery_id_draw_2)
+                    .then(lottery => {
+                        lottery.status = 'READY';
+                        lottery.save();
+                        done();
+                    });
+            })
+    });
+
     test('No user participates in the lottery event', (done) => {
         login()
             .then(() => {
@@ -163,7 +179,7 @@ describe('GET /lottery/:lottery_id/draw', () => {
             });
     });
 
-    test('One user participates in the lottery event', (done) => {
+    test('One user participates in the lottery event and should not draw twice', (done) => {
         app.get('cache').user_info.set('testopenid1', {
             open_id: 'testopenid1',
             head_img_url: 'testheadimgurl1',
@@ -177,8 +193,18 @@ describe('GET /lottery/:lottery_id/draw', () => {
                     .then(res => {
                         setTimeout(() => {
                             expect(res.statusCode).toBe(200);
-                            done();
+                            return;
                         }, 500);
+                    })
+                    .then(() => {
+                        admin_session
+                            .get('/lottery/' + lottery_id + '/draw')
+                            .then(res => {
+                                setTimeout(() => {
+                                    expect(res.statusCode).toBe(204);
+                                    done();
+                                }, 500);
+                            });
                     });
             });
     });

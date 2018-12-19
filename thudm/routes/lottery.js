@@ -56,8 +56,8 @@ router.get('/:lottery_id/draw', (req, res, next) => {
 
     Lottery.findById(lottery_id)
         .then(_lottery => {
-            if (!_lottery)
-                throw new errors.NotExistError('No lottery activity exists.');
+            if (!_lottery || _lottery.status !== 'READY')
+                throw new errors.NotExistError('No active lottery activity.');
 
             lottery = _lottery;
 

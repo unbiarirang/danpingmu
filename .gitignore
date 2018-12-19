@@ -3,6 +3,7 @@ config.json
 config_test.json
 *.sw*
 */public/images/fromuser/*
-*/public/images/activity/5c03ba2fec64483fe182a7d2/
+*/public/images/activity/*
+*/public/images/temp/*
 tags
 coverage/

@@ -72,7 +72,7 @@ exports.Lottery = mongoose.model('Lottery', lottery_schema);
 
 const message_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
-    id: { type: String, min: 1, required: true },
+    id: { type: Number, min: 1, required: true },
     type: { type: String, enum: MSG_TYPE, required: true },
     content: { type: String, required: true },
     nickname: { type: String, required: true },

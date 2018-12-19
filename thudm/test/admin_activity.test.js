@@ -3,10 +3,12 @@ const session = require('supertest-session');
 const app = require('../app_test');
 const models = require('../models/models');
 const errors = require('../common/errors');
+const consts = require('../common/consts');
 const fs = require('fs-extra');
 
 let admin_session = null;
 const activity_id = '5c03ba2fec64483fe182a7d2';
+const admin_id = 'bbb';
 
 describe('POST /auth/login/', () => {
     let test_session = session(app);
@@ -108,7 +110,8 @@ describe('GET /activity/list', () => {
 
 describe('POST /activity/upload/list', () => {
     const src_path = 'public/images/list.png'; // dummy image
-    const dest_path = '/images/activity/' + activity_id + '/list.png';
+    const dest_path = consts.STORE_IMG_PATH
+                      + '/' + admin_id + '_list.png';
 
     test('It should upload a list image', (done) => {
         return admin_session
@@ -136,13 +139,13 @@ describe('POST /activity/upload/list', () => {
             });
     });
 
-    test('It should have activity_id in the session', (done) => {
+    test('It needs login to upload background image', (done) => {
         return request(app)
             .post('/activity/upload/list')
             .attach('list_image', src_path)
             .then(res => {
                 setTimeout(() => {
-                    expect(res.statusCode).toBe(500);
+                    expect(res.statusCode).toBe(401);
                     done();
                 }, 500);
             });
@@ -151,7 +154,8 @@ describe('POST /activity/upload/list', () => {
 
 describe('POST /activity/upload/bg', () => {
     const src_path = 'public/images/list.png'; // dummy image
-    const dest_path = '/images/activity/' + activity_id + '/bg.png';
+    const dest_path = consts.STORE_IMG_PATH
+                      + '/' + admin_id + '_bg.png';
 
     test('It should upload a background image', (done) => {
         return admin_session
@@ -179,13 +183,13 @@ describe('POST /activity/upload/bg', () => {
             });
     });
 
-    test('It should have activity_id in the session', (done) => {
+    test('It needs login to upload background image', (done) => {
         return request(app)
             .post('/activity/upload/bg')
             .attach('bg_image', src_path)
             .then(res => {
                 setTimeout(() => {
-                    expect(res.statusCode).toBe(500);
+                    expect(res.statusCode).toBe(401);
                     done();
                 }, 500);
             });

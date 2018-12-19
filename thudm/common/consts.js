@@ -5,7 +5,7 @@ module.exports = Object.freeze({
     QRCODE_EXPIRE_SEC           : 3*60*60,          // 3 hours
     SESSION_EXPIRE_MSEC         : 3*24*60*60*1000,  // 3 days
     MAX_IMG_SIZE                : 2*1024*1024,      // 2 MB
-    STORE_IMG_PATH              : '/images/activity',
+    STORE_IMG_PATH              : '/images/temp',
     WECHAT_MENU                 : {
         "button": [
             {

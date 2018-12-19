@@ -58,7 +58,8 @@ router.post('/upload/list', upload_list.single('list_image'), (req, res, next) =
 
     return utils.upload_list_image(req, req.file.path)
         .then(err => {
-            if (err && err.error) throw err.error;
+            if (err && err instanceof Error)
+                throw err;
 
             let path = req.file.path
             path = path.slice(path.indexOf('/images'));
