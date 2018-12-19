@@ -39,7 +39,7 @@ router.get('/screen', (req, res, next) => {
             sendData.activity_id = activity_id;
 
             console.log('screen activity_id: ', activity_id);
-            res.render('screen', sendData);
+            res.render('screen', { items: activity });
         })
         .catch(err => {
             console.error(err);
@@ -169,7 +169,7 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
             sendData.msg_total_num = totalsent;
             sendData.activity_id = activity_id;
 
-            res.render('msglist', sendData);
+            res.render('msglist', { items: sendData});
         })
         .catch(err => {
             console.log(err);

@@ -52,7 +52,22 @@ class Room {
         });
     }
 
-    destroy(redis) {
+    load(req) {
+        req.app.get('cache').room_info.set(this.activity_id, this);
+        console.log('load_room_info: ', this);
+    }
+
+    unload(req) {
+        req.app.get('cache').room_info.delete(this.activity_id);
+        console.log('unload_room_info: ', this);
+    }
+
+    destroy(req) {
+        const redis = req.app.get('redis');
+        this.activity.status = "OVER";
+        this.activity.save();
+
+        // Flush redis
         let del_keys = [
             'rsmq:' + this.activity_id,
             'rsmq:' + this.activity_id + ':Q',
@@ -71,9 +86,13 @@ class Room {
                 console.log('flush redis');
             });
 
+        // Remove directory
         const dir_name = 'public/images/activity/' + this.activity_id;
-        return fs.removeAsync(dir_name)
+        fs.removeAsync(dir_name)
             .then(() => { console.log('rmdir'); });
+
+        // Unload
+        this.unload(req);
     }
 
     gen_id(redis) {
@@ -123,9 +142,9 @@ const load_activities = (app) => {
 exports.load_activities = load_activities;
 
 const load_activity = (req, act_id) => {
-    let room_info = new Room(act_id);
-    room_info.init(req);
-    load_room_info(req, act_id, room_info);
+    let room = new Room(act_id);
+    room.init(req);
+    room.load(req);
 }
 exports.load_activity = load_activity;
 
@@ -250,20 +269,14 @@ const update_user_info = (req, options) => {
 exports.update_user_info = update_user_info;
 
 const get_room_info = (req, activity_id) => {
-    let room_info = req.app.get('cache').room_info.get(activity_id);
+    let room = req.app.get('cache').room_info.get(activity_id);
 
-    if (!room_info)
+    if (!room)
         throw new errors.NotExistError('The activity is not exist or is over.');
 
-    return room_info;
+    return room;
 };
 exports.get_room_info = get_room_info;
-
-const load_room_info = (req, activity_id, room_info) => {
-    req.app.get('cache').room_info.set(activity_id, room_info);
-    console.log('load_room_info: ', room_info);
-}
-exports.load_room_info = load_room_info;
 
 const get_wechat_input = (req, key) => {
     if (!req.body.xml[key] || req.body.xml[key].length <= 0)
@@ -381,9 +394,9 @@ const upload_list_image = (req, file_path) => {
                     return { error: new errors.WeChatResError(JSON.parse(res).errmsg) };
 
                 let activity_id = req.session.activity_id;
-                let room_info = get_room_info(req, activity_id);
-                room_info.activity.list_media_id = JSON.parse(res).media_id;
-                room_info.activity.save();
+                let room = get_room_info(req, activity_id);
+                room.activity.list_media_id = JSON.parse(res).media_id;
+                room.activity.save();
             });
         });
 }
@@ -477,7 +490,6 @@ const get_multer = (file_name) => {
                     file_name = req.session.vote_id + '_' + file_name + req.query.id;
 
                 cb(null, file_name + '.' + file.mimetype.split('/')[1]);
-                req.profile_num = null;
             }
         })
     });

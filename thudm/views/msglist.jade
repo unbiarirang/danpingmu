@@ -6,39 +6,104 @@ block contents
               .col-md-12
                 .card.card-plain
                   .header
-                    h4.title 活动列表
+                    h4.title 弹幕列表
+                     span(style='float:right')
+                      button.btn.btn-success.btn-fill 批量通过
                   .content.table-responsive.table-full-width
                     table.table.table-hover
                       thead
                         tr  
                           th 
                             input#all.check(type='checkbox') 
-                            | NO
+                            | 序号
                           th 昵称
                           th 内容
                           th 状态
                           th 审核
                       tbody
+              .col-md-12
+                .page(style="text-align:center")
+
 block script
   script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
   script(src='/assets/js/bootstrap.min.js', type='text/javascript')
-    // Charts Plugin
-    // Notifications Plugin
   script(src='/assets/js/bootstrap-notify.js')
-    // Light Bootstrap Table Core javascript and methods for Demo purpose
   script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
-    // Light Bootstrap Table DEMO methods, don't include it in your project!
 
   //socket.io
   script(src='/socket.io/socket.io.js')
   script.
-    var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
-    var msg_list = !{msg_list != null? JSON.stringify(msg_list): 'null'};
+    var information = !{items != null? JSON.stringify(items): 'null'};
+    var activity_id = information.activity_id;
+    var msg_list = information.msg_list;
+    //var msg_list = !{msg_list != null? JSON.stringify(msg_list): 'null'};
+    var socket = io();
+    var msg_total_num = information.msg_total_num;
+    var page_num;
+    var page_list;
+    var cnt_limit = 0;
+    var current = window.location.pathname.substr(14); 
+    var now_page = parseInt(current / 5);
+
     $(document).ready(function(){
+      console.log(now_page);
       $('#M' + $('.content').attr('id')).attr('class','active');
-    })  
+      page_num = parseInt(msg_total_num / 15);
+      page_list = page_num / 5;
+      console.log('now_page',now_page);
+      console.log('pg_num',page_num);
+      for(var i = now_page; i < page_num; i++){
+        $('.page').append("<a class='pagenum' href='javascript:void(0);' id=P" + ( i + 1 ) + ">" + (i + 1) + "&nbsp&nbsp&nbsp</a>");
+        if(cnt_limit == 4){
+          break;
+        }
+        cnt_limit++;
+      }
+     $('#P' + current).css('color','black');
+      if(parseInt(page_list) > now_page)
+        $('.page').append("<a href='javascript:void(0);' id=next>下一页</a>");
+    });
+    $(document).on('click','#next',function(){
+      now_page++;
+      cnt_limit = 0;
+      $('.page').empty();
+      $('.page').append("<a href='javascript:void(0);' id='prev'>上一页&nbsp&nbsp&nbsp</a>");
+      for(var i = now_page * 5; i < page_num; i++){
+        $('.page').append("<a class='pagenum' href='javascript:void(0);' id=P" + (i + 1) + ">" + (i + 1) + "&nbsp&nbsp&nbsp</a>");
+        if(cnt_limit ==4){
+          break;
+        }
+        cnt_limit++;
+      }
+      $('#P' + (now_page * 5 + 1)).css('color','black');
+      if(parseInt(page_list) > now_page)
+        $('.page').append("<a href='javascript:void(0);' id=next>下一页</a>");
+    });
+    $(document).on('click','#prev',function(){
+      now_page--;
+      cnt_limit = 0;
+      $('.page').empty();
+      if(now_page > 0 )
+       $('.page').append("<a href='javascript:void(0);' id='prev'>上一页&nbsp&nbsp&nbsp</a>");
+      for(var i = now_page * 5; i < page_num; i++){
+        $('.page').append("<a class='pagenum' href='javascript:void(0);' id=P" + (i + 1) + ">" + (i + 1) + "&nbsp&nbsp&nbsp</a>");
+        if(cnt_limit ==4){
+          break;
+        }
+        cnt_limit++;
+      }
+      $('#P' + (now_page * 5 + 1)).css('color','black');
+      if(parseInt(page_list) > now_page)
+        $('.page').append("<a href='javascript:void(0);' id=next>下一页</a>");
+    });
+    $(document).on('click','.pagenum',function(){
+      $('.pagenum').each(function(){
+        $(this).css('color','');
+      });
+      $(this).css('color','black');
+      window.location = '/msglist/page/' + this.id.substr(1);
+    });
     $(function() {
-      var socket = io();
       var data = {'activity_id': activity_id};
       socket.emit('joinActivity', data);
       console.log('activity_id: ', activity_id);
@@ -57,11 +122,8 @@ block script
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:orange;'>WAITING</a></td>");
          else
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:GREEN;'>PERMITTED</a></td>"); 
-         $('#list' + msg.id).append("<td><button class='join btn btn-warning btn-fill'>通过</button></td>"); 
+         $('#list' + msg.id).append("<td><button class='pass btn btn-warning btn-fill'>通过</button></td>"); 
      });
-      for (let msg of msg_list) {
-        socket.emit('passReview', msg);
-      }
   
       socket.on('review', function(data) {
         console.log('on review: ', data);
@@ -70,6 +132,10 @@ block script
         socket.emit('passReview', data);
       });
     });
+    $(document).on('click','.pass',function(){ 
+        socket.emit('passReview', msg_list[this.id]);
+        console.log(msg_list[this.id]);
+    })
     $(document).on('click','input.check',function(){
       if(this.id == 'all'){
         if(this.checked == 1){
@@ -96,4 +162,3 @@ block script
        $(this).css('color','green');
       }
     })
-    

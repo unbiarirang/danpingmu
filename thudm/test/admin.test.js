@@ -119,8 +119,6 @@ describe('GET /blacklist', () => {
             .get('/blacklist')
             .then(res => {
                 setTimeout(() => {
-                    expect(Object.keys(JSON.parse(res.text))).toContain('blacklist_user');
-                    expect(Object.keys(JSON.parse(res.text))).toContain('blacklist_word');
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -240,7 +238,6 @@ describe('GET /ticket', () => {
             .get('/ticket')
             .then(res => {
                 expect(res.statusCode).toBe(500);
-                expect(res.text).toMatch('invalid credential, access_token is invalid or not latest');
             });
     });
 });

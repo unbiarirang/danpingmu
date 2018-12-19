@@ -1,10 +1,10 @@
 doctype html
-html(lang='en')
+html
   head
     meta(charset='utf-8')
     link(rel='icon', type='image/png', href='/assets/img/favicon.ico')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
-    title Light Bootstrap Dashboard by Creative Tim
+    title 弹屏目 
     meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
     meta(name='viewport', content='width=device-width')
     // Bootstrap core CSS
@@ -17,6 +17,7 @@ html(lang='en')
     link(href='http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css', rel='stylesheet')
     //link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
     link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
+    link(href='/assets/css/font-awesome.css', rel='stylesheet')
   body
     .wrapper
       .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
@@ -28,34 +29,35 @@ html(lang='en')
             .simple-text
               | 弹屏目
           ul.nav
-            li
-              a(href='/ticket',target="_blank")
-                i.pe-7s-info
-                h5 QRCODE
-            li
-              a(href='/screen',target="_blank")
-                i.pe-7s-chat
-                h5 弹幕墙
+            li#MM5
+              a(href='/activity/detail')
+                i.fa.fa-cogs(style="position:relative;top:0.4vh;")
+                h5 活动设置
             li#MM1
               a(href='/msglist')
-                i.pe-7s-note2
+                i.fa.fa-list-alt
                 h5 弹幕审核
             li#MM2
               a(href='/vote/list')
-                i.pe-7s-drawer
+                i.fa.fa-inbox
                 h5 投票
             li#MM3
               a(href='/lottery/list')
-                i.pe-7s-medal
+                i.fa.fa-gift
                 h5 抽奖
             li#MM4
               a(href='/blacklist')
-                i.pe-7s-bookmarks
+                i.fa.fa-user-times
                 h5 黑名单/过滤词
-            li#MM5
-              a(href='/activity/detail')
-                i.pe-7s-config
-                h5 房间信息
+            li
+              a(href='/screen',target="_blank")
+                i.fa.fa-comments
+                h5 弹幕墙
+            li
+              a(href='/ticket',target="_blank")
+                i.fa.fa-qrcode(style="position:relative;top:0.9vh;")
+                h5 QRCODE
+
       .main-panel
         nav.navbar.navbar-default.navbar-fixed
           .container-fluid

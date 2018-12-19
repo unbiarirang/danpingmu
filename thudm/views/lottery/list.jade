@@ -1,4 +1,4 @@
-extends layout.jade
+extends ../layout.jade
 block contents
          #M3.content
           .container-fluid
@@ -14,8 +14,8 @@ block contents
                       thead
                         tr  
                           th 序号
-                          th 昵称
-                          th 内容
+                          th 主题
+                          th 说明
                           th 状态
                           th 操作
                       tbody
@@ -32,13 +32,14 @@ block script
      var activities = !{items != null? JSON.stringify(items): 'null'}; 
      $(document).ready(function(){
         var cnt = 0;
+        console.log(activities);
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td>").text(cnt));
-          $('#tr' + cnt).append($("<td>").text(act.title));
+          $('#tr' + cnt).append("<td><a href=" + act._id + ">" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append($("<td><button class='join btn btn-success btn-fill' id=" + cnt + '>开始</button></td>'));
+          $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='start btn btn-success btn-fill' id=" + cnt + '>开始</button></td>');
           console.log(act._id);
           if(act.sub_title == 'OVER')
               $('#td' + cnt).css({'color':'red'});
@@ -54,5 +55,9 @@ block script
       })
       $(document).on('click','#make',function(){
           window.location = '/lottery/create';
+      })
+      $(document).on('click','.start',function(){
+          $('#btn' + this.id).remove();
+          $('#tr' + this.id).append("<td><button class='back btn btn-warning btn-fill' id=" + this.id + '>返回</button></td>')
       })
   

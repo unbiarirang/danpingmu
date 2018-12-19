@@ -15,7 +15,7 @@ router.get('/list', (req, res, next) => {
     Lottery.find({ activity_id: activity_id })
         .then(lotteries => {
             console.log(lotteries);
-            return res.render('lotterylist',{items: lotteries});
+            return res.render('lottery/list',{items: lotteries});
         })
         .catch(err => {
             console.error(err);
@@ -33,8 +33,7 @@ router.get('/detail', (req, res, next) => {
         .then(lottery => {
             if (!lottery)
                 throw new errors.NotExistError('No lottery activity exists.');
-
-            return res.render('list', lottery);
+            return res.render('lottery/detail', {items: lottery});
         })
         .catch(err => {
             console.error(err);
@@ -43,7 +42,7 @@ router.get('/detail', (req, res, next) => {
 });
 
 router.get('/create', (req, res, next) =>{
-    res.render('drawlottery');
+    res.render('lottery/create');
 });
 
 router.get('/:lottery_id/draw', (req, res, next) => {
@@ -81,9 +80,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         })
         .then(data => {
             let result = data.map(num => users[num - 1][1]);
-            console.log('@@@result: ', result);
             lottery.result = result.map(user => user.open_id);
-            console.log('@@@lottery.result: ', lottery.result);
             lottery.status = 'OVER';
             lottery.save();
 
@@ -126,6 +123,7 @@ router.post('/', (req, res, next) => {
 
     createLottery(req)
         .then(lottery => {
+            req.session.lottery_id = lottery._id;
             return res.send(lottery);
         })
         .catch(err => {
@@ -139,10 +137,15 @@ router.put('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let activity_id = req.session.activity_id;
-    let room = utils.get_room_info(req, activity_id);
+    let lottery_id = req.session.lottery_id;
 
-    updateLottery(room.activity, req)
+    Lottery.findById(lottery_id)
+        .then(lottery => {
+            if (!lottery)
+                throw new errors.NotExistError('No lottery Activity exists.');
+
+            return updateLottery(lottery, req);
+        })
         .then(lottery => {
             return res.send(lottery);
         })

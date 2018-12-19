@@ -1,4 +1,4 @@
-extends layout.jade
+extends ../layout.jade
 block contents
         #M2.content
           .container-fluid
@@ -13,10 +13,11 @@ block contents
                     table.table.table-hover
                       thead
                         tr  
-                          th NO
-                          th 昵称
-                          th 内容
+                          th 序号
+                          th 主题
+                          th 说明
                           th 状态
+                          th 操作
                       tbody
 block script
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
@@ -36,10 +37,10 @@ block script
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td>").text(cnt));
-          $('#tr' + cnt).append($("<td>").text(act.title));
+          $('#tr' + cnt).append("<td><a href=" + act._id + ">" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append($("<td><button class=join id=" + cnt + '>进入</button></td>'));
+          $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='display btn btn-info btn-fill' id=" + cnt + '>显示</button>&nbsp&nbsp<button class="start btn btn-success btn-fill">开始</button></td>');
           console.log(act._id);
           if(act.sub_title == 'OVER')
               $('#td' + cnt).css({'color':'red'});
@@ -48,9 +49,11 @@ block script
           cnt++;
         }); 
       });
-      $(document).on('click','.join',function(){
-          window.location = '/activity/' + activities[$(this).attr('id')]._id;
-      })
+      $(document).on('click','.start',function(){
+         $('#btn' + this.id).remove();
+         $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='stop btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>');
+      });
+ 
       $(document).on('click','#make',function(){
           window.location = '/vote/create';
       })

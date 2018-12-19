@@ -1,4 +1,4 @@
-extends layout.jade
+extends ../layout.jade
 block contents
         #M2.content
           .container-fluid
@@ -6,7 +6,7 @@ block contents
               .col-md-8
                 .card
                   .header
-                    h4.title 创建投票
+                    h4.title 修改信息
                   .content
                       .row
                         .col-md-5
@@ -26,7 +26,7 @@ block contents
                           .AllCandy
                             #CandyArray0.CandyArray
 
-                      button.btn.btn-info.btn-fill(id='create') 创建
+                      button.btn.btn-info.btn-fill(id='create') 修改
                       .clearfix
               .col-md-4
                 .card.card-user
@@ -60,36 +60,52 @@ block script
     script.
       var CandyProfile = new Array();
       var CandyName = new Array();
+      var information = !{items != null? JSON.stringify(items): 'null'};
       var CandyNum = 0;
       var ArrayNum = 0;
       var NumberAdded = 0;
       $(document).ready(function(){
-        $('#M' + $('.content').attr('id')).attr('class','active');
-        $('#AddCandy').click(function(){
-          var Name = "Anonymous";
-          var Profile = "/assets/img/faces/face-0.jpg";
-          if($('#GetName').val() != '' )
-            Name = $('#GetName').val();
-            
-          Profile = $('#sample').attr('src');
-          console.log(Profile);
- 
-          $('#CandyArray0').append('<div class = Candidates id = '+ CandyNum +'></div>');
+        console.log(information);
+        $('#title').val(information.title);
+        $('#subtitle').val(information.sub_title);
+        var option_num = 0;
+        var options = new Array();
+        options = JSON.parse(information.options);
+        for(var i = 0; i < options.length; i++){
+          $('#CandyArray0').append('<div class = Candidates id = ' + CandyNum + '></div>');
           $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
-          $('#pic' + CandyNum).css("background-image","url(" + Profile +")");
-          $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
-          $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
+          $('#pic' + CandyNum).css('background-image','url(/assets/img/faces/face-0.jpg)');
+          $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + options[CandyNum] + '</div>');
+          $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class = "glyphicon glyphicon-remove" style="color: red;"></span>');
           CandyNum++;
-        });
-        $(document).on('click','a.DeleteCandy',function(){
-            $('#' + this.id).remove();
-        });
+        }
+        $('#M' + $('.content').attr('id')).attr('class','active');
       });
+      $('#AddCandy').click(function(){
+        var Name = "Anonymous";
+        var Profile = "/assets/img/faces/face-0.jpg";
+        if($('#GetName').val() != '' )
+          Name = $('#GetName').val();
+            
+        Profile = $('#sample').attr('src');
+        console.log(Profile);
+ 
+        $('#CandyArray0').append('<div class = Candidates id = '+ CandyNum +'></div>');
+        $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
+        $('#pic' + CandyNum).css("background-image","url(" + Profile +")");
+        $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
+        $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
+        CandyNum++;
+      });
+      $(document).on('click','a.DeleteCandy',function(){
+        $('#' + this.id).remove();
+      });
+
       $('#candidate_image').on('change',function(){
          var formData = new FormData($('#upload')[0]);
          console.log(formData);
          $.ajax({
-           url: '/vote/upload/candidate?no=' + NumberAdded,
+           url: '/vote/upload/candidate?id=' + NumberAdded,
            type: 'post',
            data: formData,
            contentType: false,
@@ -113,13 +129,12 @@ block script
           list.push($('#name' + this.id).text());
         });
         list = JSON.stringify(list);
+        console.log(title,subtitle,list.length,list);
         $.ajax({
           url: '/vote',
-          type: 'post',
-          data:{'title': title, 'sub_title': subtitle, 'option_num': list.length, 'option':list},
-          contentType: false,
-          processData: false,
-          async: false,
+          type: 'PUT',
+          data:{'title': title, 'sub_title': subtitle, 'option_num': list.length, 'options':list},
+          datatype:'json',
           success:function(data){
             window.location = '/vote/list';
           },

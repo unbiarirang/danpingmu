@@ -1,6 +1,7 @@
 const express = require('express');
 let router = express.Router();
 const assert = require('assert');
+const fs = require('fs-extra');
 const errors = require('../common/errors');
 const utils = require('../common/utils');
 const models = require('../models/models');
@@ -15,7 +16,7 @@ router.get('/list', (req, res, next) => {
     Vote.find({ activity_id: activity_id })
         .then(votes => {
             let sendData = { items: votes };
-            return res.render('votelist', sendData);
+            return res.render('vote/list', sendData);
         })
         .catch(err => {
             console.error(err);
@@ -33,7 +34,7 @@ router.get('/detail', (req, res, next) => {
             if (!vote)
                 throw new errors.NotExistError('No voting Activity exists.');
 
-            return res.send(vote);
+            return res.render('vote/detail', { items: vote });
         })
         .catch(err => {
             console.error(err);
@@ -42,7 +43,16 @@ router.get('/detail', (req, res, next) => {
 });
 
 router.get('/create', (req, res, next) =>{
-    res.render('create-vote');
+    res.render('vote/create');
+});
+
+// Admin get vote result
+router.get('/:vote_id/result', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    req.session.vote_id = req.params.vote_id;
+    return res.redirect('result');
 });
 
 // Admin get vote result
@@ -80,7 +90,7 @@ router.get('/result', (req, res, next) => {
 router.get('/:vote_id/result', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-    
+
     req.session.vote_id = req.params.vote_id;
     return res.redirect('result');
 });
@@ -91,7 +101,7 @@ router.get('/:vote_id/user', (req, res, next) => {
 
     Vote.findById(vote_id)
         .then(vote => {
-            if (!vote)
+            if (!vote || vote.status !== 'ONGOING')
                 throw new errors.NotExistError('No voting Activity exists.');
 
             console.log('vote: ', vote);
@@ -142,26 +152,7 @@ router.post('/upload/candidate', upload_candidate.single('candidate_image'), (re
     let path = req.file.path
     path = path.slice(path.indexOf('/images'));
 
-    let vote_id = req.session.vote_id;
-    let candidate_id = req.query.id;
-
-    Vote.findById(vote_id)
-        .then(vote => {
-            if (!vote)
-                throw new errors.NotExistError('No voting Activity exists.');
-
-            vote.pic_urls[candidate_id - 1] = path;
-            console.log('vote.pic_urls: ', vote.pic_urls);
-            vote.save();
-        })
-        .then(result => {
-            console.log('@@@result: ', result);
-            return res.send(path);
-        })
-        .catch(err => {
-            console.error(err);
-            next(err);
-        });
+    return res.send(path);
 });
 
 // Admin get vote info
@@ -171,6 +162,36 @@ router.get('/:vote_id', (req, res, next) => {
 
     req.session.vote_id = req.params.vote_id;
     return res.redirect('detail');
+});
+
+router.post('/finish', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let vote_id = req.session.vote_id;
+
+    Vote.findById(vote_id)
+        .then(vote => {
+            if (!vote)
+                throw new errors.NotExistError('No voting Activity exists.');
+
+            vote.status = 'OVER';
+            vote.save();
+        })
+        .then(() => {
+            // Remove directory
+            const dir_name = 'public/images/activity/' + activity_id + '/' + vote_id + '*';
+            fs.removeAsync(dir_name)
+                .then(() => { console.log('rmdir'); });
+
+            req.session.vote_id = null;
+            res.sendStatus(200);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 const createVote = (req) => {
@@ -183,7 +204,7 @@ const updateVote = (vote, req) => {
     vote.sub_title = req.body.sub_title;
     vote.option_num = req.body.option_num;
     vote.options = req.body.options;
-    vote.pic_urls = [];
+    vote.pic_urls = req.body.pic_urls;
     return vote.save();
 }
 
@@ -191,13 +212,14 @@ const updateVote = (vote, req) => {
 router.post('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-
+    console.log(req.title);
     createVote(req)
         .then(vote => {
+            req.session.vote_id = vote._id;
             return res.send(vote);
         })
         .catch(err => {
-            console.error(err);
+//            console.error(err);
             next(err);
         });
 });

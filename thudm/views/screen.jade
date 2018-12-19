@@ -38,12 +38,15 @@ html(lang="zh-CN")
         const pic_limit = 30; // FIXME
         var dm_list = new Queue();
         var pic_list = new Queue();
-        var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
+        //var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
+        var activity = !{items !=null? JSON.stringify(items): 'null'};
+        var bullet_colors = JSON.parse(activity.bullet_colors);
         $(function() {
+          console.log(activity);
           var socket = io();
-          var data = {'activity_id': activity_id};
+          var data = {'activity_id': activity._id};
           socket.emit('joinActivity', data);
-          console.log('rooom: ',data);
+
           socket.on('danmu', function(data) {
             var msg_obj = JSON.parse(data.msg);
             if(msg_obj.type == "text"){
@@ -58,6 +61,7 @@ html(lang="zh-CN")
         var id2 = 1;
         var del = 1;
         $(document).ready(function(){
+          $('body').css('background-image','url(' + activity.bg_img_url + ')');
           function delete_DM(){
             if (id - del > 15){
                 $("#"+del).remove();
@@ -75,8 +79,13 @@ html(lang="zh-CN")
               $('#info' + id).append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
               $('#info' + id).append("<div class = 'content' id = content" + id +'>'+ msg_obj.content +'</div>');
               $('div.DM').animate({"bottom": "+=23vh"},500);
-              if (Math.floor(Math.random() * 101) > 50)
-                $('#content' + id).css("color","#e53258");
+              
+
+              if(bullet_colors.length > 0){
+                var color_num = Math.floor(Math.random() * 101) % bullet_colors.length;
+                console.log(color_num);
+                $('#content' + id).css("color", bullet_colors[color_num]);
+              }
               id = id + 1;
               dm_list.pop();
             }
@@ -130,7 +139,7 @@ html(lang="zh-CN")
           setInterval(reset_pic,400);
           setInterval(delete_DM,1800);
         });
-  body 
+  body.bg 
     .total
     .pic_slot
       img.picture

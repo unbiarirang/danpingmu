@@ -1,4 +1,4 @@
-extends layout.jade
+extends ../layout.jade
 block contents
         #M3.content
           .container-fluid
@@ -6,9 +6,8 @@ block contents
               .col-md-4
                 .card
                   .header
-                    h4.title 创建抽奖
+                    h4.title 修改信息
                   .content
-                    form
                       .row
                         .col-md-5
                           .form-group
@@ -20,13 +19,12 @@ block contents
                             label 抽奖说明
                             input.form-control(type='text' id='subtitle')
                       .row
-                        .col-md-2
+                        .col-md-3
                           .form-group
                             label 中奖人数
                             input.form-control(type='text' id='winnernum')
 
-                      button.btn.btn-info.btn-fill(type='submit' id='create') 创建
-                      .clearfix
+                      button.btn.btn-info.btn-fill(type='submit' id='create') 修改
    
 block script
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
@@ -38,8 +36,12 @@ block script
     // Light Bootstrap Table Core javascript and methods for Demo purpose
     script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
     script.
+        var information = !{items != null? JSON.stringify(items): 'null'};
         $(document).ready(function(){
             $('#M' + $('.content').attr('id')).attr('class','active');
+            $('#title').val(information.title);
+            $('#subtitle').val(information.sub_title);
+            $('#winnernum').val(information.winner_num);
         })
         $(document).on('click','#create',function(){
             var title = $('#title').val();
@@ -47,14 +49,14 @@ block script
             var winnernum = $('#winnernum').val();
             $.ajax({
                url:'/lottery',
-               type:'post',
+               type:'PUT',
                data: {'title': title,'sub_title': subtitle,'winner_num':winnernum},
                datatype:"json",
                success: function(data){
                  window.location = '/lottery/list';
                },
                error: function(data){
-                 alert("创建失败，请重试!");
+                 alert("修改失败，请重试!");
                }
             })
         });

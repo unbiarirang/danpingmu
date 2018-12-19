@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
 
 socketApi.reviewMessage = (activity_id, msg) => {
     console.log('socketAPI reviewMessage msg: ', msg);
-    io.sockets.in(activity_id).emit('review', {msg: msg});
+    io.sockets.in(activity_id).emit('review', { msg: msg });
 }
 
 socketApi.displayMessage = (activity_id, msg) => {
