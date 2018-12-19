@@ -216,6 +216,7 @@ describe('POST /activity and PUT /activity', () => {
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
             })
             .then(res => {
                 setTimeout(() => {
@@ -228,6 +229,7 @@ describe('POST /activity and PUT /activity', () => {
                     expect(keys).toContain('blacklist_user');
                     expect(keys).toContain('blacklist_word');
                     expect(keys).toContain('status');
+                    expect(keys).toContain('bg_img_url');
                     expect(result.title).toBe(title);
                     expect(result.sub_title).toBe(sub_title);
                     expect(res.statusCode).toBe(200);
@@ -326,16 +328,18 @@ describe('POST /activity and PUT /activity', () => {
                 done();
             });
     });
+});
 
-    test('It should destroy the Activity', (done) => {
-        let room_info = app.get('cache').room_info;
-        const dir_name = 'public/images/activity/';
-        const dir_list = fs.readdirSync(dir_name);
-        const act_id = dir_list[dir_list.length - 1];
-        let room = room_info.get(act_id);
-
-        room.destroy(app.get('redis'))
-            .then(() => { done(); });
+describe('POST /activity/finish', () => {
+    test('It should finish and destroy the Activity', (done) => {
+        return admin_session
+            .post('/activity/finish')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
     });
 
     afterAll(() => {

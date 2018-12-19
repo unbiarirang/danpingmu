@@ -92,7 +92,8 @@ describe('User clicked "vote" button', () => {
                 setTimeout(() => {
                     models.Vote.find({ status: 'ONGOING' })
                         .then(votes => {
-                            let item_count = res.text.match(/<item>/g).length;
+                            let item_count = res.text.match(/<item>/g) ?
+                                    res.text.match(/<item>/g).length : 0;
                             let len = votes ? votes.length : 0;
                             expect(item_count).toBe(len);
                             done();

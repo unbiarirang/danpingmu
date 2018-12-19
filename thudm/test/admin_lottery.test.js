@@ -9,7 +9,7 @@ let admin_session = null;
 const input_id = 'bbb';
 const input_pw = '12345678';
 const activity_id = '5c03ba2fec64483fe182a7d2';
-const lottery_id = '5c089594778fb6bc06161989';
+const lottery_id = '5c18e4841b2ff83af2c56309';
 const lottery_id_draw_2 = '5c13e3f82e42b62b621dfffd';
 const wrong_lottery_id = 'aaa89594778fb6bc06161989';
 
@@ -273,8 +273,14 @@ describe('POST /lottery and PUT /lottery', () => {
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(title);
-                    expect(res.text).toMatch(sub_title);
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('winner_num');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(sub_title);
+                    expect(result.winner_num).toBe(1);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -356,11 +362,18 @@ describe('POST /lottery and PUT /lottery', () => {
             .send({
                 title: title,
                 sub_title: changed_sub_title,
-                winner_num: 1
+                winner_num: 3
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(res.text).toMatch(changed_sub_title);
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('winner_num');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(changed_sub_title);
+                    expect(result.winner_num).toBe(3);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);

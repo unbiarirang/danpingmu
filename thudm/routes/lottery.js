@@ -81,9 +81,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         })
         .then(data => {
             let result = data.map(num => users[num - 1][1]);
-            console.log('@@@result: ', result);
             lottery.result = result.map(user => user.open_id);
-            console.log('@@@lottery.result: ', lottery.result);
             lottery.status = 'OVER';
             lottery.save();
 
@@ -126,6 +124,7 @@ router.post('/', (req, res, next) => {
 
     createLottery(req)
         .then(lottery => {
+            req.session.lottery_id = lottery._id;
             return res.send(lottery);
         })
         .catch(err => {
@@ -139,10 +138,15 @@ router.put('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let activity_id = req.session.activity_id;
-    let room = utils.get_room_info(req, activity_id);
+    let lottery_id = req.session.lottery_id;
 
-    updateLottery(room.activity, req)
+    Lottery.findById(lottery_id)
+        .then(lottery => {
+            if (!lottery)
+                throw new errors.NotExistError('No lottery Activity exists.');
+
+            return updateLottery(lottery, req);
+        })
         .then(lottery => {
             return res.send(lottery);
         })

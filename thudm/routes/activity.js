@@ -37,12 +37,16 @@ router.get('/detail', (req, res, next) => {
             if (!act)
                 throw new errors.NotExistError('Activity does not exist.');
 
-            return res.render('detail',{item: act});
+            return res.render('detail', { item: act });
         })
         .catch(err => {
             console.error(err);
             next(err);
         });
+});
+
+router.get('/create', (req, res, next) =>{
+    res.render('create');
 });
 
 const upload_list = utils.get_multer('list');
@@ -74,16 +78,7 @@ router.post('/upload/bg', upload_bg.single('bg_image'), (req, res, next) => {
     let path = req.file.path
     path = path.slice(path.indexOf('/images'));
 
-    let activity_id = req.session.activity_id;
-    let room = utils.get_room_info(req, activity_id);
-    room.activity.bg_url_img = path;
-    room.activity.save();
-
     return res.send(path);
-});
-
-router.get('/create', (req, res, next) =>{
-    res.render('create');
 });
 
 router.get('/:activity_id', (req, res, next) => {
@@ -92,6 +87,18 @@ router.get('/:activity_id', (req, res, next) => {
 
     req.session.activity_id = req.params.activity_id;
     return res.redirect('detail');
+});
+
+router.post('/finish', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let room = utils.get_room_info(req, activity_id);
+    room.destroy(req);
+
+    req.session.activity_id = null;
+    return res.sendStatus(200);
 });
 
 const createActivity = (req) => {
@@ -105,7 +112,6 @@ const updateActivity = (act, req) => {
     act.bullet_color_num = req.body.bullet_color_num;
     act.bullet_colors = req.body.bullet_colors;
     act.bg_img_url = req.body.bg_img_url;
-    act.list_media_id = req.body.list_media_id;
     return act.save();
 }
 
