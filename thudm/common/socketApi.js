@@ -14,10 +14,27 @@ io.on('connection', (socket) => {
         socket.broadcast.to(socket.activity_id).emit('event', 'User joined an activity');
     });
 
-    socket.on('passReview', (data) => {
+    socket.on('passReview', (data) => { 
+        console.log('--------0---------',data);
+        socket.activity_id = data.activity_id;
+        socket.broadcast.to(socket.activity_id).emit('danmu', {msg: data});
+    });
+    socket.on('drawlottery', (data) => {
+        socket.activity_id = data.activity_id;
         socket.broadcast.to(socket.activity_id).emit('danmu', data);
     });
-
+    socket.on('displayvote', (data) => {
+        socket.activity_id = data.activity_id;
+        socket.broadcast.to(socket.activity_id).emit('danmu', data);
+    });
+    socket.on('quitlottery', (data) => {
+        socket.activity_id = data.activity_id;
+        socket.broadcast.to(socket.activity_id).emit('quitlottery', data);
+    });
+    socket.on('quitvote', (data) => {
+        socket.activity_id = data.activity_id;
+        socket.broadcast.to(socket.activity_id).emit('quitvote', data);
+    })
     socket.on('disconnect', () => {
         console.log('A user disconnected');
     });
@@ -29,8 +46,8 @@ socketApi.reviewMessage = (activity_id, msg) => {
 }
 
 socketApi.displayMessage = (activity_id, msg) => {
-    console.log('msg: ', msg);
-    io.sockets.in(activity_id).emit('danmu', {msg: msg});
+  //  console.log('msg: ', msg);
+   // io.sockets.in(activity_id).emit('danmu', {msg: msg});
 }
 
 module.exports = socketApi;

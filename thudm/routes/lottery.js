@@ -83,12 +83,12 @@ router.get('/:lottery_id/draw', (req, res, next) => {
             lottery.result = result.map(user => user.open_id);
             lottery.status = 'OVER';
             lottery.save();
-
+            
             //sendData.data = data;
             sendData.result = result;
             sendData.users = JSON.stringify(users);
-
-            res.render('lottery', sendData);
+            console.log('----sendData------',sendData);
+            res.render('lottery', {items: sendData});
         })
         .catch(err => {
             console.error(err);

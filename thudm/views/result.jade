@@ -2,14 +2,17 @@ html
   head
   body
     script(src='/js/ajax.js')
+    script(src='/socket.io/socket.io.js')
     script(type='text/javascript').
       var candidate = !{candidate != null? JSON.stringify(candidate): 'null'};
       var title = !{title!= null? JSON.stringify(title): 'null'};
-      console.log('title: ', title);
-      var winner = new Array; 
+      var winner = new Array;
+      var socket = io();
+      var data = {'activity_id': id};
+      socket.on('quitvote', function(data){
+        window.location = '/screen';
+      });
       $(document).ready(function(){
-        console.log(candidate.title);
-       
         $('div.theme').text(candidate.title); 
         console.log(candidate);
         for(var i = 0; i < candidate.options.length; i++){

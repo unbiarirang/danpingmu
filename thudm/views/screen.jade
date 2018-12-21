@@ -48,12 +48,22 @@ html(lang="zh-CN")
           socket.emit('joinActivity', data);
 
           socket.on('danmu', function(data) {
-            var msg_obj = JSON.parse(data.msg);
-            if(msg_obj.type == "text"){
-              dm_list.push(data);
+            console.log(data);
+            if(data.type == 'lottery'){
+              window.location = '/lottery/' + data._id + '/draw'; 
+            }
+            else if(data.type == 'vote'){
+              window.location = 'vote/' + data._id + '/result';
             }
             else{
-              pic_list.push(data);
+              var msg_obj = data.msg;
+              console.log(msg_obj);
+              if(msg_obj.type == "text"){
+                dm_list.push(data);
+              }
+              else{
+                pic_list.push(data);
+              }
             }
           });
         });
@@ -72,7 +82,7 @@ html(lang="zh-CN")
           }
           function show(){
             if(dm_list.size() > 0){
-              var msg_obj = JSON.parse(dm_list.quere()[dm_list.size() - 1].msg);
+              var msg_obj = dm_list.quere()[dm_list.size() - 1].msg;
               $('div.total').append('<div class = "DM" id =' + id +'>'+'</div>');
               $('#' + id).append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
               $('#' + id).append("<div class = 'info' id = info" + id +'>' + '</div>');
@@ -113,7 +123,7 @@ html(lang="zh-CN")
 
                 pic_list.pop();
                 console.log(msg_obj.content);
-                $('img.picture').attr('src','../images/activity/' + activity_id + '/fromuser/' + msg_obj.content + '.png');
+                $('img.picture').attr('src','../images/activity/' + activity._id + '/fromuser/' + msg_obj.content + '.png');
               }
               else {
                  if(pic_cnt == 0 && first == 0){
@@ -124,7 +134,7 @@ html(lang="zh-CN")
                    }
                  }
                  if(pic_free.size() > 0){
-                   $('img.picture').attr('src','../images/activity/' + activity_id + '/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
+                   $('img.picture').attr('src','../images/activity/' + activity._id + '/fromuser/' + pic_free.quere()[pic_cnt] + '.png');
                    pic_cnt--;
                    console.log('pic_free',pic_free.size());
                    if(pic_cnt == -1)
@@ -227,7 +237,8 @@ html(lang="zh-CN")
       }
       body, html {
       background: url(/images/testbg4.gif);
-      background-size:cover;
+      background-size:100% 100%;
+      background-repeat:no-repeat;
       width: 100%;
       height: 100%;
       margin: 0;

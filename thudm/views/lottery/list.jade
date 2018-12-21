@@ -28,23 +28,31 @@ block script
     // Light Bootstrap Table Core javascript and methods for Demo purpose
     script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
     // Light Bootstrap Table DEMO methods, don't include it in your project!
+    script(src='/socket.io/socket.io.js')
     script(type='text/javascript').
-     var activities = !{items != null? JSON.stringify(items): 'null'}; 
+     var activities = !{items != null? JSON.stringify(items): 'null'};
+     var socket = io();
      $(document).ready(function(){
         var cnt = 0;
         console.log(activities);
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td>").text(cnt));
-          $('#tr' + cnt).append("<td><a href=" + act._id + ">" + act.title + "</a></td>");
+          if(act.status == 'OVER')  
+            $('#tr' + cnt).append("<td>" + act.title + "</td>");
+          else
+            $('#tr' + cnt).append("<td id=linktd" + cnt +  "><a href=" + act._id + " id = link" + cnt + ">" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='start btn btn-success btn-fill' id=" + cnt + '>开始</button></td>');
           console.log(act._id);
-          if(act.sub_title == 'OVER')
+          if(act.status == 'OVER'){
               $('#td' + cnt).css({'color':'red'});
-          else
+              $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='displayres btn btn-info btn-fill' id=" + cnt + '>查看结果</button></td>');
+          }
+          else{
               $('#td' + cnt).css({'color':'green'});
+              $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='start btn btn-success btn-fill' id=" + cnt + '>开始</button></td>');
+          }
           cnt++;
         }); 
           $('#M' + $('.content').attr('id')).attr('class','active');
@@ -58,6 +66,19 @@ block script
       })
       $(document).on('click','.start',function(){
           $('#btn' + this.id).remove();
-          $('#tr' + this.id).append("<td><button class='back btn btn-warning btn-fill' id=" + this.id + '>返回</button></td>')
-      })
+          $('#tr' + this.id).append("<td id = btn" + this.id + " ><button class='back btn btn-warning btn-fill' id=" + this.id + '>返回</button></td>')
+          console.log('ha');
+          activities[this.id].type = 'lottery';
+          socket.emit('drawlottery', activities[this.id]); 
+      });
+      $(document).on('click', '.back', function(){
+          socket.emit('quitlottery', activities[this.id]);
+          $('#btn' + this.id).remove();
+          $('#tr' + this.id).append("<td id = 'btn'" + this.id +" ><button class='back btn btn-info btn-fill' id=" + this.id + ">查看结果</button></td>");
+          $('#link' + this.id).remove();
+          $('#td' + this.id).text('OVER');
+          $('#td' + this.id).css({'color': 'red'});
+          $()
+          $('#linktd' + this.id).text(activities[this.id].title);
+      });
   

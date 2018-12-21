@@ -140,6 +140,7 @@ block script
       })
       $(document).ready(function(){
         $('#M' + $('.content').attr('id')).attr('class','active');
+        bg_path = $('#bg').css('background-image');
       })
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
@@ -170,11 +171,22 @@ block script
                 $('#bg').css('background-image','url(' + data + ')');
               },
               error: function(data){
+                $.notify({
+                   icon: 'pe-7s-attention',
+                   message: "图片上传失败，请重试"
+                },{
+                    type: 'danger',
+                    timer: 20000,
+                    placement:{
+                      from:'top',
+                      align:'center'
+                    }
+                });
               }
           });
           $(document).ready(function(){
             $.notify({
-               icon: 'pe-7s-smile',
+               icon: 'pe-7s-hourglass',
                message: "图片上传中，请稍等"
             },{
                 type: 'warning',
@@ -212,7 +224,17 @@ block script
                window.location = '/activity/list'; 
             },
             error: function(data){
-               alert("创建失败，请重试!");          
+                 $.notify({
+                   icon: 'pe-7s-attention',
+                   message: "创建失败，请重试"
+                },{
+                    type: 'danger',
+                    timer: 20000,
+                    placement:{
+                      from:'top',
+                      align:'center'
+                    }
+                });               
             }
           });
         });

@@ -9,19 +9,25 @@ html()
       .tag:hover{border:1px solid #666;}
   body
     .tagBall
+    script(src='/socket.io/socket.io.js')
     script(src = "/js/ajax.js") 
     script(type='text/javascript').
       var opacity_list =[0.666674,0.843943,0.775001,0.593971,0.517249,0.612248,0.814119,1.00851, 1.10342, 1.06527, 0.920392,0.733951,0.580372,0.51688, 0.567172,0.717691,0.925127,1.13132, 1.28065, 1.33522, 1.28431, 1.14619, 0.962525,0.786899,0.670592,0.649006,0.732104,0.901242,1.11345, 1.31243,1.44391, 1.47167, 1.38975, 1.22706, 1.04138, 0.902865,0.870046,0.964873,1.15638, 1.36328, 1.48299, 1.44621, 1.27943, 1.13205, 1.19028,1.3757];
       var zindex_list=[71,84,78, 67, 63,68, 81,101,114,108, 91, 75, 66,63, 65, 74, 91,118,150,167,151,121, 95, 79, 71, 70, 75, 89,115,159,213,230,187,137,105,89, 86, 95,123,177,237,215,150,118,129,182];
       var left_list = [564.599,645.516,648.588,549.213,450.828,426.095,481.392,572.689,648.035,670.675,627.638,532.136,418.144,322.486,273.904,283.305,343.934,431.465,517.823,578.416,595.976,561.158,478.333,368.468,258.848,178.592,146.299,168.62,235.199,321.672,399.005,448.953,454.111,402.525,304.399,193.176,108.716,82.854,122.508,202.573,275.174,301.538,246.629,139.869,96.4037,166.561];
       var top_list = [526.214,498.869,356.812,331.464,437.822,577.891,652.349,618.189,496.211,345.098,227.778,186.525,233.679,349.452,494.018,618.928,685.355,671.808,582.605,443.258,292.962,170.996,108.317,121.001,205.522,337.817,481.377,594.95,645.058,614.085,509.338,362.223,219.429,121.205,99.4781,164.035,292.597,433.55,523.831,513.776,401.86,253.51,167.56,217.984,355.172,342.331];
-      var users = !{users != null? users: 'null'};
+      var information = !{items != null? JSON.stringify(items): 'null'};
       var info = new Array();
+      var users = information.users;
+      var result = information.result;
+      var socket = io();
+      users = JSON.parse(users);
+      console.log('users', users);
+      console.log('result', result[0]);
       for(var i = 0;i < users.length; i++){
         info.push(JSON.stringify(users[i][1]));
-        var temp = JSON.parse(info[i]).head_img_url;
+        //var temp = JSON.parse(info[i]).head_img_url;
       }
-      var data = !{data != null? JSON.stringify(data):'null'};
       $(document).ready(function(){
       var cnt = 0;
       for(var i = 0; i < 46; i++){
@@ -36,14 +42,14 @@ html()
         timerun++;
         if(timerun == 2){
           $('div.tagBall').remove();
-          for(var i = 0; i < data.length; i++){
+          for(var i = 0; i < result.length; i++){
             clearInterval(interval);
             $('body').css("background-image","url(/images/bg.jpg)"); 
-            $('body').append('<div class = winner id = winner' + i + ' style = "display: none; width:' + (100/data.length) + 'vw;"></div>');
+            $('body').append('<div class = winner id = winner' + i + ' style = "display: none; width:' + (100/(result.length)) + 'vw;"></div>');
             $('#winner' + i).append('<div class = information id = info' + i + '></div>');
             $('#info' + i).append('<div class = profile id = profile' + i + '></div>');
-            $('#info' + i).append('<div class = name>' + JSON.parse(info[data[i] - 1]).nickname + '</div>');
-            $('#profile' + i).append('<img class = "prize" src =' + JSON.parse(info[data[i] - 1]).head_img_url + '>' );
+            $('#info' + i).append('<div class = name>' + result[i].nickname + '</div>');
+            $('#profile' + i).append('<img class = "prize" src =' + result[i].head_img_url + '>' );
             $('div.winner').fadeIn(5000);
 
           }
@@ -57,6 +63,12 @@ html()
           angleX = angleX / 1.2;
         }
       },1000);
+      var data = {'activity_id': JSON.parse(info[0]).activity_id};
+      socket.emit('joinActivity', data);
+      console.log(JSON.parse(info[0]).activity_id);
+      socket.on('quitlottery', function(data){
+          window.location = '/screen';
+      });
 
       var tagEle = "querySelectorAll" in document ? document.querySelectorAll(".tag") : getClass("tag"),
       paper = "querySelectorAll" in document ? document.querySelector(".tagBall") : getClass("tagBall")[0];
@@ -162,10 +174,11 @@ html()
     }
     img.prize{
     position:relative;
-    left: 10%;
-    width: 80%;
+    left: 35%;
+    width: 30%;
     height:30%;
     border-radius:20px;
+    text-align:center;
     top: 40%;
     }
     div.name{

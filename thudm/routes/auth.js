@@ -26,7 +26,6 @@ router.post('/login', (req, res, next) => {
         .then(user => {
             if (!user)
                 throw new errors.NotLoggedInError('Wrong id or password.');
-
             let salt = user.salt;
             crypto.pbkdf2(input_pw, salt, 10000, 50, 'sha512', (err, key) => {
                 if (user.password !== key.toString('base64'))
@@ -35,10 +34,9 @@ router.post('/login', (req, res, next) => {
                 // Login succeed, Creaste a new admin session
                 req.session.login = true;
                 req.session.admin_id = input_id;
-
                 //let sendData = { login: true };
                 //res.send(sendData);
-                res.redirect("../activity/list");
+                res.redirect("/activity/list");
             });
         })
         .catch(err => {
@@ -55,7 +53,7 @@ router.post('/signup', (req, res, next) => {
     let input_id = req.body.input_id;
     let input_pw = req.body.input_pw;
     let input_email = req.body.input_email;
-        
+    console.log(input_id);   
     User.findOne({ id: input_id })
         .then(user => {
             if (user)

@@ -26,6 +26,11 @@ block contents
                             form(action='/activity/upload/bg',method='PUT',enctype='multipart/form-data',id="uploadfile")
                               input.form-control(type='file',id = 'bg_image', name = 'bg_image')
                       .row
+                        .col-md-9
+                            label 节目单( 不能超过2MB )
+                            form(action='/activity/upload/list',method='POST',enctype='multipart/form-data',id='uploadlist')
+                              input.form-control(type='file',id = 'list_image', name = 'list_image')
+                      .row
                         .col-md-12
                           .form-group
                             label 弹幕颜色
@@ -75,6 +80,7 @@ block script
     script.
       var information = !{item != null? JSON.stringify(item): 'null'};
       var ColorList = new Array();
+      var new_path;
       for(var i = 0; i < 10; i++)
         ColorList[i] = 0;
       $(function(){
@@ -94,6 +100,7 @@ block script
       })
       $(document).ready(function(){
         $('#M' + $('.content').attr('id')).attr('class','active');
+        $('#bg').css('background-image','url(' + information.bg_img_url + ')');
         var colorlist = JSON.parse(information.bullet_colors);
         console.log(information);
         colorlist.forEach((color) =>{ 
@@ -131,11 +138,57 @@ block script
                        }
                    });
                  });
+                new_path = data;
                 $('#bg').css('background-image','url(' + data + ')');
               },
               error: function(data){
               }
           });
+          $(document).ready(function(){
+            $.notify({
+               icon: 'pe-7s-smile',
+               message: "图片上传中，请稍等"
+            },{
+                type: 'warning',
+                timer: 20000,
+                placement:{
+                  from:'top',
+                  align:'center'
+                }
+            });
+          });
+      })
+      $('#list_image').on('change',function(){
+          var filePath = $(this).val();
+          var formData = new FormData($("#uploadlist")[0]);
+          $.ajax({
+              url:'/activity/upload/list',
+              type:'POST',
+              data: formData,
+              cache: false,
+              contentType: false,
+              processData: false,
+              success: function(data){
+                 console.log(data);
+                 $(document).ready(function(){
+                   $.notify({
+            	       icon: 'pe-7s-smile',
+            	       message: "上传成功！"
+                   },{
+                       type: 'success',
+                       timer: 20000,
+                       placement:{
+                         from:'top',
+                         align:'center'
+                       }
+                   });
+                 });
+                new_path = data;
+              },
+              error: function(data){
+              }
+          });
+
           $(document).ready(function(){
             $.notify({
                icon: 'pe-7s-smile',
@@ -170,7 +223,7 @@ block script
           ColorSelected = JSON.stringify(ColorSelected);
           $.ajax({
             type:"PUT",
-            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colors": ColorSelected},
+            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colors": ColorSelected,"bg_img_url": new_path},
             datatype:"json",
             url:"/activity",
             success: function(data){

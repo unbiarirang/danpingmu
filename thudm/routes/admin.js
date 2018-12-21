@@ -21,7 +21,7 @@ router.use('/lottery', lottery_router);
 
 router.get('/', (req, res, next) => {
     console.log(req.session.id);
-    return res.render('index');
+    return res.render('index',{id: req.session});
 });
 
 router.get('/screen', (req, res, next) => {

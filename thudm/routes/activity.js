@@ -77,7 +77,7 @@ router.post('/upload/bg', upload_bg.single('bg_image'), (req, res, next) => {
 
     let path = req.file.path
     path = path.slice(path.indexOf('/images'));
-
+    console.log('ha');
     return res.send(path);
 });
 

@@ -68,13 +68,19 @@ block script
         console.log(information);
         $('#title').val(information.title);
         $('#subtitle').val(information.sub_title);
+
         var option_num = 0;
         var options = new Array();
         options = JSON.parse(information.options);
+        pic_urls = JSON.parse(information.pic_urls);
+        console.log(pic_urls);
         for(var i = 0; i < options.length; i++){
           $('#CandyArray0').append('<div class = Candidates id = ' + CandyNum + '></div>');
           $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
-          $('#pic' + CandyNum).css('background-image','url(/assets/img/faces/face-0.jpg)');
+          var path = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
+          path = path.substr(0,path.length - 2);
+          console.log(path);
+          $('#pic' + CandyNum).css('background-image','url(' + path + ')');
           $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + options[CandyNum] + '</div>');
           $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class = "glyphicon glyphicon-remove" style="color: red;"></span>');
           CandyNum++;
@@ -124,16 +130,18 @@ block script
         var title = $('#title').val();
         var subtitle = $('#subtitle').val();
         var list = new Array();
+        var pic_urls = new Array();
         $('.Candidates').each(function(){
-          console.log(this.id);
           list.push($('#name' + this.id).text());
+          pic_urls.push($('#pic' + this.id).css('background-image'));
         });
         list = JSON.stringify(list);
+        pic_urls = JSON.stringify(pic_urls);
         console.log(title,subtitle,list.length,list);
         $.ajax({
           url: '/vote',
           type: 'PUT',
-          data:{'title': title, 'sub_title': subtitle, 'option_num': list.length, 'options':list},
+          data:{'title': title, 'sub_title': subtitle, 'option_num': list.length, 'options':list, 'pic_urls': pic_urls},
           datatype:'json',
           success:function(data){
             window.location = '/vote/list';

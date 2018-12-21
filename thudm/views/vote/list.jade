@@ -40,22 +40,46 @@ block script
           $('#tr' + cnt).append("<td><a href=" + act._id + ">" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='display btn btn-info btn-fill' id=" + cnt + '>显示</button>&nbsp&nbsp<button class="start btn btn-success btn-fill">开始</button></td>');
+          $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='start btn btn-success btn-fill' id=" + cnt + ">开始</button></td>");
+          
           console.log(act._id);
-          if(act.sub_title == 'OVER')
-              $('#td' + cnt).css({'color':'red'});
-          else
+          if(act.status == 'ONGOING')
               $('#td' + cnt).css({'color':'green'});
+          else if(act.status == 'READY')
+              $('#td' + cnt).css({'color':'orange'});
+           else
+              $('#td' + cnt).css({'color':'red'});
           cnt++;
         }); 
       });
       $(document).on('click','.start',function(){
-         $('#btn' + this.id).remove();
-         $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='stop btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>');
+         $.ajax({
+           url: '/' + activities[this.id]._id + '/start',
+           type: 'post',
+           data: {'msg': 'start'},
+           datatype: 'json',
+           success: function(data){
+             $('#btn' + this.id).remove();
+             $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='display btn btn-info btn-fill' id=dis" + this.id + ">显示</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + this.id + '>结束</button></td>');
+             $('#td' + this.id).text('ONGOING');
+           },
+           error:function(data){
+           
+           }
+         })
       });
- 
+      $(document).on('click','.display',function(){
+         $('#btn' + this.id).remove();
+         $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='back btn btn-warning btn-fill' id=back" + this.id + ">返回</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + this.id + '>结束</button></td>');
+         activities[this.id].type = 'vote';
+         socket.emit('displayvote', activities[this.id]); 
+      });
+      $(document).on('click', '.back',function(){
+         socket.emit('quitvote', activities[this.id]);
+         $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='display btn btn-info btn-fill' id=dis" + this.id + ">返回</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + this.id + '>结束</button></td>');
+      });
       $(document).on('click','#make',function(){
-          window.location = '/vote/create';
+         window.location = '/vote/create';
       })
 
 

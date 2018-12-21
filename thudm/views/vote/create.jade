@@ -111,9 +111,8 @@ block script
         var pic_urls = new Array();
         var option_num;
         $('.Candidates').each(function(){
-          console.log(this.id);
           list.push($('#name' + this.id).text());
-          pic_urls.push($('#pic') + this.id);
+          pic_urls.push($('#pic' + this.id).css('background-image'));
         });
         option_num = list.length;
         list = JSON.stringify(list);
@@ -127,7 +126,7 @@ block script
             window.location = '/vote/list';
           },
           error:function(data){
-          
+            alert("创建失败，请重试"); 
           }
         });
       });
