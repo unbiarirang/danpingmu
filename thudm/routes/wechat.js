@@ -54,7 +54,7 @@ router.post('/', (req, res, next) => {
                             console.log("RSMQ data sent", data);
                         });
 
-                    socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
+                    //socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
                 })
                 .catch(err => {
                     console.error(err);
@@ -189,8 +189,6 @@ router.post('/', (req, res, next) => {
 
                                 return utils.get_reply_news(data);
                             });
-                        break;
-                    case 'KEY_RED_PACKET':
                         break;
                     case 'KEY_LIST':
                         pr_chain = pr_chain.then(() => {

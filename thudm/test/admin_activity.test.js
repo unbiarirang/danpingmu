@@ -8,7 +8,11 @@ const fs = require('fs-extra');
 
 let admin_session = null;
 const activity_id = '5c03ba2fec64483fe182a7d2';
+const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
 const admin_id = 'bbb';
+const title = 'test activity';
+const sub_title = 'sub title';
+const changed_sub_title = 'changed sub title';
 
 describe('POST /auth/login/', () => {
     let test_session = session(app);
@@ -31,7 +35,6 @@ describe('POST /auth/login/', () => {
 
 describe('GET /activity/:wrong_activity_id and GET /activity/detail', () => {
     test('It should redirect to /activity/detail', (done) => {
-        const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
         return admin_session
             .get('/activity/' + wrong_activity_id)
             .then(res => {
@@ -96,14 +99,153 @@ describe('GET /activity/:activity_id and GET /activity/detail', () => {
 });
 
 describe('GET /activity/list', () => {
+    test('It needs login to show list of activities the admin has', (done) => {
+        return request(app)
+            .get('/activity/list')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
     test('It should return activity list that the admin has', (done) => {
         return admin_session
             .get('/activity/list')
             .then(res => {
+                expect(res.statusCode).toBe(200);
+                done();
+            });
+    });
+});
+
+describe('GET /activity/create', () => {
+    test('It should return create activity page', (done) => {
+        return admin_session
+            .get('/activity/create')
+            .then(res => {
+                expect(res.statusCode).toBe(200);
+                done();
+            });
+    });
+});
+
+describe('POST /activity and PUT /activity', () => {
+    test('It should create new Activity', (done) => {
+        return admin_session
+            .post('/activity')
+            .send({
+                title: title,
+                sub_title: sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
                 setTimeout(() => {
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('bullet_color_num');
+                    expect(keys).toContain('bullet_colors');
+                    expect(keys).toContain('blacklist_user');
+                    expect(keys).toContain('blacklist_word');
+                    expect(keys).toContain('status');
+                    expect(keys).toContain('bg_img_url');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(sub_title);
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
+            });
+    });
+
+    test('All required fields should be filled', (done) => {
+        return admin_session
+            .post('/activity')
+            .send({
+                title: title,
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It needs login to create new Activity', (done) => {
+        return request(app)
+            .post('/activity')
+            .send({
+                title: title,
+                sub_title: sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should update the Activity', (done) => {
+        return admin_session
+            .put('/activity')
+            .send({
+                title: title,
+                sub_title: changed_sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
+                setTimeout(() => {
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('bullet_color_num');
+                    expect(keys).toContain('bullet_colors');
+                    expect(keys).toContain('blacklist_user');
+                    expect(keys).toContain('blacklist_word');
+                    expect(keys).toContain('status');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(changed_sub_title);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('All required fields should be filled', (done) => {
+        return admin_session
+            .put('/activity')
+            .send({
+                title: title,
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(500);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It needs login to update the Activity', (done) => {
+        return request(app)
+            .put('/activity')
+            .send({
+                title: title,
+                sub_title: sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: 'some.url',
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
             });
     });
 });
@@ -196,145 +338,16 @@ describe('POST /activity/upload/bg', () => {
     });
 });
 
-describe('GET /activity/create', () => {
-    test('It should return create activity page', (done) => {
-        return admin_session
-            .get('/activity/create')
-            .then(res => {
-                expect(res.statusCode).toBe(200);
-                done();
-            });
-    });
-});
-
-describe('POST /activity and PUT /activity', () => {
-    const title = 'test activity';
-    const sub_title = 'sub title';
-    const changed_sub_title = 'changed sub title';
-
-    test('It should create new Activity', (done) => {
-        return admin_session
-            .post('/activity')
-            .send({
-                title: title,
-                sub_title: sub_title,
-                bullet_color_num: 3,
-                bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
-            })
-            .then(res => {
-                setTimeout(() => {
-                    let result = JSON.parse(res.text);
-                    let keys = Object.keys(result);
-                    expect(keys).toContain('title');
-                    expect(keys).toContain('sub_title');
-                    expect(keys).toContain('bullet_color_num');
-                    expect(keys).toContain('bullet_colors');
-                    expect(keys).toContain('blacklist_user');
-                    expect(keys).toContain('blacklist_word');
-                    expect(keys).toContain('status');
-                    expect(keys).toContain('bg_img_url');
-                    expect(result.title).toBe(title);
-                    expect(result.sub_title).toBe(sub_title);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-
-    test('All required fields should be filled', (done) => {
-        return admin_session
-            .post('/activity')
-            .send({
-                title: title,
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(500);
-                    done();
-                }, 500);
-            });
-    });
-
-    test('It needs login to create new Activity', (done) => {
-        const sub_title = 'sub title';
-        return request(app)
-            .post('/activity')
-            .send({
-                title: title,
-                sub_title: sub_title,
-                bullet_color_num: 3,
-                bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
-            })
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-                done();
-            });
-    });
-
-    test('It should update the Activity', (done) => {
-        return admin_session
-            .put('/activity')
-            .send({
-                title: title,
-                sub_title: changed_sub_title,
-                bullet_color_num: 3,
-                bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
-            })
-            .then(res => {
-                setTimeout(() => {
-                    let result = JSON.parse(res.text);
-                    let keys = Object.keys(result);
-                    expect(keys).toContain('title');
-                    expect(keys).toContain('sub_title');
-                    expect(keys).toContain('bullet_color_num');
-                    expect(keys).toContain('bullet_colors');
-                    expect(keys).toContain('blacklist_user');
-                    expect(keys).toContain('blacklist_word');
-                    expect(keys).toContain('status');
-                    expect(result.title).toBe(title);
-                    expect(result.sub_title).toBe(changed_sub_title);
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
-            });
-    });
-
-    test('All required fields should be filled', (done) => {
-        return admin_session
-            .put('/activity')
-            .send({
-                title: title,
-            })
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(500);
-                    done();
-                }, 500);
-            });
-    });
-
-    test('It needs login to update the Activity', (done) => {
-        const sub_title = 'sub title';
-        return request(app)
-            .put('/activity')
-            .send({
-                title: title,
-                sub_title: sub_title,
-                bullet_color_num: 3,
-                bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
-            })
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-                done();
-            });
-    });
-});
-
 describe('POST /activity/finish', () => {
+    test('It needs login to finish and destroy the Activity', (done) => {
+        return request(app)
+            .post('/activity/finish')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
     test('It should finish and destroy the Activity', (done) => {
         return admin_session
             .post('/activity/finish')

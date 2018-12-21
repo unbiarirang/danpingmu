@@ -12,13 +12,6 @@ class BaseError extends Error {
     }
 }
 
-class UnknownError extends BaseError {
-    constructor(message) {
-        super(0, message || 'Unknown Error.', 520);
-    }
-}
-exports.UnknownError = UnknownError;
-
 class NotExistError extends BaseError {
     constructor(message) {
         super(1, message || 'Data not exist.', 204);
@@ -46,31 +39,3 @@ class NotLoggedInError extends BaseError {
     }
 }
 exports.NotLoggedInError = NotLoggedInError;
-
-class RedisError extends BaseError {
-    constructor(message) {
-        super(5, message || 'Error from redis.', 500);
-    }
-}
-exports.RedisError = RedisError;
-
-class TypeError extends BaseError {
-    constructor(message) {
-        super(6, message || 'Type is wrong.', 500);
-    }
-}
-exports.TypeError = TypeError;
-
-class KeyError extends BaseError {
-    constructor(message) {
-        super(7, message || 'Key not exist.', 500);
-    }
-}
-exports.KeyError = KeyError;
-
-class FileOpError extends BaseError {
-    constructor(message) {
-        super(8, message || 'File operation error.', 500);
-    }
-}
-exports.FileOpError = FileOpError;

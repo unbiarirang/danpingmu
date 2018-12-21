@@ -48,23 +48,20 @@ html(lang="zh-CN")
           socket.emit('joinActivity', data);
 
           socket.on('danmu', function(data) {
+            var msg_obj = data.msg;
+            console.log(msg_obj);
+            if(msg_obj.type == "text")
+              dm_list.push(data);
+            else
+              pic_list.push(data);
+          });
+          socket.on('lottery', function(data) {
             console.log(data);
-            if(data.type == 'lottery'){
               window.location = '/lottery/' + data._id + '/draw'; 
-            }
-            else if(data.type == 'vote'){
-              window.location = 'vote/' + data._id + '/result';
-            }
-            else{
-              var msg_obj = data.msg;
-              console.log(msg_obj);
-              if(msg_obj.type == "text"){
-                dm_list.push(data);
-              }
-              else{
-                pic_list.push(data);
-              }
-            }
+          });
+          socket.on('vote', function(data) {
+            console.log(data);
+            window.location = 'vote/' + data._id + '/result';
           });
         });
         var id = 1;

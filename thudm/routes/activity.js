@@ -155,13 +155,15 @@ router.put('/', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-
     let room = utils.get_room_info(req, activity_id);
+
     updateActivity(room.activity, req)
         .then(act => {
+            utils.update_room_info(req, { activity: act });
             return res.send(act);
         })
         .catch(err => {
+            room.recover();
             console.error(err);
             next(err);
         });

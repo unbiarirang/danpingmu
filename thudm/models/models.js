@@ -66,7 +66,7 @@ const lottery_schema = new mongoose.Schema({
         }
     },
     status: { type: String, enum: STATUS , default: 'READY' },
-    result: [String],
+    result: { type: Array },
 });
 exports.Lottery = mongoose.model('Lottery', lottery_schema);
 

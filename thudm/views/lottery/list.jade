@@ -69,10 +69,10 @@ block script
           $('#tr' + this.id).append("<td id = btn" + this.id + " ><button class='back btn btn-warning btn-fill' id=" + this.id + '>返回</button></td>')
           console.log('ha');
           activities[this.id].type = 'lottery';
-          socket.emit('drawlottery', activities[this.id]); 
+          socket.emit('drawWinner', activities[this.id]); 
       });
       $(document).on('click', '.back', function(){
-          socket.emit('quitlottery', activities[this.id]);
+          socket.emit('quitLottery', activities[this.id]);
           $('#btn' + this.id).remove();
           $('#tr' + this.id).append("<td id = 'btn'" + this.id +" ><button class='back btn btn-info btn-fill' id=" + this.id + ">查看结果</button></td>");
           $('#link' + this.id).remove();

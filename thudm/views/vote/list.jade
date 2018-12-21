@@ -72,10 +72,10 @@ block script
          $('#btn' + this.id).remove();
          $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='back btn btn-warning btn-fill' id=back" + this.id + ">返回</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + this.id + '>结束</button></td>');
          activities[this.id].type = 'vote';
-         socket.emit('displayvote', activities[this.id]); 
+         socket.emit('displayVote', activities[this.id]); 
       });
       $(document).on('click', '.back',function(){
-         socket.emit('quitvote', activities[this.id]);
+         socket.emit('quitVote', activities[this.id]);
          $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='display btn btn-info btn-fill' id=dis" + this.id + ">返回</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + this.id + '>结束</button></td>');
       });
       $(document).on('click','#make',function(){

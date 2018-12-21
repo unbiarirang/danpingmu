@@ -12,6 +12,7 @@ const activity_id = '5c03ba2fec64483fe182a7d2';
 const lottery_id = '5c18e4841b2ff83af2c56309';
 const lottery_id_draw_2 = '5c13e3f82e42b62b621dfffd';
 const wrong_lottery_id = 'aaa89594778fb6bc06161989';
+const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 
 const login = () => {
     let test_session = session(app);
@@ -275,6 +276,51 @@ describe('GET /lottery/:lottery_id/draw', () => {
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(401);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('GET /lottery/:lottery_id/result', () => {
+    beforeEach(done => {
+        models.Lottery.findById(lottery_id)
+            .then(lottery => {
+                lottery.status = 'OVER';
+                lottery.result = [{ open_id: open_id }];
+                lottery.save();
+            })
+            .then(() => {
+                models.Lottery.findById(lottery_id_draw_2)
+                    .then(lottery => {
+                        lottery.status = 'READY';
+                        lottery.save();
+                        done();
+                    });
+            });
+    });
+
+    test('It should return a lottery result', (done) => {
+        return admin_session
+            .get('/lottery/' + lottery_id + '/result')
+            .set('Accept', 'application/json')
+            .then(res => {
+                setTimeout(() => {
+                    let result = JSON.parse(res.text);
+                    expect(result[0].open_id).toBe(open_id);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should not return a lottery result of not finished vote activity', (done) => {
+        return admin_session
+            .get('/lottery/' + lottery_id_draw_2 + '/result')
+            .set('Accept', 'application/json')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(204);
                     done();
                 }, 500);
             });

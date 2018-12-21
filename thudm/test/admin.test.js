@@ -9,6 +9,9 @@ let admin_session = null;
 const input_id = 'bbb';
 const input_pw = '12345678';
 const activity_id = '5c03ba2fec64483fe182a7d2';
+const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
+const open_id = 'testopenid';
+const word = 'xxx';
 
 describe('POST /auth/login/', () => {
     test_session = session(app);
@@ -44,14 +47,33 @@ describe('GET /', () => {
 });
 
 describe('GET /screen', () => {
+    test('It should not return screen page with wrong activity_id', (done) => {
+        return admin_session
+            .get('/activity/' + wrong_activity_id)
+            .then(() => {
+                admin_session
+                    .get('/screen')
+                    .then(res => {
+                        setTimeout(() => {
+                            expect(res.statusCode).toBe(204);
+                            done();
+                        }, 500);
+                    });
+            });
+    });
+
     test('It should return screen page', (done) => {
         return admin_session
-            .get('/screen')
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(200);
-                    done();
-                }, 500);
+            .get('/activity/' + activity_id)
+            .then(() => {
+                admin_session
+                    .get('/screen')
+                    .then(res => {
+                        setTimeout(() => {
+                            expect(res.statusCode).toBe(200);
+                            done();
+                        }, 500);
+                    });
             });
     });
 
@@ -114,7 +136,7 @@ describe('GET /msglist/page/:page_id', () => {
 });
 
 describe('GET /blacklist', () => {
-    test('It should get user and word blacklist', (done) => {
+    test('It should return user and word blacklist', (done) => {
         return admin_session
             .get('/blacklist')
             .then(res => {
@@ -124,11 +146,18 @@ describe('GET /blacklist', () => {
                 }, 500);
             });
     });
+
+    test('It needs login to return blacklist', () => {
+        return request(app)
+            .get('/blacklist')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+            });
+    });
 });
 
 describe('PUT /blacklist', () => {
     test('It should append a user to the user blacklist', (done) => {
-        const open_id = 'testopenid';
         return admin_session
             .put('/blacklist')
             .send({
@@ -145,7 +174,6 @@ describe('PUT /blacklist', () => {
 
 
     test('It should append a word to the word blacklist', (done) => {
-        const word = 'xxx';
         return admin_session
             .put('/blacklist')
             .send({
@@ -159,11 +187,21 @@ describe('PUT /blacklist', () => {
                 }, 500);
             });
     });
+
+    test('It needs login to update blacklist', () => {
+        return request(app)
+            .put('/blacklist')
+            .send({
+                blocked_word: word
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+            });
+    });
 });
 
 describe('DELETE /blacklist', () => {
     test('It should delete a user from the user blacklist', (done) => {
-    const open_id = 'testopenid';
         return admin_session
             .delete('/blacklist')
             .send({
@@ -179,7 +217,6 @@ describe('DELETE /blacklist', () => {
     });
 
     test('It should delete a word from the word blacklist', (done) => {
-        const word = 'xxx';
         return admin_session
             .delete('/blacklist')
             .send({
@@ -191,6 +228,17 @@ describe('DELETE /blacklist', () => {
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
+            });
+    });
+
+    test('It needs login to delete items from blacklist', () => {
+        return request(app)
+            .delete('/blacklist')
+            .send({
+                blocked_word: word
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
             });
     });
 });

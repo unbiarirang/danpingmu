@@ -444,7 +444,38 @@ describe('POST /vote and PUT /vote', () => {
     });
 });
 
+describe('POST /vote/start', () => {
+    test('It needs login to start a vote activity', (done) => {
+        return request(app)
+            .post('/vote/start')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should start the vote activity', (done) => {
+        return admin_session
+            .post('/vote/start')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+});
+
 describe('POST /vote/finish', () => {
+    test('It needs login to finish a vote activity', (done) => {
+        return request(app)
+            .post('/vote/finish')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
     test('It should finish the vote activity', (done) => {
         return admin_session
             .post('/vote/finish')

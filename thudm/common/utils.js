@@ -36,7 +36,14 @@ class Room {
 
     init(req) { // Asynchronous db process
         const redis = req.app.get('redis');
-        Activity.findById(this.activity_id)
+        redis.hget("generated_id", this.activity_id, (err, id) => {
+            if (err) id = 0;
+
+            console.log('generated_id: ', id);
+            this.generated_id = id;
+        });
+
+        return Activity.findById(this.activity_id)
             .then(act => {
                 if (!act)
                     throw new errors.NotExistError('Activity does not exists.');
@@ -44,17 +51,22 @@ class Room {
                 this.activity = act;
             });
 
-        redis.hget("generated_id", this.activity_id, (err, id) => {
-            if (err) id = 0;
-
-            console.log('generated_id: ', id);
-            this.generated_id = id;
-        });
     }
 
     load(req) {
         req.app.get('cache').room_info.set(this.activity_id, this);
         console.log('load_room_info: ', this);
+    }
+
+    recover() {
+        return Activity.findById(this.activity_id)
+            .then(act => {
+                if (!act)
+                    throw new errors.NotExistError('Activity does not exists.');
+
+                this.activity = act;
+            });
+
     }
 
     unload(req) {
@@ -146,8 +158,11 @@ exports.load_activities = load_activities;
 
 const load_activity = (req, act_id) => {
     let room = new Room(act_id);
-    room.init(req);
-    room.load(req);
+
+    room.init(req)
+        .then(() => {
+            room.load(req);
+        });
 }
 exports.load_activity = load_activity;
 
@@ -202,13 +217,20 @@ const get_access_token = (req) => {
     };
 
     return rp(options)
-        .then((res) => {
+        .then(res => {
+            // Error from wechat
+            if (res.errcode)
+                throw new errors.WeChatResError(res.errmsg);
+
             req.app.set('access_token', res.access_token);
             req.app.set('access_token_expire',
                 Date.now() / 1000 + res.expires_in
             );
             console.log('access_token: ', res.access_token);
             return res.access_token;
+        })
+        .catch(err => {
+            //console.error(err);
         });
 };
 exports.get_access_token = get_access_token;
@@ -220,7 +242,9 @@ const _get_user_info = (req) => {
 
 const get_user_info = (req) => {
     let user_info = _get_user_info(req);
-    console.log('get_user_info: ', user_info);
+    console.log('get_user_info');
+    // FIXME: temp
+    //return Promise.resolve({ nickname: 'tempnickname', head_img_url: 'headimgurl' });
     if (user_info.nickname === undefined || user_info.head_img_url === undefined)
         return request_user_info(req).then(get_user_info);
 
@@ -255,7 +279,8 @@ const request_user_info = (req) => {
                 open_id: res.openid
             });
             return req;
-        });
+        })
+        .catch(err => { console.error(err); });
 };
 exports.request_user_info = request_user_info;
 
@@ -280,6 +305,18 @@ const get_room_info = (req, activity_id) => {
     return room;
 };
 exports.get_room_info = get_room_info;
+
+const update_room_info = (req, options) => {
+    let activity_id = req.session.activity_id;
+    let room_info = get_room_info(req, activity_id);
+
+    for (let key in options)
+        room_info[key] = options[key];
+
+    req.app.get('cache').room_info.set(activity_id, room_info);
+    console.log('update room_info');
+}
+exports.update_room_info = update_room_info;
 
 const get_wechat_input = (req, key) => {
     if (!req.body.xml[key] || req.body.xml[key].length <= 0)
@@ -314,7 +351,7 @@ const request_random_nums = (amount, min, max) => {
             if (typeof(data) === 'number')
                 return [data];
 
-            throw new errors.TypeError();
+            throw new errors.NotExistError('Random data is wrong or not exist.');
         });
 }
 exports.request_random_nums = request_random_nums;
@@ -340,11 +377,11 @@ const delete_image = (activity_id) => {
     if (file_list.length <= consts.MAX_FROMUSER_IMAGE_NUM)
         return;
 
-    // Delete the oldest image. Don't need to be synchronous
+    // Delete the oldest. Don't need to be synchronous
     console.log('delete filename: ', dir_name + file_list[0]);
     fs.unlink(dir_name + file_list[0], err => {
         if (err)
-            throw new errors.FileOpError(err);
+            throw err;
 
         console.log('Delete complete');
     });
@@ -389,17 +426,18 @@ const upload_list_image = (req, file_path) => {
                         + ' http://file.api.weixin.qq.com/cgi-bin/material/add_material?access_token='
                         + access_token;
 
-            // FIXME: handle error!
             return new Promise((resolve, reject) => {
                 exec(command, (err, res) => {
                     if (err)
-                        return reject(new errors.UnknowError(err));
+                        return reject(err);
                     if (JSON.parse(res).errcode)
                         return reject(new errors.WeChatResError(JSON.parse(res).errmsg));
 
+                    console.log('@@@@@@res:', res);
                     let activity_id = req.session.activity_id;
                     let room = get_room_info(req, activity_id);
                     room.activity.list_media_id = JSON.parse(res).media_id;
+                    console.log('@@@@@@room:', room);
                     resolve(room.activity.save());
                 });
             })

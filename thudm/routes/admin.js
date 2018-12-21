@@ -205,12 +205,18 @@ router.put('/blacklist', (req, res, next) => {
         room.activity.blacklist_user.push(blocked_id);
     if (blocked_word)
         room.activity.blacklist_word.push(blocked_word);
-    room.activity.save();
 
-    res.send({
-        blacklist_user: room.activity.blacklist_user,
-        blacklist_word: room.activity.blacklist_word
-    });
+    room.activity.save()
+        .then(() => {
+            res.send({
+                blacklist_user: room.activity.blacklist_user,
+                blacklist_word: room.activity.blacklist_word
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 router.delete('/blacklist', (req, res, next) => {
@@ -233,11 +239,17 @@ router.delete('/blacklist', (req, res, next) => {
     if (index >= 0)
         blacklist_word.splice(index, 1);
 
-    room.activity.save();
-    res.send({
-        blacklist_user: room.activity.blacklist_user,
-        blacklist_word: room.activity.blacklist_word
-    });
+    room.activity.save()
+        .then(() => {
+            res.send({
+                blacklist_user: room.activity.blacklist_user,
+                blacklist_word: room.activity.blacklist_word
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
 router.get('/ticket', (req, res, next) => {

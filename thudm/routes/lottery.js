@@ -80,7 +80,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
         })
         .then(data => {
             let result = data.map(num => users[num - 1][1]);
-            lottery.result = result.map(user => user.open_id);
+            lottery.result = result;
             lottery.status = 'OVER';
             lottery.save();
             
@@ -95,6 +95,26 @@ router.get('/:lottery_id/draw', (req, res, next) => {
             next(err);
         });
 });
+
+router.get('/:lottery_id/result', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let lottery_id = req.params.lottery_id;
+
+    Lottery.findById(lottery_id)
+        .then(lottery => {
+            if (!lottery || lottery.status !== 'OVER')
+                throw new errors.NotExistError('Result not exist.');
+            return res.send(lottery.result);
+        })
+        .catch(err => {
+            console
+            console.error(err);
+            next(err);
+        });
+});
+
 
 router.get('/:lottery_id', (req, res, next) => {
     if (!req.session.login)

@@ -1,4 +1,7 @@
 var socket_io = require('socket.io');
+const models = require('../models/models');
+const errors = require('./errors');
+const Message = models.Message;
 var io = socket_io();
 var socketApi = {};
 
@@ -14,40 +17,52 @@ io.on('connection', (socket) => {
         socket.broadcast.to(socket.activity_id).emit('event', 'User joined an activity');
     });
 
-    socket.on('passReview', (data) => { 
-        console.log('--------0---------',data);
-        socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('danmu', {msg: data});
+    socket.on('passReview', (data) => {
+        if (!data) return;
+
+        Message.findOne({ activity_id: data.activity_id, id: data.id })
+            .then(msg => {
+                if (!msg)
+                    throw new errors.NotExistError('Message not exist');
+
+                socket.broadcast.to(socket.activity_id).emit('danmu', data);
+
+                msg.review_flag = true;
+                msg.save();
+            })
+            .catch(err => {
+                console.error(err);
+            });
     });
-    socket.on('drawlottery', (data) => {
+
+    socket.on('drawWinner', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('danmu', data);
+        socket.broadcast.to(socket.activity_id).emit('lottery', data);
     });
-    socket.on('displayvote', (data) => {
+
+    socket.on('quitLottery', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('danmu', data);
+        socket.broadcast.to(socket.activity_id).emit('quitLottery', data);
     });
-    socket.on('quitlottery', (data) => {
+
+    socket.on('displayVote', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('quitlottery', data);
+        socket.broadcast.to(socket.activity_id).emit('vote', data);
     });
-    socket.on('quitvote', (data) => {
+
+    socket.on('quitVote', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('quitvote', data);
-    })
+        socket.broadcast.to(socket.activity_id).emit('quitVote', data);
+    });
+
     socket.on('disconnect', () => {
         console.log('A user disconnected');
     });
 });
 
-socketApi.reviewMessage = (activity_id, msg) => {
-    console.log('socketAPI reviewMessage msg: ', msg);
-    io.sockets.in(activity_id).emit('review', { msg: msg });
-}
-
 socketApi.displayMessage = (activity_id, msg) => {
-  //  console.log('msg: ', msg);
-   // io.sockets.in(activity_id).emit('danmu', {msg: msg});
-}
+    console.log('msg: ', msg);
+    io.sockets.in(activity_id).emit('danmu', { msg: msg });
+};
 
 module.exports = socketApi;

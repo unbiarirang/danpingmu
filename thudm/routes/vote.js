@@ -15,8 +15,7 @@ router.get('/list', (req, res, next) => {
 
     Vote.find({ activity_id: activity_id })
         .then(votes => {
-            let sendData = { items: votes };
-            return res.render('vote/list', sendData);
+            return res.render('vote/list', { items: votes });
         })
         .catch(err => {
             console.error(err);
@@ -60,6 +59,7 @@ router.get('/result', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
+    const activity_id = req.session.activity_id;
     const vote_id = req.session.vote_id;
     const redis = req.app.get('redis');
     const key = 'vote_' + vote_id;
@@ -103,8 +103,6 @@ router.get('/:vote_id/user', (req, res, next) => {
         .then(vote => {
             if (!vote || vote.status !== 'ONGOING')
                 throw new errors.NotExistError('No voting Activity exists.');
-
-            console.log('vote: ', vote);
 
             return res.render('vote', vote);
        })
@@ -164,6 +162,30 @@ router.get('/:vote_id', (req, res, next) => {
     return res.redirect('detail');
 });
 
+router.post('/start', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let vote_id = req.session.vote_id;
+
+    Vote.findById(vote_id)
+        .then(vote => {
+            if (!vote)
+                throw new errors.NotExistError('No voting Activity exists.');
+
+            vote.status = 'ONGOING';
+            vote.save();
+        })
+        .then(() => {
+            res.sendStatus(200);
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
 router.post('/finish', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
@@ -219,7 +241,7 @@ router.post('/', (req, res, next) => {
             return res.send(vote);
         })
         .catch(err => {
-//            console.error(err);
+            console.error(err);
             next(err);
         });
 });
