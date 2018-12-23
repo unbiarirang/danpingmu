@@ -71,7 +71,11 @@ block script
         var Profile = "/assets/img/faces/face-0.jpg";
         if($('#GetName').val() != '' )
           Name = $('#GetName').val();
-            
+        else{
+          alert("名字不能为空！");
+          return;
+        }
+          
         Profile = $('#sample').attr('src');
         console.log(Profile);
  

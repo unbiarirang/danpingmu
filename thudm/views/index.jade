@@ -20,7 +20,9 @@ html(xmlns='http://www.w3.org/1999/xhtml')
         $("a#fancybox").fancybox();
         if(id.login == true){
           $('#iflogin').text('你好!'); 
-          $('#iflogin').append('<a style="font-size:15px;color:blue" href=/activity/list>' + id.admin_id + '</a>');
+          $('#iflogin').append('<a style="font-size:15px;color:blue" href=/activity/list>' + id.admin_id + '&nbsp&nbsp&nbsp&nbsp</a>');
+          $('#log').text('登出');
+          $('#log').attr('href','/auth/logout');
         }
       });
 
@@ -47,7 +49,7 @@ html(xmlns='http://www.w3.org/1999/xhtml')
           li.login
             br
             label(id = 'iflogin' style='font-size:15px') 您还未登陆  
-            a(href='auth/login',style='color:red;font-size:15px') &nbsp&nbsp登陆
+            a(id='log' href='/auth/login',style='color:red;font-size:15px') &nbsp&nbsp登陆
         ul
           li.title
             a(href='#') About

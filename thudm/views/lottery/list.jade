@@ -47,7 +47,7 @@ block script
           console.log(act._id);
           if(act.status == 'OVER'){
               $('#td' + cnt).css({'color':'red'});
-              $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='displayres btn btn-info btn-fill' id=" + cnt + '>查看结果</button></td>');
+              $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='result btn btn-info btn-fill' id=" + cnt + '>查看结果</button></td>');
           }
           else{
               $('#td' + cnt).css({'color':'green'});
@@ -74,11 +74,14 @@ block script
       $(document).on('click', '.back', function(){
           socket.emit('quitLottery', activities[this.id]);
           $('#btn' + this.id).remove();
-          $('#tr' + this.id).append("<td id = 'btn'" + this.id +" ><button class='back btn btn-info btn-fill' id=" + this.id + ">查看结果</button></td>");
+          $('#tr' + this.id).append("<td id = 'btn'" + this.id +" ><button class='result btn btn-info btn-fill' id=" + this.id + ">查看结果</button></td>");
           $('#link' + this.id).remove();
           $('#td' + this.id).text('OVER');
           $('#td' + this.id).css({'color': 'red'});
           $()
           $('#linktd' + this.id).text(activities[this.id].title);
       });
+      $(document).on('click', '.result', function(){
+          window.open('/lottery/' + activities[this.id]._id + '/result');
+      })
   

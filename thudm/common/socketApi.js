@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
                 if (!msg)
                     throw new errors.NotExistError('Message not exist');
 
-                socket.broadcast.to(socket.activity_id).emit('danmu', data);
+                socket.broadcast.to(socket.activity_id).emit('danmu', { data: data });
 
                 msg.review_flag = true;
                 msg.save();
@@ -37,22 +37,22 @@ io.on('connection', (socket) => {
 
     socket.on('drawWinner', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('lottery', data);
+        socket.broadcast.to(socket.activity_id).emit('lottery', data );
     });
 
     socket.on('quitLottery', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('quitLottery', data);
+        socket.broadcast.to(socket.activity_id).emit('quitLottery', data );
     });
 
     socket.on('displayVote', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('vote', data);
+        socket.broadcast.to(socket.activity_id).emit('vote', data );
     });
 
     socket.on('quitVote', (data) => {
         socket.activity_id = data.activity_id;
-        socket.broadcast.to(socket.activity_id).emit('quitVote', data);
+        socket.broadcast.to(socket.activity_id).emit('quitVote', data );
     });
 
     socket.on('disconnect', () => {

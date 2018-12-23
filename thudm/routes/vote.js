@@ -45,14 +45,6 @@ router.get('/create', (req, res, next) =>{
     res.render('vote/create');
 });
 
-// Admin get vote result
-router.get('/:vote_id/result', (req, res, next) => {
-    if (!req.session.login)
-        throw new errors.NotLoggedInError();
-
-    req.session.vote_id = req.params.vote_id;
-    return res.redirect('result');
-});
 
 // Admin get vote result
 router.get('/result', (req, res, next) => {
@@ -73,11 +65,12 @@ router.get('/result', (req, res, next) => {
                 .then(vote => {
                     if (!vote)
                         throw new errors.NotExistError('No voting Activity exists.');
-
+                    
+                    sendData.activity_id = vote.activity_id;
                     sendData.title= vote.title;
                     sendData.options = vote.options;
                     sendData.pic_urls = vote.pic_urls;
-                    return res.render('result', sendData);
+                    return res.render('result', { 'candidate': sendData });
                 });
         })
         .catch(err => {
@@ -92,7 +85,7 @@ router.get('/:vote_id/result', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     req.session.vote_id = req.params.vote_id;
-    return res.redirect('result');
+    return res.redirect('/vote/result');
 });
 
 // User get vote information

@@ -44,6 +44,8 @@ block script
             var title = $('#title').val();
             var subtitle = $('#subtitle').val();
             var winnernum = $('#winnernum').val();
+            if(winnernum == "" || subtitle == "" || title == "")
+              alert("输入不能有空");
             $.ajax({
                url:'/lottery',
                type:'post',

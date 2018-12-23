@@ -140,20 +140,19 @@ block script
       })
       $(document).ready(function(){
         $('#M' + $('.content').attr('id')).attr('class','active');
-        bg_path = $('#bg').css('background-image');
+        bg_path = "/images/testbg4.gif";
       })
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
           var formData = new FormData($("#uploadfile")[0]);
           $.ajax({
               url:'/activity/upload/bg',
-              type:'post',
+              type:'POST',
               data: formData,
               cache: false,
               contentType: false,
               processData: false,
               success: function(data){
-                 console.log(data);
                  $(document).ready(function(){
                    $.notify({
             	       icon: 'pe-7s-smile',

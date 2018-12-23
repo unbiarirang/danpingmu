@@ -15,7 +15,7 @@ router.get('/list', (req, res, next) => {
     Lottery.find({ activity_id: activity_id })
         .then(lotteries => {
             console.log(lotteries);
-            return res.render('lottery/list',{items: lotteries});
+            return res.render('lottery/list', { items: lotteries });
         })
         .catch(err => {
             console.error(err);
@@ -33,7 +33,7 @@ router.get('/detail', (req, res, next) => {
         .then(lottery => {
             if (!lottery)
                 throw new errors.NotExistError('No lottery activity exists.');
-            return res.render('lottery/detail', {items: lottery});
+            return res.render('lottery/detail', { items: lottery });
         })
         .catch(err => {
             console.error(err);
@@ -87,8 +87,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
             //sendData.data = data;
             sendData.result = result;
             sendData.users = JSON.stringify(users);
-            console.log('----sendData------',sendData);
-            res.render('lottery', {items: sendData});
+            res.render('lottery', { items: sendData });
         })
         .catch(err => {
             console.error(err);
@@ -106,7 +105,7 @@ router.get('/:lottery_id/result', (req, res, next) => {
         .then(lottery => {
             if (!lottery || lottery.status !== 'OVER')
                 throw new errors.NotExistError('Result not exist.');
-            return res.send(lottery.result);
+            return res.render('lottery/result', { items: lottery });
         })
         .catch(err => {
             console

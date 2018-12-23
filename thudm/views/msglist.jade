@@ -44,7 +44,6 @@ block script
     var cnt_limit = 0;
     var current = window.location.pathname.substr(14); 
     var now_page = parseInt(current / 6);
-    var start_page = 
 
     $(document).ready(function(){
       console.log(information);
@@ -118,18 +117,22 @@ block script
          if(msg == null)
            return;
          $('tbody').append("<tr id=list" + msg.id + "></tr>");
-         $('#list' + msg.id).append("<td><input type='checkbox' class = check id =check" + msg.id + '>' + msg.id);
+         if(msg.review_flag == false)
+           $('#list' + msg.id).append("<td><input type='checkbox' class = check id =check" + msg.id + '>' + msg.id + "</td>");
+         else 
+           $('#list' + msg.id).append("<td>" + msg.id + "</td>");
          $('#list' + msg.id).append($("<td>").text(msg.nickname));
-         $('#list' + msg.id).append($("<td>").text(msg.content));
-
-         //$('#list' + msg.id).append($("<td>").text(msg.review_flag));
+         if(msg.type == 'text')
+           $('#list' + msg.id).append($("<td>").text(msg.content));
+         else
+           $('#list' + msg.id).append("<td><img src= /images/activity/" + msg.activity_id + '/fromuser/' + msg.content + ".png width='50px' height:'50px' ></td>");
          if(msg.review_flag == false){  
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:orange;'>WAITING</a></td>");
             $('#list' + msg.id).append("<td id=btn" + msg.id + "><button class='pass btn btn-success btn-fill' id=" + msg.id + ">通过</button></td>"); 
          }
          else{
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:GREEN;'>PASS</a></td>"); 
-            $('#btn' + this.id).append("<label style='color:GREEN;'>已通过</label>");
+            $('#list' + msg.id).append("<td style='color:GREEN;'>已通过</td>");
          }
      });
   
@@ -151,9 +154,10 @@ block script
           msg_list[getid % 16 - 1].review_flag = true;
           socket.emit('passReview', msg_list[getid % 16 - 1]);
         }
-        $('#btn' + this.id).empty();
-        $('#btn' + this.id).append("<label style='color:GREEN;'>已通过</label>");
+        $('#btn' + this.id).remove();
+        $('#list' + this.id).append("<td style='color:GREEN;'>已通过</td>");
         $('#permit' + this.id).text('PASS');
+        $('#check' + this.id).remove();
         $('#permit' + this.id).css('color','green');
     })
     $(document).on('click','input.check',function(){
@@ -194,6 +198,7 @@ block script
           $('#btn' + getid).append("<label style='color:green;'>已通过</label>")
           $('#permit' + getid).text('PASS');
           $('#permit' + getid).css('color','green');
+          $('#check' + getid).remove();
         }
       })
     })

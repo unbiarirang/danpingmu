@@ -8,7 +8,7 @@ block contents
                   .header
                     h4.title 房间信息
                      span(style="float:right")
-                      button.btn.btn-danger.btn-fill 结束活动
+                      button.btn.btn-danger.btn-fill(id = 'finish') 结束活动
                   .content
                       .row
                         .col-md-5
@@ -80,7 +80,7 @@ block script
     script.
       var information = !{item != null? JSON.stringify(item): 'null'};
       var ColorList = new Array();
-      var new_path;
+      var new_path = information.bg_img_url;
       for(var i = 0; i < 10; i++)
         ColorList[i] = 0;
       $(function(){
@@ -106,6 +106,7 @@ block script
         colorlist.forEach((color) =>{ 
           $('.SetColor').each(function(){
              if($(this).css('background-color') == color){
+               ColorList[this.id.substr(1)] = 1;
                $(this).css('border','2px solid #a40000');
              }
           })
@@ -157,7 +158,21 @@ block script
                 }
             });
           });
-      })
+      });
+      $(document).on('click','#finish',function(){
+        $.ajax({
+          url: '/activity/finish',
+          type: 'post',
+          data: {'activity_id': information._id},
+          datatype: 'json',
+          success: function(data){
+            window.location = '/activity/list';
+          },
+          error: function(data){
+            alert("结束失败，请重试");
+          }
+        });
+      });
       $('#list_image').on('change',function(){
           var filePath = $(this).val();
           var formData = new FormData($("#uploadlist")[0]);
@@ -183,7 +198,6 @@ block script
                        }
                    });
                  });
-                new_path = data;
               },
               error: function(data){
               }
@@ -233,8 +247,8 @@ block script
                alert("创建失败，请重试!");          
             }
           })
-        })
-      })
+        });
+      });
     style.
       div.ColorBox{
       position:relative;

@@ -83,18 +83,41 @@ html
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td>").text(cnt));
-          $('#tr' + cnt).append("<td><a href=/activity/" + activities[cnt]._id + ">" + act.title + "</a></td>");
+          if(act.status == 'ONGOING')
+            $('#tr' + cnt).append("<td><a href=/activity/" + activities[cnt]._id + ">" + act.title + "</a></td>");
+          else
+            $('#tr' + cnt).append("<td>" + activities[cnt].title + "</td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          $('#tr' + cnt).append($("<td><button class='button btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>'));
+          if(act.status == "ONGOING")
+            $('#tr' + cnt).append("<td><button class='finish button btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>');
+          else{
+            $('#tr' + cnt).append("<td id=notice" + cnt + ">活动已结束</td>");
+            $('#notice' + cnt).css({'color':'red'});
+          }
           console.log(act._id);
-          if(act.sub_title == 'OVER')
+          if(act.status == 'OVER')
               $('#td' + cnt).css({'color':'red'});
           else
               $('#td' + cnt).css({'color':'green'});
           cnt++;
         }); 
       });
+      $(document).on('click','.finish',function(){
+        console.log(activities[this.id]._id);
+        $.ajax({
+          url: '/activity/finish',
+          type: 'post',
+          data: {'activity_id': activities[this.id]._id},
+          datatype: 'json',
+          success: function(data){
+            window.location = '/activity/list';
+          },
+          error: function(data){
+            alert("结束失败，请重试");
+          }
+        });
+      })
       $(document).on('click','.join',function(){
           window.location = '/activity/' + activities[$(this).attr('id')]._id;
       })

@@ -66,7 +66,7 @@ html()
       var data = {'activity_id': JSON.parse(info[0]).activity_id};
       socket.emit('joinActivity', data);
       console.log(JSON.parse(info[0]).activity_id);
-      socket.on('quitlottery', function(data){
+      socket.on('quitLottery', function(data){
           window.location = '/screen';
       });
 
