@@ -22,8 +22,22 @@ html(xmlns='http://www.w3.org/1999/xhtml')
           $('#iflogin').text('你好!'); 
           $('#iflogin').append('<a style="font-size:15px;color:blue" href=/activity/list>' + id.admin_id + '&nbsp&nbsp&nbsp&nbsp</a>');
           $('#log').text('登出');
-          $('#log').attr('href','/auth/logout');
+          $('#log').attr('href','/');
         }
+      });
+      $(document).on('click', '#log', function(){
+        $.ajax({
+          url: '/auth/logout',
+          type: 'post',
+          data: {'cmd': 'logout'},
+          datatype: 'json',
+          success:function(data){
+            alert("成功登出！");
+          },
+          error:function(data){
+            alert("您已登出");
+          }
+        })
       });
 
     style.

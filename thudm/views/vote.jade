@@ -9,12 +9,18 @@ html(lang="zh-CN")
           var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
           var title = !{title != null? JSON.stringify(title): 'null'};
           var _id = !{_id != null? JSON.stringify(_id): 'null'};
+          options = JSON.parse(options);
+          pic_urls = JSON.parse(pic_urls);
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
           console.log("title = ",title); 
           console.log("vote_id = ", _id);
 
           $(document).ready(function(){
+              for(var i = 0; i < pic_urls.length; i++){
+                pic_urls[i] = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
+                pic_urls[i] = pic_urls[i].substr(0, pic_urls[i].length -2);
+              }
               var op_num = options.length;
               var candy_num = 0;
               var line_num;
@@ -68,16 +74,17 @@ html(lang="zh-CN")
                }
              });
              $("input.voteit").click(function(){
+               var openid = window.location.search;
                var flag = 0;
                for(var i = 0; i < $("input.cb").length; i++){
                  if($("#radio" + i).attr('checked') == true){
                     flag = 1;
                     console.log("vote id = ",i);
                     $.ajax({
-                      type:"get",
+                      type:"POST",
                       data:{"vote": i},
                       datatype:"text",
-                      url:"/vote/"+ _id +"/votefor/" + i,
+                      url:"/vote/"+ _id +"/votefor/" + i + openid,
                       success: function(data){
                         console.log('data:', data);
                         window.location = "/vote_warning.html";
@@ -85,7 +92,7 @@ html(lang="zh-CN")
                       error: function(e){
                          if(e.status == 403)
                            alert("您已参加过投票！");
-                         window.location = "/vote_warning.html";
+                       //window.location = "/vote_warning.html";
                       }
                     })
                  }

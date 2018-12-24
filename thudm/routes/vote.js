@@ -96,7 +96,7 @@ router.get('/:vote_id/user', (req, res, next) => {
         .then(vote => {
             if (!vote || vote.status !== 'ONGOING')
                 throw new errors.NotExistError('No voting Activity exists.');
-
+            console.log(vote);
             return res.render('vote', vote);
        })
         .catch(err => {
