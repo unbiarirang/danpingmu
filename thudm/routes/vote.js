@@ -112,7 +112,6 @@ router.post('/:vote_id/votefor/:option_id', (req, res, next) => {
     //const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
     const vote_id = req.params.vote_id;
     const option_id = req.params.option_id;
-    console.log(vote_id, option_id);
 
     redis.hgetAsync('voteuser_' + vote_id, open_id)
         .then(data => {

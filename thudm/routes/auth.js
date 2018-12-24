@@ -82,13 +82,9 @@ router.post('/signup', (req, res, next) => {
         });
 });
 
-router.get('/logout', (req, res, next) => {
-    req.session = null;
-
-    let sendData = {
-        login: false
-    };
-    res.render('login', sendData);
+router.post('/logout', (req, res, next) => {
+    req.session.destroy();
+    res.render('login', { login: false });
 });
 
 router.get('/find', (req, res, next) => {

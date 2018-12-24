@@ -89,11 +89,11 @@ router.get('/:activity_id', (req, res, next) => {
     return res.redirect('detail');
 });
 
-router.post('/finish', (req, res, next) => {
+router.post('/finish/:activity_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
-    let activity_id = req.session.activity_id;
+    let activity_id = req.params.activity_id;
     let room = utils.get_room_info(req, activity_id);
     room.destroy(req);
 
