@@ -1,0 +1,321 @@
+extends ../layout.jade
+block contents
+        #M5.content
+          .container-fluid
+            .row
+              .col-md-8
+                .card
+                  .header
+                    h2.title 房间信息
+                     span(style="float:right")
+                      button.btn.btn-danger.btn-fill(id = 'finish') 结束活动
+                  .content
+                      .row
+                        .col-md-5
+                          .form-group
+                            label 活动名称
+                            input.form-control(type='text' id = 'Title')
+                      .row
+                        .col-md-5
+                          .form-group
+                            label 活动说明
+                            input.form-control(type='text' id = 'SubTitle')
+                      .row
+                        .col-md-9
+                          .form-group
+                            label 背景图片( 不能超过2MB )
+                            form(action='/activity/upload/bg',method='PUT',enctype='multipart/form-data',id="uploadfile")
+                              input.form-control(type='file',id = 'bg_image', name = 'bg_image')
+                      .row
+                        .col-md-9
+                          .form-group
+                            label 节目单( 不能超过2MB )
+                            form(action='/activity/upload/list',method='POST',enctype='multipart/form-data',id='uploadlist')
+                              input.form-control(type='file',id = 'list_image', name = 'list_image')
+                      .row
+                        .col-md-12
+                          .form-group
+                            label 弹幕颜色
+                            .ColorArray
+                              #0.ColorBox
+                                #C0.SetColor(style='background:#5eb3c8;')
+                              #1.ColorBox(style='left:50px;')
+                                #C1.SetColor(style='background:#ff80c0;')
+                              #2.ColorBox(style='left:100px;')
+                                #C2.SetColor(style='background:#6b4d9d;')
+                              #3.ColorBox(style='left:150px;')
+                                #C3.SetColor(style='background:#008040;')
+                              #4.ColorBox(style='left:200px;')
+                                #C4.SetColor(style='background:#0080c0;')
+                            br
+                            br
+                            .ColorArray
+                              #5.ColorBox
+                                #C5.SetColor(style='background:#e26b6b;')
+                              #6.ColorBox(style='left:50px;')
+                                #C6.SetColor(style='background:#d1ce5c;')
+                              #7.ColorBox(style='left:100px;')
+                                #C7.SetColor(style='background:#66dbbb;')
+                              #8.ColorBox(style='left:150px;')
+                                #C8.SetColor(style='background:#ff8000;')
+                              #9.ColorBox(style='left:200px;')
+                                #C9.SetColor(style='background:#408080;')
+                      #create.button.btn.btn-info.btn-fill(type='submit') 修改
+                      .clearfix
+              .col-md-4
+                  #bg.example
+                    .DM
+                      img.profile(src='/assets/img/faces/face-0.jpg')
+                      .info
+                        .name Anonymous
+                        #show.contents Hello World!
+block script
+    script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
+    script(src='/assets/js/bootstrap.min.js', type='text/javascript')
+    // Charts Plugin
+    script(src='/assets/js/chartist.min.js')
+    // Notifications Plugin
+    script(src='/assets/js/bootstrap-notify.js')
+    // Light Bootstrap Table Core javascript and methods for Demo purpose
+    script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
+    // Light Bootstrap Table DEMO methods, don't include it in your project!
+    script.
+      var information = !{item != null? JSON.stringify(item): 'null'};
+      var ColorList = new Array();
+      var new_path = information.bg_img_url;
+      for(var i = 0; i < 10; i++)
+        ColorList[i] = 0;
+      $(function(){
+        $('div.ColorBox').click(function(){
+          var IdNum;
+          IdNum = $(this).attr('id');
+          $('#show').css('color',$('#C' +IdNum).css('background-color'));
+          if(ColorList[IdNum] == 0){
+            ColorList[IdNum] = 1;
+            $('#C' + IdNum).css('border','2px solid #a40000');
+          }
+          else{
+            ColorList[IdNum] = 0;
+            $('#C' + IdNum).css('border','none');
+          }
+        });
+      })
+      $(document).ready(function(){
+        $('#M' + $('.content').attr('id')).attr('class','active');
+        $('#bg').css('background-image','url(' + information.bg_img_url + ')');
+        var colorlist = JSON.parse(information.bullet_colors);
+        console.log(information);
+        colorlist.forEach((color) =>{ 
+          $('.SetColor').each(function(){
+             if($(this).css('background-color') == color){
+               ColorList[this.id.substr(1)] = 1;
+               $(this).css('border','2px solid #a40000');
+             }
+          })
+        })
+        $('#Title').val(information.title);
+        $('#SubTitle').val(information.sub_title);
+      })
+      $('#bg_image').on('change',function(){
+          var filePath = $(this).val();
+          var formData = new FormData($("#uploadfile")[0]);
+          $.ajax({
+              url:'/activity/upload/bg',
+              type:'POST',
+              data: formData,
+              cache: false,
+              contentType: false,
+              processData: false,
+              success: function(data){
+                 console.log(data);
+                 $(document).ready(function(){
+                   $.notify({
+            	       icon: 'pe-7s-smile',
+            	       message: "上传成功！"
+                   },{
+                       type: 'success',
+                       timer: 20000,
+                       placement:{
+                         from:'top',
+                         align:'center'
+                       }
+                   });
+                 });
+                new_path = data;
+                $('#bg').css('background-image','url(' + data + ')');
+              },
+              error: function(data){
+              }
+          });
+          $(document).ready(function(){
+            $.notify({
+               icon: 'pe-7s-smile',
+               message: "图片上传中，请稍等"
+            },{
+                type: 'warning',
+                timer: 20000,
+                placement:{
+                  from:'top',
+                  align:'center'
+                }
+            });
+          });
+      });
+      $(document).on('click','#finish',function(){
+        $.ajax({
+          url: '/activity/finish',
+          type: 'post',
+          data: {'activity_id': information._id},
+          datatype: 'json',
+          success: function(data){
+            window.location = '/activity/list';
+          },
+          error: function(data){
+            alert("结束失败，请重试");
+          }
+        });
+      });
+      $('#list_image').on('change',function(){
+          var filePath = $(this).val();
+          var formData = new FormData($("#uploadlist")[0]);
+          $.ajax({
+              url:'/activity/upload/list',
+              type:'POST',
+              data: formData,
+              cache: false,
+              contentType: false,
+              processData: false,
+              success: function(data){
+                 console.log(data);
+                 $(document).ready(function(){
+                   $.notify({
+            	       icon: 'pe-7s-smile',
+            	       message: "上传成功！"
+                   },{
+                       type: 'success',
+                       timer: 20000,
+                       placement:{
+                         from:'top',
+                         align:'center'
+                       }
+                   });
+                 });
+              },
+              error: function(data){
+              }
+          });
+
+          $(document).ready(function(){
+            $.notify({
+               icon: 'pe-7s-smile',
+               message: "图片上传中，请稍等"
+            },{
+                type: 'warning',
+                timer: 20000,
+                placement:{
+                  from:'top',
+                  align:'center'
+                }
+            });
+          });
+      })
+      
+      $(function(){
+        $('#create').click(function(){
+          var ActTitle = $('#Title').val();
+          var ActSubTitle = $('#SubTitle').val(); 
+          var ColorNum = 0;
+          var ColorSelected = new Array();
+          if(ActTitle == "" || ActSubTitle == ""){
+            alert("输入栏不能有空!");
+            return;
+          }
+          for(var i = 0; i < 10; i++){
+            if(ColorList[i] == 1){
+              ColorSelected.push($('#C' + i).css('background-color'));
+              ColorNum++;
+            }
+          }
+          ColorSelected = JSON.stringify(ColorSelected);
+          $.ajax({
+            type:"PUT",
+            data:{"title": ActTitle,"sub_title": ActSubTitle,"bullet_color_num": ColorNum,"bullet_colors": ColorSelected,"bg_img_url": new_path},
+            datatype:"json",
+            url:"/activity",
+            success: function(data){
+               window.location = '/msglist'; 
+            },
+            error: function(data){
+               alert("创建失败，请重试!");          
+            }
+          })
+        });
+      });
+    style.
+      div.ColorBox{
+      position:relative;
+      float:left;
+      width:40px;
+      height:40px;
+      }
+      div.SetColor{
+      position:relative;
+      width:40px;
+      height:40px;
+      }
+      div.ColorArray{
+      position:relative;
+      height:20px;
+      }
+      div.example{
+      background: url(/images/testbg4.gif);
+      background-size:100% 100%;
+      background-repeat:no-repeat;
+      width:100%;
+      height:80vh;
+      -webkit-box-shadow:2px 2px 4px #888;
+      }
+      div.DM {
+      background: rgba(0, 0, 0, 0.3);
+      width: 90%;
+      height: 20%;
+      bottom: 20%;
+      position:absolute;
+      text-align: center;
+      color: white;
+      border-radius: 20px;
+      }
+      div.name{
+      position: relative;
+      width: 100%;
+      height: 20%;
+      color:white;
+      text-align:left;
+      font-size: 2.3vh; 
+      overflow: auto;
+      }
+      div.contents{
+      position: relative;
+      width: 100%;
+      height: 80%;
+      color:white;
+      text-align:left;
+      font-size: 3vw;
+      display:block;
+      overflow: auto;
+      word-break: break-all;
+      word-wrap: break-word;
+      }
+      img.profile{
+      position: relative;
+      float:left;
+      width: 20%;
+      height: 100%;
+      border-radius: 10px;
+      }
+      div.info{
+      position:relative;
+      float:left;
+      width: 80%;
+      height: 100%;
+      }

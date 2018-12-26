@@ -7,12 +7,20 @@ html(lang="zh-CN")
       script.
           var options = !{options != null? JSON.stringify(options): 'null'};
           var pic_urls = !{pic_urls != null? JSON.stringify(pic_urls): 'null'};
-          var title = !{sub_title != null? JSON.stringify(sub_title): 'null'};
+          var title = !{title != null? JSON.stringify(title): 'null'};
+          var _id = !{_id != null? JSON.stringify(_id): 'null'};
+          options = JSON.parse(options);
+          pic_urls = JSON.parse(pic_urls);
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
           console.log("title = ",title); 
+          console.log("vote_id = ", _id);
 
           $(document).ready(function(){
+              for(var i = 0; i < pic_urls.length; i++){
+                pic_urls[i] = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
+                pic_urls[i] = pic_urls[i].substr(0, pic_urls[i].length -2);
+              }
               var op_num = options.length;
               var candy_num = 0;
               var line_num;
@@ -32,8 +40,7 @@ html(lang="zh-CN")
                   line_num = (op_num + 1) / 2;
                   console.log(line_num);
                   for(var i = 0; i < line_num; i++){
-                   console.log()
-                   $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
+                    $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
                     candy_num++;
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
@@ -46,7 +53,7 @@ html(lang="zh-CN")
                  $('#candy' + id).append("<div class = form  id = form" + id + '></div>');
                  $('#form' + id).append("<img src = " + pic_urls[id] + '>');
                  $('#form' + id).append("<div class = title id = title" + id +'>' + '</div>');
-                 $('#title' + id).append("<label><input type = 'radio' class = cb  id = radio" + id + "><label></label>" + options[id]) + '</label>';
+                 $('#title' + id).append("<label><input type = 'radio' class = cb  id = radio" + id + "><label class = box id =" + id +"></label>" + options[id]) + '</label>';
              }         
              $("input.cb").click(function(){
                for(var i = 0; i < $("input.cb").length; i++){
@@ -55,39 +62,55 @@ html(lang="zh-CN")
                  }
                }
              });
+             $("label.box").click(function(){
+               for(var i = 0; i < $("input.cb").length; i++){
+                 if($(this).attr('id') != (i)){
+                   $("#radio" + i).attr("checked",false);
+                 }
+                 else{
+                   console.log($(this).attr('id'),i);
+                   $("#radio" + i).attr("checked",true);
+                 }
+               }
+             });
              $("input.voteit").click(function(){
+               var openid = window.location.search;
                var flag = 0;
                for(var i = 0; i < $("input.cb").length; i++){
                  if($("#radio" + i).attr('checked') == true){
                     flag = 1;
                     console.log("vote id = ",i);
                     $.ajax({
-                      type:"GET",
+                      type:"POST",
                       data:{"vote": i},
-                      dataType:"text",
-                      url:"/vote/5bf588a235192a28284ac003/votefor/" + i,
+                      datatype:"text",
+                      url:"/vote/"+ _id +"/votefor/" + i + openid,
                       success: function(data){
-                        alert("OK");
+                        console.log('data:', data);
+                        window.location = "/vote_warning.html";
                       },
                       error: function(e){
+                         if(e.status == 403)
+                           alert("您已参加过投票！");
+                       //window.location = "/vote_warning.html";
                       }
                     })
                  }
-                 window.location = "../../vote_warning.html";
-               }
+                               }
                if(flag == 0)
                 alert("请选择一个对象");
              })
  
           });
    body
+      .theme
       .total
 
 style(type="text/css").
   div.total{
       position:relative;
       width:100vw;
-      height:100vh;
+      height:90vh;
   }
   div.line{
       position:relative;

@@ -12,23 +12,16 @@ class BaseError extends Error {
     }
 }
 
-class UnknownError extends BaseError {
-    constructor(message) {
-        super(0, message || 'Unknown Error.', 520);
-    }
-}
-exports.UnknownError = UnknownError;
-
 class NotExistError extends BaseError {
     constructor(message) {
-        super(1, message || 'Data not exist.', 404);
+        super(1, message || 'Data not exist.', 204);
     }
 }
 exports.NotExistError = NotExistError;
 
 class DuplicatedError extends BaseError {
     constructor(message) {
-        super(2, message || 'Data duplicated.', 500);
+        super(2, message || 'Data duplicated.', 403);
     }
 }
 exports.DuplicatedError = DuplicatedError;
@@ -42,28 +35,7 @@ exports.WeChatResError = WeChatResError;
 
 class NotLoggedInError extends BaseError {
     constructor(message) {
-        super(4, message || 'Need login.', 500);
+        super(4, message || 'Need login.', 401);
     }
 }
 exports.NotLoggedInError = NotLoggedInError;
-
-class RedisError extends BaseError {
-    constructor(message) {
-        super(5, message || 'Error from redis.', 500);
-    }
-}
-exports.RedisError = RedisError;
-
-class TypeError extends BaseError {
-    constructor(message) {
-        super(6, message || 'Type is wrong.', 500);
-    }
-}
-exports.TypeError = TypeError;
-
-class FileOpError extends BaseError {
-    constructor(message) {
-        super(7, message || 'File operation error.', 500);
-    }
-}
-exports.FileOpError = FileOpError;

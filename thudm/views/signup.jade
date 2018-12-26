@@ -11,36 +11,47 @@ html
       var err = !{err != null? JSON.stringify(err): 'null'};
       if (err) {alert(err.message);}
 
-      function signupClick() {
-        var id=document.signup.input_id.value;
-        var pw=document.signup.input_pw.value;
-        var confirm=document.signup.input_confirm.value;
-        var email=document.signup.input_email.value;
+      $(document).on('click','#signup',function(){
+        var input_id = $('#input_id').val();
+        var input_pw = $('#input_pw').val();
+        var input_confirm = $('#input_confirm').val();
+        var input_email = $('#input_email').val();
        
-        if(id==null||id.length==0){
+        if(input_id==null||input_id.length==0){
           alert("Please confirm your ID.");
           return;
         }
-        if(pw==null||pw.length==0){
+        if(input_pw==null||input_pw.length==0){
           alert("Please confirm your password.");
           return;
         }
-        if(!(confirm == pw)){
+        if(!(input_confirm == input_pw)){
           alert("Please confirm your password.");
           return;
         }
-        if(pw.length < 8){
+        if(input_pw.length < 8){
             alert("The length of password should be longer than 8.");
             return;
         }
         var reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$");
-        if (!reg.test(email)) {
+        if (!reg.test(input_email)) {
             alert("Please confirm your Email.");
             return;
         }
-          document.signup.input_pw.value = md5(pw);
-          document.signup.submit();
-      }
+        input_pw = md5(input_pw);
+        $.ajax({
+          url:'/auth/signup',
+          type:'post',
+          data:{'input_id': input_id, 'input_pw': input_pw, 'input_confirm': input_confirm, 'input_email': input_email},
+          datatype: 'json',
+          success: function(data){
+            window.location = "/auth/login";
+          },
+          error: function(data){
+            alert("创建失败，请重试！");
+          }
+        }) 
+      });
 
   
   body#LoginForm
@@ -50,16 +61,15 @@ html
           .panel
             a(href='/') 弹屏目
           p1(style='color:red') #{warning}
-          form(method = "post",action ='signup',name = 'signup')
-            .form-group
-              input#inputId.form-control(type = 'text', placeholder = '账户',name = 'input_id')
-            .form-group
-              input#inputPassword.form-control(type = 'password', placeholder = '密码',name = 'input_pw')
-            .form-group
-              input#inputConfirm.form-control(type = 'password', placeholder = '确认密码',name = 'input_confirm')
-            .form-group
-              input#inputEmail.form-control(type = 'text', placeholder = '邮箱',name = 'input_email')
-            .forgot  
-          button.btn.btn-primary(onClick = 'signupClick()') 注册
+          .form-group
+            input#input_id.form-control(type = 'text', placeholder = '账户')
+          .form-group
+            input#input_pw.form-control(type = 'password', placeholder = '密码')
+          .form-group
+            input#input_confirm.form-control(type = 'password', placeholder = '确认密码')
+          .form-group
+            input#input_email.form-control(type = 'text', placeholder = '邮箱')
+          .forgot  
+          button.btn.btn-primary(id='signup') 注册
           
            

@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const STATUS = ['READY', 'ONGOING', 'OVER'];
+const MSG_TYPE = ['text', 'image'];
+
 const user_schema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -12,10 +15,22 @@ const activity_schema = new mongoose.Schema({
     admin_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
-    bullet_color_num: Number,
-    bullet_colors: mongoose.Mixed,
-    banned_words_url: String,
+    bullet_color_num: {
+        type: Number,
+        default: 1,
+        required: true,
+        validate: {
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        }
+    },
+    bullet_colors: { type: [String], required: true,  default: ["white"] },
     bg_img_url: String,
+    list_media_id: String,
+    blacklist_user: [String],
+    blacklist_word: [String],
+    review_flag: { type: Boolean, default: true },
+    status: { type: String, enum: STATUS , default: 'ONGOING' },
 });
 exports.Activity = mongoose.model('Activity', activity_schema);
 
@@ -23,11 +38,18 @@ const vote_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
-    option_num: Number,
-    options: mongoose.Mixed,
-    pic_urls: mongoose.Mixed,
-    start_time: Date,
-    end_time: Date,
+    option_num: {
+        type: Number,
+        min: 1,
+        required: true,
+        validate: {
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        }
+    },
+    options: { type: [String], required: true },
+    pic_urls: { type: [String], required: true },
+    status: { type: String, enum: STATUS, required: true, default: 'READY' },
 });
 exports.Vote = mongoose.model('Vote', vote_schema);
 
@@ -35,15 +57,37 @@ const lottery_schema = new mongoose.Schema({
     activity_id: { type: String, required: true },
     title: { type: String, required: true },
     sub_title: String,
-    winner_num: Number,
+    winner_num: {
+        type: Number,
+        min: 1,
+        required: true,
+        validate: { // Validate integer
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        }
+    },
+    duration: {
+        type: Number,
+        min: 10, // second
+        requred: true,
+        validate: { // Validate integer
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        },
+        default: 20
+    },
+    status: { type: String, enum: STATUS, required: true, default: 'READY' },
+    result: { type: Array },
 });
 exports.Lottery = mongoose.model('Lottery', lottery_schema);
 
 const message_schema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true },
-    type: { type: String ,required: true },
+    activity_id: { type: String, required: true },
+    id: { type: Number, min: 1, required: true },
+    type: { type: String, enum: MSG_TYPE, required: true },
     content: { type: String, required: true },
     nickname: { type: String, required: true },
+    open_id: { type: String, required: true },
     head_img_url: { type: String, required: true },
     review_flag: { type: Boolean, required: true, default: false },
 });

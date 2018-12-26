@@ -4,13 +4,18 @@ const assert = require('assert');
 const errors = require('../common/errors');
 const models = require('../models/models');
 const User = models.User;
+const Activity = models.Activity;
 const crypto = require('crypto');
 
 router.get('/login', (req, res, next) => {
     console.log('+++req.session:', req.session);
     console.log('+++req.session.id:', req.session.id);
     console.log('+++req.sessionID:', req.sessionID);
-    res.render('login');
+    let sendData = {
+        login: req.session.login ? true : false
+    };
+    console.log('sendData', sendData);
+    res.render('login', sendData);
 });
 
 router.post('/login', (req, res, next) => {
@@ -20,29 +25,27 @@ router.post('/login', (req, res, next) => {
     User.findOne({ id: input_id })
         .then(user => {
             if (!user)
-                throw new errors.NotExistError('Wrong id or password.');
-            var salt = user.salt;
-            console.log("id: ",user.id);
-            console.log("salt: ",salt);
+                throw new errors.NotLoggedInError('Wrong id or password.');
+            let salt = user.salt;
             crypto.pbkdf2(input_pw, salt, 10000, 50, 'sha512', (err, key) => {
-                console.log("salt2: ",key.toString('base64'));
-                if (user.password === key.toString('base64')) {
-                    req.session.login = true;
-                    req.session.admin_id = input_id;
-                    res.redirect("../screen/1");
-                }
-                //else
-                 //   throw new errors.NotExistError('Wrong id or password.');
+                if (user.password !== key.toString('base64'))
+                    return next(new errors.NotLoggedInError('Wrong id or password.'));
+
+                // Login succeed, Creaste a new admin session
+                req.session.login = true;
+                req.session.admin_id = input_id;
+                //let sendData = { login: true };
+                //res.send(sendData);
+                res.redirect("/activity/list");
             });
         })
         .catch(err => {
+            console.error(err);
             next(err);
         });
 });
 
 router.get('/signup', (req, res, next) => {
-    console.log('+++req.session:', req.session);
-    console.log('+++req.session.id:', req.session.id);
     res.render('signup');
 });
 
@@ -50,13 +53,13 @@ router.post('/signup', (req, res, next) => {
     let input_id = req.body.input_id;
     let input_pw = req.body.input_pw;
     let input_email = req.body.input_email;
-        
+    console.log(input_id);   
     User.findOne({ id: input_id })
         .then(user => {
             if (user)
                 throw new errors.DuplicatedError('The id already exists');
 
-            var salt = crypto.randomBytes(64);
+            let salt = crypto.randomBytes(64);
             console.log('salt_new: ', salt.toString('base64'));
             crypto.pbkdf2(input_pw, salt.toString('base64'), 10000, 50, 'sha512', (err, key) => {
                 user = new User();
@@ -69,23 +72,23 @@ router.post('/signup', (req, res, next) => {
             });
         })
         .then(() => {
+            //let sendData = { signup: true };
+            //res.send(sendData);
             res.redirect('login');
         })
         .catch(err => {
             console.error(err);
-            let sendData = {};
-            sendData.err = err;
-            res.render('signup', sendData);
             next(err);
         });
 });
 
-router.get('/find', (req, res, next) => {
-    res.send('/auth/find => render find id/password page');
+router.post('/logout', (req, res, next) => {
+    req.session.destroy();
+    res.render('login', { login: false });
 });
 
-router.get('/', (req, res, next) => {
-    res.send('/auth');
+router.get('/find', (req, res, next) => {
+    res.send('/auth/find => render find id/password page');
 });
 
 module.exports = router;

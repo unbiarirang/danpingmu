@@ -1,0 +1,176 @@
+html
+  head
+  body
+    script(src='/js/ajax.js')
+    script(src='/socket.io/socket.io.js')
+    script(type='text/javascript').
+      var candidate = !{candidate != null? JSON.stringify(candidate): 'null'};
+      var winner = new Array;
+      var socket = io();
+      $(document).ready(function(){
+        console.log(candidate);
+        var data = {'activity_id': candidate.activity_id};
+        socket.emit('joinActivity', data);
+        socket.on('quitVote', function(data){
+          window.location = '/screen';
+        });
+        candidate.options = JSON.parse(candidate.options);
+        candidate.pic_urls = JSON.parse(candidate.pic_urls);
+        $('div.theme').text(candidate.title); 
+        console.log(candidate);
+        for(var i = 0; i < candidate.options.length; i++){
+          winner[i] = i;
+          if(candidate.result == null){
+            candidate.result = new Array();
+            candidate.result[0]="0";
+          }
+          if(candidate.result[i] == undefined){
+            candidate.result[i] = "0";
+          }
+        }
+        console.log(candidate.result);
+        for(var i = 0; i < candidate.options.length; i++)
+          for(var j = i; j < candidate.options.length; j++){
+            console.log("i",candidate.result[winner[i]],"j",candidate.result[winner[j]]);
+            if(parseInt(candidate.result[winner[i]],10) < parseInt(candidate.result[winner[j]],10)){
+              var temp = winner[i];
+              winner[i] = winner[j];
+              winner[j] = temp;
+            }
+            console.log(winner);
+          }
+         console.log(winner);
+         for(var i = 0;i < candidate.options.length; i++){
+           var path = candidate.pic_urls[winner[i]].slice(candidate.pic_urls[i].indexOf('/images'));
+           $('#pic' + (i + 1)).attr('src', path.substr(0, path.length - 2));
+           $('#name' + (i + 1)).text(candidate.options[winner[i]]);
+           $('#score' + (i + 1)).text(candidate.result[winner[i]] + '票');
+           if (i === 2)
+             break;
+         }
+      });
+    .theme
+    .total
+      #slot2.slot
+        #second.candidate
+          .rank
+            img.prize(src='/images/secondprize.png')
+          .profile
+            img#pic2.pic()
+          #name2.name
+          #score2.score
+      #slot1.slot
+        #first.candidate
+          .rank
+            img.prize(src='/images/firstprize.png')
+          .profile
+            img#pic1.pic()
+          #name1.name
+          #score1.score
+      #slot3.slot
+        #second.candidate
+          .rank
+            img.prize(src='/images/thirdprize.png')
+          .profile
+            img#pic3.pic()
+          #name3.name
+          #score3.score
+    style.
+      ::-webkit-scrollbar{
+      display:none;
+      }
+      .theme{
+      position:relative;
+      text-align:center;
+      width:100%;
+      height:auto;
+      font-weight:700;
+      font-size:4vw;
+      color:#212121;
+      }
+      .total{
+      position:relative;
+      left:10%;
+      height:80%;
+      width:80%;
+      }
+      .rank{
+      position:relative;
+      width:100%;
+      height:auto;
+      text-align:center;
+      }
+      .prize{
+      position:relative;
+      width:80%;
+      }
+      .profile{
+      position:relative;
+      text-align:center;
+      height:auto;
+      width:100%;
+      }
+      #pic2{
+      position:relative;
+      height:90%;
+      width:80%;
+      border-radius:20px;
+      }
+      #pic3{
+      position:relative;
+      height:90%;
+      width:80%;
+      border-radius:20px;
+      }
+      #pic1{
+      position:relative;
+      height:120%;
+      width:90%;
+      border-radius:20px;
+      }
+      .candidate{
+      position:relative;
+      height:40%;
+      width:100%;
+      }
+      .slot{
+      position:relative;
+      float:left;
+      height:100%;
+      }
+      .name{
+      position:relative;
+      text-align:center;
+      font-weight:800;
+      font-size:4vw;
+      font-family: "微软雅黑";
+      word-break:break-all;
+      word-wrap:break-word;
+      }
+      .score{
+      position:relative;
+      text-align:center;
+      font-family:"宋体",
+      font-weight:800;
+      font-size:4vw;
+      }
+      #second{
+      position:relative;
+      top:20%;
+      }
+      #third{
+      position:relative;
+      top:20%;
+      }
+      #slot2{
+      width:30%;
+      text-align:right;
+      }
+      #slot1{
+      width:40%;
+      text-align:center;
+      }
+      #slot3{
+      width:30%;
+      text-align:lefts;
+      }

@@ -1,6 +1,50 @@
-extends layout
-
-block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    link(rel='icon', type='image/png', href='/assets/img/favicon.ico')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
+    title 404Error 
+    meta(content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0', name='viewport')
+    meta(name='viewport', content='width=device-width')
+    // Bootstrap core CSS
+    link(href='/assets/css/bootstrap.min.css', rel='stylesheet')
+    // Light Bootstrap Table core CSS
+    link(href='/assets/css/light-bootstrap-dashboard.css?v=1.4.0', rel='stylesheet')
+    link(type='text/css', rel='stylesheet', href='/404style.css')
+  body
+    .wrapper
+      .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
+        //
+          Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
+          Tip 2: you can also add an image using data-image tag
+        .sidebar-wrapper
+          .logo
+            .simple-text
+              | 
+      .main-panel
+        nav.navbar.navbar-default.navbar-fixed
+          .container-fluid
+            .collapse.navbar-collapse
+              ul.nav.navbar-nav.navbar-right
+                li
+                  a(href='')
+                    p Home
+                li
+                  a(href='#')
+                    p Log out
+                li.separator.hidden-lg.hidden-md
+        .content
+          .container-fluid
+            .row
+              body
+                #notfound
+                  .notfound
+                    .notfound-404
+                      h3 Oops! Page not found
+                      h1
+                        span 4
+                        span 0
+                        span 4
+                    h2 we are sorry, but the page you requested was not found
+  // This templates was made by Colorlib (https://colorlib.com)

@@ -1,12 +1,13 @@
 const express = require('express');
 const rp = require('request-promise');
-const promise = require('bluebird');
 const router = express.Router();
 const utils = require('../common/utils');
+const consts = require('../common/consts');
 const errors = require('../common/errors');
 const socketApi = require('../common/socketApi');
 const models = require('../models/models');
 const Message = models.Message;
+const Activity = models.Activity;
 
 const auth_router = require('./auth');
 const activity_router = require('./activity');
@@ -18,35 +19,70 @@ router.use('/activity', activity_router);
 router.use('/vote', vote_router);
 router.use('/lottery', lottery_router);
 
-router.get('/msglist/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
-    res.redirect('/msglist/' + room_id + '/page/1');
+router.get('/', (req, res, next) => {
+    console.log(req.session.id);
+    return res.render('index',{id: req.session});
 });
 
-let NUM_MSG_PER_PAGE = 15;
-router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
+router.get('/screen', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+
+    Activity.findById(activity_id)
+        .then(activity => {
+            if (!activity)
+                throw new errors.NotExistError('Activity does not exist.');
+
+            let sendData = {};
+            sendData.activity_id = activity_id;
+
+            console.log('screen activity_id: ', activity_id);
+            res.render('screen', { items: activity });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
+});
+
+router.get('/msglist', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    res.redirect('msglist/page/1');
+});
+
+router.get('/msglist/page/:page_id', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
     let rsmq = req.app.get('rsmq');
-    let room_id = req.params.room_id;
+    let activity_id = req.session.activity_id;
     let page_id = req.params.page_id;
 
     let promise_chain = Promise.resolve();
     let ret_promises = [];
     let not_ret_promises = [];
 
+    let totalsent = null;
+
     promise_chain = promise_chain.then(() => {
-            return rsmq.getQueueAttributes({ qname: room_id });
+            return rsmq.getQueueAttributes({ qname: activity_id });
         })
         .then(attr => {
             console.log('attr: ', attr);
-            const request_min_id = NUM_MSG_PER_PAGE * (page_id - 1);
-            const request_max_id = NUM_MSG_PER_PAGE * page_id;
+            const request_min_id = consts.MSG_PER_PAGE_NUM * (page_id - 1) + 1;
+            const request_max_id = consts.MSG_PER_PAGE_NUM * page_id;
             let totalrecv = attr.totalrecv;
-            let totalsent = attr.totalsent;
+            totalsent = attr.totalsent;
 
             // Pop messages before reqest min id
-            while(totalrecv < request_min_id) {
+            while(totalrecv < request_min_id - 1
+                  && totalrecv < totalsent) {
                 not_ret_promises.push(new Promise((resolve, reject) => {
-                        rsmq.popMessage({ qname: room_id })
+                        rsmq.popMessage({ qname: activity_id })
                             .then(data => {
                                 console.log("RSMQ pop data");
                                 let msg_obj = JSON.parse(data.message);
@@ -57,7 +93,7 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
                                 return resolve(msg_obj);
                             })
                             .catch(err => {
-                                console.log(err);
+                                console.error(err);
                             });
                     })
                 );
@@ -66,22 +102,22 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
             }
 
             // Retrieve request messages
-            for (let i = 0; i < NUM_MSG_PER_PAGE; i++) {
+            for (let i = 0; i < consts.MSG_PER_PAGE_NUM; i++) {
                 let msg_id = request_min_id + i;
 
                 // Message not exist for the msg_id
-                if (msg_id >= totalsent)
+                if (msg_id > totalsent)
                     break;
 
                 // Requested message was already in Mongodb
-                if (msg_id < totalrecv) {
-                    console.log('msg_id, totalsent', msg_id, totalsent);
+                if (msg_id <= totalrecv) {
+                    console.log('from mongodb', msg_id);
                     ret_promises.push(new Promise((resolve, reject) => {
-                            Message.findOne({ id: msg_id })
+                            Message.findOne({ activity_id: activity_id, id: msg_id })
                                 .then(msg => {
                                     console.log('Get from mongodb');
                                     if (!msg)
-                                        throw new errors.NotExistError("Message not exists.");
+                                        console.error(new errors.NotExistError("Message not exists. msg_id: " + msg_id));
 
                                     return resolve(msg);
                                 })
@@ -94,9 +130,9 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
 
                 // Pop message from redis queue and store it in Mongodb
                 else if (msg_id <= totalsent) {
-                    console.log('msg_id, totalrecv', msg_id, totalrecv);
+                    console.log('from redis', msg_id);
                     ret_promises.push(new Promise((resolve, reject) => {
-                            rsmq.popMessage({ qname: room_id })
+                            rsmq.popMessage({ qname: activity_id })
                                 .then(data => {
                                     console.log("RSMQ pop data");
                                     let msg_obj = JSON.parse(data.message);
@@ -126,13 +162,14 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
             return Promise
                 .all(ret_promises);
         })
-        .then((msg_list) => {
+        .then(msg_list => {
             console.log(msg_list);
             let sendData = {};
             sendData.msg_list = msg_list;
-            sendData.room_id = room_id;
+            sendData.msg_total_num = totalsent;
+            sendData.activity_id = activity_id;
 
-            res.render('msglist', sendData);
+            res.render('msglist', { items: sendData});
         })
         .catch(err => {
             console.log(err);
@@ -141,60 +178,96 @@ router.get('/msglist/:room_id/page/:page_id', (req, res, next) => {
     return promise_chain;
 });
 
-//some additional html
-router.get('/msglist', (req, res, next) => {
-    res.render('msglist');
+router.get('/blacklist', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let room = utils.get_room_info(req, activity_id);
+
+    res.render('blacklist', {
+        blacklist_user: room.activity.blacklist_user,
+        blacklist_word: room.activity.blacklist_word
+    });
 });
 
-router.get('/manage', (req, res, next) => {
-    res.render('manage');
-});
+router.put('/blacklist', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
 
-router.get('/test', (req, res, next) => {
-    res.render('test');
-});
+    let activity_id = req.session.activity_id;
+    let blocked_id = req.body.blocked_id;
+    let blocked_word = req.body.blocked_word;
 
-router.get('/screen/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
-    let rsmq = req.app.get('rsmq');
+    let room = utils.get_room_info(req, activity_id);
 
-    // FIXME: for test. create queue in create activity
-    rsmq.createQueue({ qname: room_id })
-        .then(done => {
-            console.log("QUEUE created");
+    if (blocked_id)
+        room.activity.blacklist_user.push(blocked_id);
+    if (blocked_word)
+        room.activity.blacklist_word.push(blocked_word);
+
+    room.activity.save()
+        .then(() => {
+            res.send({
+                blacklist_user: room.activity.blacklist_user,
+                blacklist_word: room.activity.blacklist_word
+            });
         })
         .catch(err => {
-            console.error("QUEUE already exists");
-        })
-        .finally(() => {
-            let sendData = {};
-            sendData.room_id = room_id;
-
-            console.log('screen room_id: ', room_id);
-            res.render('screen', sendData);
+            console.error(err);
+            next(err);
         });
 });
 
-router.get('/qrcode/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
+router.delete('/blacklist', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
 
-    console.log('ticket:', req.app.get('ticket' + room_id));
-    res.redirect('https://mp.weixin.qq.com/cgi-bin/showqrcode'
-        + '?ticket=' + req.app.get('ticket' + room_id));
+    let activity_id = req.session.activity_id;
+    let blocked_id = req.body.blocked_id;
+    let blocked_word = req.body.blocked_word;
+
+    let room = utils.get_room_info(req, activity_id);
+
+    let blacklist_user = room.activity.blacklist_user;
+    let blacklist_word = room.activity.blacklist_word;
+
+    let index = blacklist_user.indexOf(blocked_id);
+    if (index >= 0)
+        blacklist_user.splice(index, 1);
+    index = blacklist_word.indexOf(blocked_word);
+    if (index >= 0)
+        blacklist_word.splice(index, 1);
+
+    room.activity.save()
+        .then(() => {
+            res.send({
+                blacklist_user: room.activity.blacklist_user,
+                blacklist_word: room.activity.blacklist_word
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            next(err);
+        });
 });
 
-router.get('/ticket/:room_id', (req, res, next) => {
-    let room_id = req.params.room_id;
+router.get('/ticket', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    console.log('ticket activity_id: ', activity_id);
 
     let sendData = {};
 
-    sendData.expire_seconds = 86400; // 3hours
-    sendData.action_name = 'QR_SCENE';
-    // scene_id 1~100000, scene_str
-    sendData.action_info = {'scene': {'scene_id': room_id}};
+    sendData.expire_seconds = consts.QRCODE_EXPIRE_SEC;
+    sendData.action_name = 'QR_STR_SCENE';
+    // QR_SCENE: scene_id (1~100000) QR_STR_SCENE: scene_str
+    sendData.action_info = { 'scene': { 'scene_str': activity_id } };
 
     utils.get_access_token(req)
-        .then((access_token) => {
+        .then(access_token => {
             let options = {
                 method: 'POST',
                 uri: 'https://api.weixin.qq.com/cgi-bin/qrcode/create' +
@@ -204,26 +277,29 @@ router.get('/ticket/:room_id', (req, res, next) => {
             };
             return rp(options);
         })
-        .then((body) => {
-            // POST succeeded
+        .then(body => {
             // Error from wechat
             if (body.errcode)
                 throw new errors.WeChatResError(body.errmsg);
 
-            req.app.set('ticket' + room_id, body.ticket);
-            res.redirect('http://123.206.96.15/QRCODE/1');
+            res.redirect(utils.get_url_ip('/qrcode?ticket='
+                         + body.ticket));
         })
-        .catch((err) => {
-            // POST failed
-            console.log(err);
+        .catch(err => {
+            console.error(err);
             next(err);
         });
 });
 
-router.get('/', (req, res, next) => {
-    console.log(req.session.id);
-    res.render('index');
-    return Promise.resolve(res);
+router.get('/qrcode', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let ticket = req.query.ticket;
+
+    res.redirect('https://mp.weixin.qq.com/cgi-bin/showqrcode'
+        + '?ticket=' + ticket);
 });
 
 module.exports = router;

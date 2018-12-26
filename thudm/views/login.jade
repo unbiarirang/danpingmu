@@ -6,34 +6,44 @@ html
     script(src="http://cdn.bootcss.com/blueimp-md5/1.1.0/js/md5.js")
     script(src="http://cdn.bootcss.com/blueimp-md5/1.1.0/js/md5.min.js")
     script(type = 'text/javascript').
-      function loginClick() {
-        var id = document.login.input_id.value;
-        var pw = document.login.input_pw.value;
-        
+      $(document).on('click','#login',function(){
+        var id = $('#input_id').val();
+        var pw = $('#input_pw').val();
+         
         if(id==null || id.length==0){
           alert("ID can not be empty");
           return;
-        }
+        } 
         if(pw==null || pw.length==0){
           alert("Password can not be empty!");
           return;
         }
-                 document.login.input_pw.value = md5(pw);
-          document.login.submit();
-      }
+          pw = md5(pw);
+          $.ajax({
+            url:'/auth/login',
+            type:'post',
+            data: {'input_id': id, 'input_pw': pw},
+            datatype: 'json',
+            success: function(data){
+               window.location = "/activity/list";
+            },
+            error: function(data){
+               alert("输入有误，请重试！");
+            }
+          })
+      });
   body#LoginForm
-    .container
-      .login-form
-        .main-div
-          .panel
-            a(href='/') 弹屏目
-          form(method = "post",name = 'login')
-            .form-group
-              input#inputEmail.form-control(type = 'text', placeholder ='账户',name = 'input_id')
-            .form-group
-              input#inputPassword.form-control(type = 'password', placeholder='密码',name = 'input_pw')
-            .forgot
-              a 没有账号?
-              a(href='signup') 注册
-            button.btn.btn-primary(onClick = 'loginClick()') 登陆
+   .container
+    .login-form
+      .main-div
+        .panel
+          a(href='/') 弹屏目
+        .form-group
+          input.form-control(type = 'text', placeholder ='账户',id = 'input_id')
+        .form-group
+          input.form-control(type = 'password', placeholder='密码',id = 'input_pw')
+        .forgot
+          a 没有账号?
+          a(href='signup') 注册
+        button.btn.btn-primary(id='login') 登陆
 

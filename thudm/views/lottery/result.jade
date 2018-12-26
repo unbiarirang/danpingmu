@@ -1,0 +1,56 @@
+doctype transitional
+html()
+  head
+    meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+    title 抽奖结果
+  body
+    script(src = "/js/ajax.js") 
+    script(type='text/javascript').
+      var information = !{items != null? JSON.stringify(items): 'null'};
+      var info = new Array();
+      var result = information.result;
+      $(document).ready(function(){
+        console.log(result);
+        var cnt = 0;
+        for(var i = 0; i < result.length; i++){
+          $('body').css("background-image","url(/images/bg.jpg)"); 
+          $('body').append('<div class = winner id = winner' + i + ' style = "width:' + (100/(result.length)) + 'vw;"></div>');
+          $('#winner' + i).append('<div class = information id = info' + i + '></div>');
+          $('#info' + i).append('<div class = profile id = profile' + i + '></div>');
+          $('#info' + i).append('<div class = name>' + result[i].nickname + '</div>');
+          $('#profile' + i).append('<img class = "prize" src =' + result[i].head_img_url + '>' );
+        }
+      });
+ 
+   style(type = "text/css").
+    div.winner{
+    position: relative;
+    float: left;
+    height: 100vh;
+    }
+    img.prize{
+    position:relative;
+    left: 35%;
+    width: 30%;
+    height:30%;
+    border-radius:20px;
+    text-align:center;
+    top: 40%;
+    }
+    div.name{
+    position:relative;
+    text-align:center;
+    font-weight:800;
+    font-size:4vw;
+    }
+    body{
+    background: url(/images/bg.jpg) no-repeat;
+    height:100%;
+    width:100%;
+    overflow:hidden;
+    background-size:cover;
+    }
+    div.information{
+    position:relative;
+    top:20%;
+    }

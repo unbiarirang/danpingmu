@@ -1,0 +1,117 @@
+extends ../layout.jade
+block contents
+        #M2.content
+          .container-fluid
+            .row
+              .col-md-12
+                .card.card-plain
+                  .header
+                    h4.title 投票列表
+                     span(style="float:right")
+                      button.btn.btn-info.btn-fill(type='submit' id='make')创建
+                  .content.table-responsive.table-full-width
+                    table.table.table-hover
+                      thead
+                        tr  
+                          th 序号
+                          th 主题
+                          th 说明
+                          th 状态
+                          th 操作
+                      tbody
+block script
+    script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
+    script(src='/assets/js/bootstrap.min.js', type='text/javascript')
+    // Charts Plugin
+    // Notifications Plugin
+    script(src='/socket.io/socket.io.js')
+    script(src='/assets/js/bootstrap-notify.js')
+    // Light Bootstrap Table Core javascript and methods for Demo purpose
+    script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
+    // Light Bootstrap Table DEMO methods, don't include it in your project!
+    script(type='text/javascript').
+     var activities = !{items != null? JSON.stringify(items): 'null'}; 
+     var socket = io();
+     $(document).ready(function(){
+        var cnt = 0;
+        console.log(activities);
+        $('#M' + $('.content').attr('id')).attr('class','active');
+        activities.forEach((act) =>{
+          $('tbody').append("<tr id=tr" + cnt + "></tr>");
+          $('#tr' + cnt).append($("<td>").text(cnt));
+          if (act.status == 'OVER' || act.status == 'ONGOING')
+            $('#tr' + cnt).append("<td>" + act.title + "</td>");
+          else
+            $('#tr' + cnt).append("<td><a href=" + act._id + " class=vote_title >" + act.title + "</a></td>");
+          $('#tr' + cnt).append($("<td>").text(act.sub_title));
+          $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
+          if(act.status == 'READY')
+            $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='start btn btn-success btn-fill' id=" + cnt + ">开始</button></td>");
+          else if (act.status == 'ONGOING')
+            $('#tr' + cnt).append('<td id = btn' + cnt + " style='padding:5px'><button class='display btn btn-info btn-fill' id=dis" + cnt + ">显示</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>'); 
+          else if (act.status == 'OVER')
+            $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='result btn btn-info btn-fill' id=" + cnt + ">查看结果</button></td>");
+          console.log(act._id);
+          if(act.status == 'ONGOING')
+              $('#td' + cnt).css({'color':'green'});
+          else if(act.status == 'READY')
+              $('#td' + cnt).css({'color':'orange'});
+          else
+              $('#td' + cnt).css({'color':'red'});
+          cnt++;
+        }); 
+      });
+      $(document).on('click','.start',function(){
+         $.ajax({
+           url: '/vote/' + activities[this.id]._id + '/start',
+           type: 'post',
+           data: {'msg': '/start'},
+           datatype: 'json',
+           success: function(data){
+             window.location = '/vote/list';
+           },
+           error:function(data){
+           
+           }
+         })
+      });
+      $(document).on('click', '.result', function(){
+        window.open('/vote/' + activities[this.id]._id + '/result');
+      });
+      $(document).on('click','.display',function(){ 
+         var getid = this.id.substr(3,this.id.length-1);
+         $('#btn' + getid).empty();
+         $('#btn' + getid).append('<td id = btn' + getid + "><button class='back btn btn-warning btn-fill' id=" + getid + ">返回</button></td>");
+         activities[getid].type = 'vote';
+         console.log(activities[getid]);
+         socket.emit('displayVote', activities[getid]); 
+      });
+      $(document).on('click', '.back',function(){
+         socket.emit('quitVote', activities[this.id]);
+         $('#btn' + this.id).remove();
+         $('#tr' + this.id).append('<td id = btn' + this.id + "><button class='display btn btn-info btn-fill' id=dis" + this.id + ">显示</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + this.id + '>结束</button></td>');
+      });
+      $(document).on('click', '.stop',function(){
+         $.ajax({
+           url: '/vote/' + activities[this.id]._id + '/finish',
+           type: 'post',
+           data: {'msg': '/finish'},
+           datatype: 'json',
+           success: function(data){
+             window.location = '/vote/list';
+           },
+           error:function(data){
+           
+           }
+         })
+      });
+      $(document).on('click','#make',function(){
+         window.location = '/vote/create';
+      })
+
+    style.
+     .vote_title:hover{color:red;}
+     .vote_title{
+       text-decoration:underline;
+       color:rgb(0,102,204);
+     }

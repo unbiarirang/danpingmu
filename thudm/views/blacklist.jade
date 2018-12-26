@@ -1,0 +1,289 @@
+extends layout.jade
+block contents
+        #M4.content
+            .row
+              .col-md-6
+               .card
+                .header
+                  h4.title 添加过滤词
+                .content
+                 .row
+                  .col-md-5
+                    .form-group
+                      label 过滤词
+                      input.form-control(type='text' id='word')
+                    button.makeit.btn.btn-info.btn-fill(type='submit' id='addword') 添加
+                 
+              .col-md-6
+               .card
+                .header 
+                  h4.title 添加黑名单
+                .content
+                 .row
+                  .col-md-5
+                   .form-group
+                     label 名字
+                     input.form-control(type='text' id='user')
+                   button.btn.btn-info.btn-fill(type='submit' id='adduser') 添加
+              .col-md-6
+                .card.card-plain
+                  .header
+                    h4.title 过滤词
+                     span(style="float:right")
+                      button.btn.btn-danger.btn-fill(type='submit' class='deleteW' id='deleteword') 批量删除
+                  .content.table-responsive.table-full-width
+                    table.table.table-hover
+                      thead
+                        tr
+                          th 
+                            input#wordall(type='checkbox' class='checkW')
+                          th 内容
+                          th  
+                      tbody(id = "wordlist")
+               .col-md-6
+                .card.card-plain
+                  .header
+                    h4.title 黑名单
+                     span(style="float:right")
+                      button.btn.btn-danger.btn-fill(type='submit' class='deleteU' id='deleteuser') 批量删除
+                  .content.table-responsive.table-full-width
+                    table.table.table-hover
+                      thead
+                        tr
+                          th 
+                            input#userall(type='checkbox' class='checkU')
+                          th 内容
+                      tbody(id = "userlist")
+
+block script
+    script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
+    script(src='/assets/js/bootstrap.min.js', type='text/javascript')
+    // Charts Plugin
+    script(src='/assets/js/chartist.min.js')
+    // Notifications Plugin
+    script(src='/assets/js/bootstrap-notify.js')
+    // Light Bootstrap Table Core javascript and methods for Demo purpose
+    script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
+    script.
+      var userlist = !{blacklist_user != null? JSON.stringify(blacklist_user):'null'};
+      var wordlist = !{blacklist_word != null? JSON.stringify(blacklist_word):'null'};
+      var cntU = 0;
+      var cntW = 0;
+      $(document).ready(function(){
+        $('#M' + $('.content').attr('id')).attr('class','active');
+        userlist.forEach((user) =>{
+          $('#userlist').append("<tr id=trU" + cntU + "></tr>");
+          $("#trU" + cntU).append("<td><input type='checkbox' class='check checkU' id=U" + cntU + ">");
+          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user + "</td>")
+          $("#trU" + cntU).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = U" + cntU + ">删除</button></td>");
+          cntU++;
+        }) 
+        wordlist.forEach((word) =>{
+          $('#wordlist').append("<tr id=trW" + cntW + "></tr>");
+          $("#trW" + cntW).append("<td><input type='checkbox' class='checkW check' id=W" + cntW + ">");
+          $("#trW" + cntW).append("<td id=wordW" + cntW + ">" + word + "</td>")
+          $("#trW" + cntW).append("<td><button class='deleteW btn btn-danger btn-fill' style='float:right' id = W" + cntW + ">删除</button></td>");
+          cntW++;
+        })
+        console.log(wordlist);
+      });
+      $(document).on('click','#addword',function(){
+        var word = $('#word').val();
+        console.log(word);
+        if(word == ""){
+          alert("过滤词不能为空！");
+          return;
+        }
+        $.ajax({
+          type: "PUT",
+          data: {"blocked_word": word},
+          datatype: "json",
+          url: "/blacklist",
+          success: function(data){
+            $('#wordlist').append("<tr id=trW" + cntW + "></tr>");
+            $("#trW" + cntW).append("<td><input type='checkbox' class='check checkW' id=W" + cntW + ">");
+            $("#trW" + cntW).append("<td id=wordW" + cntW + ">" + word + "</td>")
+            $("#trW" + cntW).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = W" + cntW + ">删除</button></td>");
+            cntW++;
+          },
+          error: function(data){
+          }
+        });
+      });
+      $(document).on('click','#adduser',function(){
+        var user = $('#user').val();
+        if(user == ""){
+          alert("名字不能为空！");
+          return;
+        }
+        $.ajax({
+          type: "PUT",
+          data: {"blocked_id": user},
+          datatype: "json",
+          url: "/blacklist",
+          success: function(data){
+            $('#userlist').append("<tr id=trU" + cntU + "></tr>");
+            $("#trU" + cntU).append("<td><input type='checkbox' class='check checkU' id=U" + cntU + ">");
+            $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user + "</td>")
+            $("#trU" + cntU).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = U" + cntU + ">删除</button></td>");
+            cntU++;
+          },
+          error: function(data){
+          }
+        });
+      });
+      $(document).on('click','.deleteU',function(){
+        if(this.id == 'deleteuser'){
+          $('.checkU').each(function(){
+            var getid = this.id;
+            if(this.checked == 1){
+               console.log(getid);
+               var userid = $('#name' + getid).text();
+               console.log(userid);
+               $.ajax({
+                 type:"DELETE",
+                 data:{'blocked_id':userid},
+                 datatype:"json",
+                 url:"/blacklist",
+                 success: function(data){
+                   $('#tr' + getid).remove();
+                 },
+                 error: function(data){
+                 }
+               });
+            }
+          });
+        }
+        else{
+          var getid = this.id;
+          var userid = $('#name' + getid).text();
+          console.log(userid);
+          $.ajax({
+            type:"DELETE",
+            data:{'blocked_id':userid},
+            datatype:"json",
+            url:"/blacklist",
+            success: function(data){
+              $('#tr' + getid).remove();
+            },
+            error: function(data){
+            }
+          });
+        }
+      });
+      $(document).on('click','.deleteW',function(){
+        if(this.id == 'deleteword'){
+          $('.checkW').each(function(){
+            var getid = this.id;
+            if(this.checked == 1){
+               console.log(getid);
+               var wordcontent = $('#word' + getid).text();
+               console.log(wordcontent);
+               $.ajax({
+                 type:"DELETE",
+                 data:{'blocked_word':wordcontent},
+                 datatype:"json",
+                 url:"/blacklist",
+                 success: function(data){
+                   $('#tr' + getid).remove();
+                 },
+                 error: function(data){
+                 }
+               });
+            }
+          });
+        }
+        else{
+          var getid = this.id;
+          console.log(getid);
+          var wordcontent = $('#word' + getid).text();
+          console.log(wordcontent);
+          $.ajax({
+            type:"DELETE",
+            data:{'blocked_word':wordcontent},
+            datatype:"json",
+            url:"/blacklist",
+            success: function(data){
+              $('#tr' + getid).remove();
+            },
+            error: function(data){
+            }
+          });
+        }
+      })
+      $(document).on('click','.checkU',function(){
+        if(this.id == 'userall'){
+          if(this.checked == 1){
+             $('.checkU').each(function(){
+               this.checked = 1;
+             });
+          }
+          else{
+            $(".checkU").each(function(){
+              this.checked = 0;
+            })
+          } 
+        }
+        else{
+          if(this.checked == 0)
+            this.checked = 0;
+          else
+            this.checked = 1;
+        }
+      });
+      $(document).on('click','.checkW',function(){
+        if(this.id == 'wordall'){
+          if(this.checked == 1){
+             $('.checkW').each(function(){
+               this.checked = 1;
+             });
+          }
+          else{
+            $(".checkW").each(function(){
+              this.checked = 0;
+            })
+          } 
+        }
+        else{
+          if(this.checked == 0)
+            this.checked = 0;
+          else
+            this.checked = 1;
+        }
+      }); 
+    style.
+      div.Candidates{
+      position:relative;
+      float:left;
+      width:50%;
+      height:60px;
+      }
+      div.AllCandy{
+      position:relative;
+      width:100%;
+      height:40px;
+      }
+      div.Profile{
+      position:relative;
+      float:left;
+      width:60px;
+      height:60px;
+      background-size:100% 100%;
+      background-repeat:no-repeat;
+      }
+      div.Name{
+      position:relative;
+      float:left;
+      top:50%;
+      width:auto;
+      height:60px;
+      }
+      div.CandyArray{
+      position:relative;
+      height:60px;
+      width:100%;
+      }
+      div.del{
+      position:relative;
+      z-index:1;
+      }

@@ -1,4 +1,9 @@
 node_modules/
 config.json
+config_test.json
 *.sw*
 */public/images/fromuser/*
+*/public/images/activity/*
+*/public/images/temp/*
+tags
+coverage/
