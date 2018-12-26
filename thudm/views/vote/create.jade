@@ -83,10 +83,11 @@ block script
         $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
         $('#pic' + CandyNum).css("background-image","url(" + Profile +")");
         $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
+ 
         $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
         CandyNum++;
       });
-      $(document).on('click','a.DeleteCandy',function(){
+      $(document).on('click','.DeleteCandy',function(){
         $('#' + this.id).remove();
       });
       $('#candidate_image').on('change',function(){
