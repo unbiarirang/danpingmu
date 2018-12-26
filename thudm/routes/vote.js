@@ -154,12 +154,12 @@ router.get('/:vote_id', (req, res, next) => {
     return res.redirect('detail');
 });
 
-router.post('/start', (req, res, next) => {
+router.post('/:vote_id/start', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-    let vote_id = req.session.vote_id;
+    let vote_id = req.params.vote_id;
 
     Vote.findById(vote_id)
         .then(vote => {
@@ -178,12 +178,12 @@ router.post('/start', (req, res, next) => {
         });
 });
 
-router.post('/finish', (req, res, next) => {
+router.post('/:vote_id/finish', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-    let vote_id = req.session.vote_id;
+    let vote_id = req.params.vote_id;
 
     Vote.findById(vote_id)
         .then(vote => {

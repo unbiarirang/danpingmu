@@ -24,11 +24,12 @@ const activity_schema = new mongoose.Schema({
             message: '{VALUE} is not an integer value'
         }
     },
-    bullet_colors: { type: [String], default: ["white"], required: true },
+    bullet_colors: { type: [String], required: true,  default: ["white"] },
     bg_img_url: String,
     list_media_id: String,
     blacklist_user: [String],
     blacklist_word: [String],
+    review_flag: { type: Boolean, required: true, default: true },
     status: { type: String, enum: STATUS , default: 'ONGOING' },
 });
 exports.Activity = mongoose.model('Activity', activity_schema);
@@ -48,7 +49,7 @@ const vote_schema = new mongoose.Schema({
     },
     options: { type: [String], required: true },
     pic_urls: { type: [String], required: true },
-    status: { type: String, enum: STATUS , default: 'READY' },
+    status: { type: String, enum: STATUS, required: true, default: 'READY' },
 });
 exports.Vote = mongoose.model('Vote', vote_schema);
 
@@ -65,7 +66,17 @@ const lottery_schema = new mongoose.Schema({
             message: '{VALUE} is not an integer value'
         }
     },
-    status: { type: String, enum: STATUS , default: 'READY' },
+    duration: {
+        type: Number,
+        min: 10, // second
+        requred: true,
+        validate: { // Validate integer
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        },
+        default: 20
+    },
+    status: { type: String, enum: STATUS, required: true, default: 'READY' },
     result: { type: Array },
 });
 exports.Lottery = mongoose.model('Lottery', lottery_schema);

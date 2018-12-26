@@ -132,6 +132,7 @@ const updateLottery = (lottery, req) => {
     lottery.title = req.body.title;
     lottery.sub_title = req.body.sub_title;
     lottery.winner_num = req.body.winner_num;
+    lottery.duration = req.body.duration;
     return lottery.save();
 }
 

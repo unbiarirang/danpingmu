@@ -338,10 +338,10 @@ describe('POST /activity/upload/bg', () => {
     });
 });
 
-describe('POST /activity/finish', () => {
+describe('POST /activity/:activity_id/finish', () => {
     test('It needs login to finish and destroy the Activity', (done) => {
         return request(app)
-            .post('/activity/finish')
+            .post('/activity/' + activity_id + '/finish')
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();

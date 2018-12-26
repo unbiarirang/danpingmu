@@ -21,30 +21,36 @@ router.post('/', (req, res, next) => {
             utils.get_user_info(req)
                 .then(user_info => {
                     let activity_id = user_info.activity_id;
+
                     // User not belong to any activityactivity_id;
                     // if (!activity_id) return;
                     if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72';// FIXME: for test
                     let room = utils.get_room_info(req, activity_id);
                     let content = utils.get_wechat_input(req, 'content');
+                    let open_id = user_info.open_id;
 
-                    if (room.is_blocked_user(user_info.open_id)
+                    if (room.is_blocked_user(open_id)
                         || room.is_blocked_word(content)
                         || content === '[Unsupported Message]')
                         return;
 
-                    let nickname = user_info.nickname;
-                    let head_img_url = user_info.head_img_url;
-
                     let msg_obj = {
                         "activity_id": activity_id,
+                        "open_id": open_id,
                         "id": room.gen_id(req.app.get('redis')),
                         "type": "text",
                         "content": content,
-                        "nickname": nickname,
-                        "head_img_url": head_img_url,
+                        "nickname": user_info.nickname,
                         "review_flag": false
                     };
 
+                    let review_flag = room.activity.review_flag;
+
+                    // Display the message directly on the screen
+                    if (!review_flag)
+                        return socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
+
+                    // Store the message in the redis for review
                     let rsmq = req.app.get('rsmq');
                     rsmq.sendMessage({
                             qname: activity_id,
@@ -53,8 +59,6 @@ router.post('/', (req, res, next) => {
                         .then(data => {
                             console.log("RSMQ data sent", data);
                         });
-
-                    //socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
                 })
                 .catch(err => {
                     console.error(err);
@@ -76,16 +80,14 @@ router.post('/', (req, res, next) => {
 
                     pic_url = utils.get_wechat_input(req, 'picurl');
                     msg_id = utils.get_wechat_input(req, 'msgid');
-                    let nickname = user_info.nickname;
-                    let head_img_url = user_info.head_img_url;
                     let room = utils.get_room_info(req, activity_id);
                     let msg_obj = {
                         "activity_id": activity_id,
+                        "open_id": user_info.open_id,
                         "id": room.gen_id(req.app.get('redis')),
                         "type": "image",
                         "content": msg_id, // Save image as the msg_id
-                        "nickname": nickname,
-                        "head_img_url": head_img_url,
+                        "nickname": user_info.nickname,
                         "review_flag": false
                     };
                     console.log('Send to room', activity_id);

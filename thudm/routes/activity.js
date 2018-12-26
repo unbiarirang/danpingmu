@@ -89,7 +89,7 @@ router.get('/:activity_id', (req, res, next) => {
     return res.redirect('detail');
 });
 
-router.post('/finish/:activity_id', (req, res, next) => {
+router.post('/:activity_id/finish', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
@@ -112,6 +112,7 @@ const updateActivity = (act, req) => {
     act.bullet_color_num = req.body.bullet_color_num;
     act.bullet_colors = req.body.bullet_colors;
     act.bg_img_url = req.body.bg_img_url;
+    act.review_flag = req.body.review_flag;
     return act.save();
 }
 
