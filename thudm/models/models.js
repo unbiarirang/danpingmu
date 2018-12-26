@@ -87,6 +87,7 @@ const message_schema = new mongoose.Schema({
     type: { type: String, enum: MSG_TYPE, required: true },
     content: { type: String, required: true },
     nickname: { type: String, required: true },
+    open_id: { type: String, required: true },
     head_img_url: { type: String, required: true },
     review_flag: { type: Boolean, required: true, default: false },
 });

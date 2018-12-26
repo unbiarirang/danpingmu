@@ -27,6 +27,7 @@ router.post('/', (req, res, next) => {
                     if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72';// FIXME: for test
                     let room = utils.get_room_info(req, activity_id);
                     let content = utils.get_wechat_input(req, 'content');
+                    content = utils.filter_content(content);
                     let open_id = user_info.open_id;
 
                     if (room.is_blocked_user(open_id)
@@ -41,6 +42,7 @@ router.post('/', (req, res, next) => {
                         "type": "text",
                         "content": content,
                         "nickname": user_info.nickname,
+                        "head_img_url": user_info.head_img_url,
                         "review_flag": false
                     };
 
@@ -88,6 +90,7 @@ router.post('/', (req, res, next) => {
                         "type": "image",
                         "content": msg_id, // Save image as the msg_id
                         "nickname": user_info.nickname,
+                        "head_img_url": user_info.head_img_url,
                         "review_flag": false
                     };
                     console.log('Send to room', activity_id);
@@ -100,7 +103,9 @@ router.post('/', (req, res, next) => {
                                 });
                 })
                 .then(msg_obj => {
-                    socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
+                    // Display the message directly on the screen
+                    if (!review_flag)
+                        return socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
 
                     let rsmq = req.app.get('rsmq');
                     return rsmq.sendMessage({

@@ -570,3 +570,8 @@ const get_multer = (file_name) => {
     });
 };
 exports.get_multer = get_multer;
+
+const filter_content = (content) => {
+    return content.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;");
+};
+exports.filter_content = filter_content;
