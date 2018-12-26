@@ -306,8 +306,8 @@ describe('GET /lottery/:lottery_id/result', () => {
             .set('Accept', 'application/json')
             .then(res => {
                 setTimeout(() => {
-                    let result = JSON.parse(res.text);
-                    expect(result[0].open_id).toBe(open_id);
+                    console.log('@@@@@', res.text);
+                    expect(res.text).toMatch('{"duration":20,"status":"OVER","result":[{"open_id":"o9T2M1c89iwXQ4RG7pdEOzfa55sc"}],"_id":"5c18e4841b2ff83af2c56309","activity_id":"5c03ba2fec64483fe182a7d2","title":"draw 1","sub_title":"changed sub title","winner_num":3');
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
@@ -417,7 +417,8 @@ describe('POST /lottery and PUT /lottery', () => {
             .send({
                 title: title,
                 sub_title: sub_title,
-                winner_num: 1
+                winner_num: 1,
+                duration: 20,
             })
             .then(res => {
                 setTimeout(() => {
@@ -434,7 +435,8 @@ describe('POST /lottery and PUT /lottery', () => {
             .send({
                 title: title,
                 sub_title: changed_sub_title,
-                winner_num: 3
+                winner_num: 3,
+                duration: 20,
             })
             .then(res => {
                 setTimeout(() => {
@@ -459,7 +461,8 @@ describe('POST /lottery and PUT /lottery', () => {
             .send({
                 title: title,
                 sub_title: changed_sub_title,
-                winner_num: wrong_type_winner_num
+                winner_num: wrong_type_winner_num,
+                duration: 20,
             })
             .then(res => {
                 setTimeout(() => {
@@ -476,7 +479,8 @@ describe('POST /lottery and PUT /lottery', () => {
             .send({
                 title: title,
                 sub_title: changed_sub_title,
-                winner_num: 1
+                winner_num: 1,
+                duration: 20,
             })
             .then(res => {
                 setTimeout(() => {

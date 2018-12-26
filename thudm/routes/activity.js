@@ -101,6 +101,29 @@ router.post('/:activity_id/finish', (req, res, next) => {
     return res.sendStatus(200);
 });
 
+router.put('/review_flag', (req, res, next) => {
+    if (!req.session.login)
+        throw new errors.NotLoggedInError();
+
+    let activity_id = req.session.activity_id;
+    let room = utils.get_room_info(req, activity_id);
+    console.log(room);
+
+    room.activity.review_flag = req.body.review_flag;
+    room.activity.save()
+        .then(act => {
+            utils.update_room_info(req, { activity: act });
+        })
+        .then(() => {
+            return res.sendStatus(200);
+        })
+        .catch(err => {
+            room.recover();
+            console.error(err);
+            next(err);
+        });
+});
+
 const createActivity = (req) => {
     let act = new Activity();
     return updateActivity(act, req);
@@ -112,9 +135,19 @@ const updateActivity = (act, req) => {
     act.bullet_color_num = req.body.bullet_color_num;
     act.bullet_colors = req.body.bullet_colors;
     act.bg_img_url = req.body.bg_img_url;
-    act.review_flag = req.body.review_flag;
     return act.save();
 }
+
+// For test
+router.post('/:activity_id/create/queue', (req, res, next) => {
+    let activity_id = req.params.activity_id;
+    let rsmq = req.app.get('rsmq');
+    rsmq.createQueue({ qname: activity_id })
+        .then(() => {
+            console.log("QUEUE created");
+            res.sendStatus(200);
+        });
+});
 
 // Create activity
 router.post('/', (req, res, next) => {
@@ -129,7 +162,7 @@ router.post('/', (req, res, next) => {
 
             let rsmq = req.app.get('rsmq');
             rsmq.createQueue({ qname: activity_id })
-                .then(done => {
+                .then(() => {
                     console.log("QUEUE created");
                 });
 

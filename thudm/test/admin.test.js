@@ -8,7 +8,7 @@ let admin_session = null;
 
 const input_id = 'bbb';
 const input_pw = '12345678';
-const activity_id = '5c03ba2fec64483fe182a7d2';
+const activity_id = '5c238c720b380cd6109ed126';
 const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
 const open_id = 'testopenid';
 const word = 'xxx';

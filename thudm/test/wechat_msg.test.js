@@ -3,7 +3,7 @@ const fs = require('fs');
 const app = require('../app_test');
 const utils = require('../common/utils');
 
-const activity_id = '5c03ba2fec64483fe182a7d2';
+const activity_id = '5c238c720b380cd6109ed126';
 const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 const wrong_open_id = 'aaa2M1c89iwXQ4RG7pdEOzfa55sc';
 

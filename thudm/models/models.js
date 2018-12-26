@@ -29,7 +29,7 @@ const activity_schema = new mongoose.Schema({
     list_media_id: String,
     blacklist_user: [String],
     blacklist_word: [String],
-    review_flag: { type: Boolean, required: true, default: true },
+    review_flag: { type: Boolean, default: true },
     status: { type: String, enum: STATUS , default: 'ONGOING' },
 });
 exports.Activity = mongoose.model('Activity', activity_schema);

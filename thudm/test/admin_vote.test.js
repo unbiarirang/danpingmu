@@ -7,7 +7,7 @@ const consts = require('../common/consts');
 let admin_session = null;
 const activity_id = '5c03ba2fec64483fe182a7d2';
 const vote_id = '5c1880cd5af1b8404b4d63ae';
-const vote_id_ready = '5c19fdb997519755f9bf296f';
+const vote_id_ready = '5c239a590b380cd6109ed127';
 const wrong_vote_id = 'aaa4f7be1cab9d6c156f401c';
 const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 const admin_id = 'bbb';
@@ -202,6 +202,11 @@ describe('GET /vote/:vote_id/result and GET /vote/result', () => {
 });
 
 describe('GET /vote/:vote_id/user', () => {
+    beforeAll(done => {
+        models.Vote.updateOne({_id: vote_id }, { status: "ONGOING" })
+            .then(() => { done(); });
+    });
+
     test('It should return vote information with the vote id for user', (done) => {
             request(app)
             .get('/vote/' + vote_id + '/user')
@@ -224,7 +229,7 @@ describe('GET /vote/:vote_id/user', () => {
             });
     });
 
-    test('It should fail to return vote information of inactive vote activity', (done) => {
+    test('It should fail to return vote page for inactive vote activity', (done) => {
             request(app)
             .get('/vote/' + vote_id_ready + '/user')
             .then(res => {
@@ -444,10 +449,10 @@ describe('POST /vote and PUT /vote', () => {
     });
 });
 
-describe('POST /vote/start', () => {
+describe('POST /vote/:vote_id/start', () => {
     test('It needs login to start a vote activity', (done) => {
         return request(app)
-            .post('/vote/start')
+            .post('/vote/' + vote_id + '/start')
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -456,7 +461,7 @@ describe('POST /vote/start', () => {
 
     test('It should start the vote activity', (done) => {
         return admin_session
-            .post('/vote/start')
+            .post('/vote/' + vote_id + '/start')
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
@@ -466,10 +471,10 @@ describe('POST /vote/start', () => {
     });
 });
 
-describe('POST /vote/finish', () => {
+describe('POST /vote/:vote_id/finish', () => {
     test('It needs login to finish a vote activity', (done) => {
         return request(app)
-            .post('/vote/finish')
+            .post('/vote/' + vote_id + '/finish')
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -478,7 +483,7 @@ describe('POST /vote/finish', () => {
 
     test('It should finish the vote activity', (done) => {
         return admin_session
-            .post('/vote/finish')
+            .post('/vote/' + vote_id + '/finish')
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);

@@ -45,7 +45,6 @@ router.get('/create', (req, res, next) =>{
     res.render('vote/create');
 });
 
-
 // Admin get vote result
 router.get('/result', (req, res, next) => {
     if (!req.session.login)

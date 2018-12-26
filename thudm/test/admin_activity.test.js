@@ -7,7 +7,7 @@ const consts = require('../common/consts');
 const fs = require('fs-extra');
 
 let admin_session = null;
-const activity_id = '5c03ba2fec64483fe182a7d2';
+const activity_id = '5c238c720b380cd6109ed126';
 const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
 const admin_id = 'bbb';
 const title = 'test activity';
@@ -152,6 +152,7 @@ describe('POST /activity and PUT /activity', () => {
                     expect(keys).toContain('blacklist_word');
                     expect(keys).toContain('status');
                     expect(keys).toContain('bg_img_url');
+                    expect(keys).toContain('review_flag');
                     expect(result.title).toBe(title);
                     expect(result.sub_title).toBe(sub_title);
                     expect(res.statusCode).toBe(200);
@@ -211,6 +212,7 @@ describe('POST /activity and PUT /activity', () => {
                     expect(keys).toContain('blacklist_user');
                     expect(keys).toContain('blacklist_word');
                     expect(keys).toContain('status');
+                    expect(keys).toContain('review_flag');
                     expect(result.title).toBe(title);
                     expect(result.sub_title).toBe(changed_sub_title);
                     expect(res.statusCode).toBe(200);
@@ -250,7 +252,7 @@ describe('POST /activity and PUT /activity', () => {
     });
 });
 
-describe('POST /activity/upload/list', () => {
+describe.skip('POST /activity/upload/list', () => {
     const src_path = 'public/images/list.png'; // dummy image
     const dest_path = consts.STORE_IMG_PATH
                       + '/' + admin_id + '_list.png';
@@ -339,9 +341,16 @@ describe('POST /activity/upload/bg', () => {
 });
 
 describe('POST /activity/:activity_id/finish', () => {
+    let activitiy_id_to_finish;
+
+    beforeAll(done => {
+        models.Activity.findOne({ title: title })
+            .then(act => { activity_id_to_finish = act._id; done(); });
+    });
+
     test('It needs login to finish and destroy the Activity', (done) => {
         return request(app)
-            .post('/activity/' + activity_id + '/finish')
+            .post('/activity/' + activity_id_to_finish + '/finish')
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -350,7 +359,7 @@ describe('POST /activity/:activity_id/finish', () => {
 
     test('It should finish and destroy the Activity', (done) => {
         return admin_session
-            .post('/activity/finish')
+            .post('/activity/' + activity_id_to_finish + '/finish')
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
