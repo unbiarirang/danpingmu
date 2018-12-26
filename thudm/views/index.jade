@@ -8,37 +8,43 @@ html(xmlns='http://www.w3.org/1999/xhtml')
     link(rel='stylesheet', href='js/slide/default.css', type='text/css', media='screen')
     link(rel='stylesheet', href='js/slide/nivo-slider.css', type='text/css', media='screen')
 
-    script(src='js/ajax.js')
-    script.
-      !window.jQuery && document.write('<script src="js/jquery-1.4.3.min.js"><\\/script>');
+    script(src='/js/ajax.js',text='text/javascript')
     script(type='text/javascript', src='js/fancybox/jquery.fancybox-1.3.4.pack.js')
     link(rel='stylesheet', type='text/css', href='js/fancybox/jquery.fancybox-1.3.4.css', media='screen')
-    script(type='text/javascript').
+    script.
       var id = !{id !=null? JSON.stringify(id):'null'};
       console.log(id);
       $(document).ready(function() {
         $("a#fancybox").fancybox();
         if(id.login == true){
           $('#iflogin').text('你好!'); 
-          $('#iflogin').append('<a style="font-size:15px;color:blue" href=/activity/list>' + id.admin_id + '&nbsp&nbsp&nbsp&nbsp</a>');
+          $('#iflogin').append('<a style="font-size:15px;" href=/activity/list>' + id.admin_id + '&nbsp&nbsp&nbsp&nbsp</a>');
           $('#log').text('登出');
-          $('#log').attr('href','/');
         }
-      });
-      $(document).on('click', '#log', function(){
-        $.ajax({
-          url: '/auth/logout',
-          type: 'post',
-          data: {'cmd': 'logout'},
-          datatype: 'json',
-          success:function(data){
-            alert("成功登出！");
-          },
-          error:function(data){
-            alert("您已登出");
+        $('#log').click(function(){
+          if(id.login == true){
+            console.log('ha');
+            $.ajax({
+              url: '/auth/logout',
+              type: 'post',
+              data: {'cmd': 'logout'},
+              datatype: 'json',
+              success:function(data){
+                alert("成功登出！");
+                window.location= '/';
+              },
+              error:function(data){
+                alert("您已登出");
+              }
+            })
           }
-        })
+          else
+            window.location = "/auth/login";
+        });
+        if(id.login == true)
+          $('#info').append("<a href='/activity/list' style='color:blue;font-size:15px'>&nbsp&nbsp 管理者页面</a>");
       });
+
 
     style.
       .fancy a img {
@@ -60,10 +66,10 @@ html(xmlns='http://www.w3.org/1999/xhtml')
       .nav
         // start navigation				
         ul
-          li.login
+          li.login(id='info')
             br
             label(id = 'iflogin' style='font-size:15px') 您还未登陆  
-            a(id='log' href='/auth/login',style='color:red;font-size:15px') &nbsp&nbsp登陆
+            a(id='log', href='javascript:void(0)',style='color:red;font-size:15px') &nbsp&nbsp登陆
         ul
           li.title
             a(href='#') About

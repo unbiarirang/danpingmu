@@ -41,17 +41,17 @@ block script
           if(act.status == 'OVER')  
             $('#tr' + cnt).append("<td>" + act.title + "</td>");
           else
-            $('#tr' + cnt).append("<td id=linktd" + cnt +  "><a href=" + act._id + " id = link" + cnt + ">" + act.title + "</a></td>");
+            $('#tr' + cnt).append("<td id=linktd" + cnt +  "><a href=" + act._id + " id = link" + cnt + " class=lottery_title >" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
           console.log(act._id);
           if(act.status == 'OVER'){
               $('#td' + cnt).css({'color':'red'});
-              $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='result btn btn-info btn-fill' id=" + cnt + '>查看结果</button></td>');
+              $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='result btn btn-info btn-fill' id=" + cnt + '>查看结果</button></td>');
           }
           else{
               $('#td' + cnt).css({'color':'green'});
-              $('#tr' + cnt).append("<td id = btn" + cnt + "><button class='start btn btn-success btn-fill' id=" + cnt + '>开始</button></td>');
+              $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='start btn btn-success btn-fill' id=" + cnt + '>开始</button></td>');
           }
           cnt++;
         }); 
@@ -84,4 +84,9 @@ block script
       $(document).on('click', '.result', function(){
           window.open('/lottery/' + activities[this.id]._id + '/result');
       })
-  
+    style.
+      .lottery_title:hover{color:red;}
+      .lottery_title{
+        text-decoration:underline;
+        color:rgb(0,102,204);
+      }

@@ -26,7 +26,8 @@ html
         .sidebar-wrapper
           .logo
             .simple-text
-              | 弹屏目
+              a(href="/" style="color:white")
+               弹屏目
           ul.nav
             li.active
               a(href='/activity/list')
@@ -42,10 +43,10 @@ html
             .collapse.navbar-collapse
               ul.nav.navbar-nav.navbar-right
                 li
-                  a(href='')
+                  a(href='/')
                     p Home
                 li
-                  a(href='#')
+                  a(href='javascript:void(0)' id='logout')
                     p Log out
                 li.separator.hidden-lg.hidden-md
         .content
@@ -84,13 +85,14 @@ html
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td>").text(cnt));
           if(act.status == 'ONGOING')
-            $('#tr' + cnt).append("<td><a href=/activity/" + activities[cnt]._id + ">" + act.title + "</a></td>");
+            $('#tr' + cnt).append("<td><a href=/activity/" + activities[cnt]._id + " class=act_title >" + act.title + "</a></td>");
           else
             $('#tr' + cnt).append("<td>" + activities[cnt].title + "</td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          if(act.status == "ONGOING")
-            $('#tr' + cnt).append("<td><button class='finish button btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>');
+          if(act.status == "ONGOING"){
+            $('#tr' + cnt).append("<td><button class='finish button btn btn-danger btn-fill' id=" + cnt + ">结束</button></td>");
+          }
           else{
             $('#tr' + cnt).append("<td id=notice" + cnt + ">活动已结束</td>");
             $('#notice' + cnt).css({'color':'red'});
@@ -103,10 +105,25 @@ html
           cnt++;
         }); 
       });
+      $(document).on('click','#logout',function(){
+        $.ajax({
+          url: '/auth/logout',
+          type:'post',
+          data:{'cmd': 'logout'},
+          datatype:'json',
+          success:function(data){
+            alert("成功登出！");
+            window.location = '/';
+          },
+          error:function(data){
+            alert("您已登出");
+          }
+        })
+      })
       $(document).on('click','.finish',function(){
         console.log(activities[this.id]._id);
         $.ajax({
-          url: '/activity/finish',
+          url: '/activity/' + activities[this.id]._id + '/finish',
           type: 'post',
           data: {'activity_id': activities[this.id]._id},
           datatype: 'json',
@@ -121,3 +138,9 @@ html
       $(document).on('click','.join',function(){
           window.location = '/activity/' + activities[$(this).attr('id')]._id;
       })
+  style.
+    .act_title:hover{color:red;}
+    .act_title{
+      text-decoration:underline;
+      color:rgb(0,102,204);
+    }

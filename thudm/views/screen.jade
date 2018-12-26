@@ -38,6 +38,7 @@ html(lang="zh-CN")
         const pic_limit = 30; // FIXME
         var dm_list = new Queue();
         var pic_list = new Queue();
+        var displaystart = 0;
         //var activity_id = !{activity_id != null? JSON.stringify(activity_id): 'null'};
         var activity = !{items !=null? JSON.stringify(items): 'null'};
         var bullet_colors = JSON.parse(activity.bullet_colors);
@@ -49,10 +50,13 @@ html(lang="zh-CN")
 
           socket.on('danmu', function(data) {
             var msg_obj = data.data;
+            console.log('haha',msg_obj);
             if(msg_obj.type == "text")
               dm_list.push(data);
-            else
+            else{
               pic_list.push(data);
+              displaystart = 1;
+            }
           });
           socket.on('lottery', function(data) {
             console.log(data);
@@ -79,13 +83,13 @@ html(lang="zh-CN")
           function show(){
             if(dm_list.size() > 0){
               var msg_obj = dm_list.quere()[dm_list.size() - 1].data;
+              console.log('yoyo',msg_obj);
               $('div.total').append('<div class = "DM" id =' + id +'>'+'</div>');
               $('#' + id).append('<img class = "profile" id = img'+ id + ' src="'+ msg_obj.head_img_url + '"/>');
               $('#' + id).append("<div class = 'info' id = info" + id +'>' + '</div>');
               $('#info' + id).append("<div class = 'name' id = name" + id +'>'+ msg_obj.nickname +'</div>');
               $('#info' + id).append("<div class = 'content' id = content" + id +'>'+ msg_obj.content +'</div>');
               $('div.DM').animate({"bottom": "+=23vh"},500);
-              
 
               if(bullet_colors.length > 0){
                 var color_num = Math.floor(Math.random() * 101) % bullet_colors.length;
@@ -107,7 +111,7 @@ html(lang="zh-CN")
               fadeflag = 0;
               picflag = 0;
             }
-            else if(fadeflag == 1 && picflag == 0){
+            else if(fadeflag == 1 && picflag == 0 && displaystart){
               $('img.picture').fadeIn(500);
               picflag = 1;
               fadeflag++;
@@ -148,8 +152,10 @@ html(lang="zh-CN")
   body.bg 
     .total
     .pic_slot
-      img.picture
+      img.picture(style='display:none')
       //1920:904
+
+
     style(type="text/css").
       ::-webkit-scrollbar{
       display:none;

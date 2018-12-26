@@ -18,11 +18,8 @@ html
     //link(href='http://fonts.googleapis.com/css?family=Roboto:400,700,300', rel='stylesheet', type='text/css')
     link(href='/assets/css/pe-icon-7-stroke.css', rel='stylesheet')
     link(href='/assets/css/font-awesome.css', rel='stylesheet')
-    script(src='/js/ajax.js').
-      $(document).on('click','#login',function(){
-         window.location = '/auth/logout';
-      });
-      
+    script(src='/js/ajax.js')
+
   body
     .wrapper
       .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
@@ -32,7 +29,8 @@ html
         .sidebar-wrapper
           .logo
             .simple-text
-              | 弹屏目
+              a(href='/' style="color:white")
+                弹屏目
           ul.nav
             li#MM5
               a(href='/activity/detail')
@@ -62,6 +60,10 @@ html
               a(href='/ticket',target="_blank")
                 i.fa.fa-qrcode(style="position:relative;top:0.6vh;")
                 h5 QRCODE
+            div(style="position:absolute; top:90vh; width:10vw") 
+              a(href='/activity/list' style='color:white')
+               i.fa.fa-home 
+               h5 返回列表
 
       .main-panel
         nav.navbar.navbar-default.navbar-fixed
@@ -69,10 +71,10 @@ html
             .collapse.navbar-collapse
               ul.nav.navbar-nav.navbar-right
                 li
-                  a(href='')
+                  a(href='/')
                     p Home
                 li
-                  a(href='/' id='logout')
+                  a(href='javascript:void(0)' id='logout')
                     p Log out
                 li.separator.hidden-lg.hidden-md
         
@@ -80,3 +82,19 @@ html
         block contents
 
     block script
+    script.
+      $(document).on('click','#logout',function(){
+        $.ajax({
+          url: '/auth/logout',
+          type: 'post',
+          data: {'cmd': 'logout'},
+          datatype: 'json',
+          success:function(data){
+            alert("成功登出！");
+            window.location = '/';
+          },
+          error:function(data){
+            alert("您已登出");
+          }
+        })
+      }); 

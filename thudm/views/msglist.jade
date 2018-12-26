@@ -6,10 +6,11 @@ block contents
               .col-md-12
                 .card.card-plain
                   .header
-                    h4.title 弹幕列表
+                    h4.title 弹幕列表&nbsp&nbsp&nbsp
+                     input(id='auditsw'  checked type='checkbox' data-toggle='toggle' data-onstyle='success')
                      span(style='float:right')
-                      button.totalpass.btn.btn-success.btn-fill 批量通过
-                  .content.table-responsive.table-full-width
+                      button.totalpass.btn.btn-success.btn-fill(id='multipass') 批量通过
+                  .content.table-responsive.table-full-width(id='msgtable')
                     table.table.table-hover
                       thead
                         tr  
@@ -29,22 +30,22 @@ block script
   script(src='/assets/js/bootstrap.min.js', type='text/javascript')
   script(src='/assets/js/bootstrap-notify.js')
   script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
-
+  link(href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet")
+  script(src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js")
   //socket.io
   script(src='/socket.io/socket.io.js')
   script.
     var information = !{items != null? JSON.stringify(items): 'null'};
     var activity_id = information.activity_id;
     var msg_list = information.msg_list;
-    //var msg_list = !{msg_list != null? JSON.stringify(msg_list): 'null'};
     var socket = io();
     var msg_total_num = information.msg_total_num;
     var page_num;
     var page_list;
     var cnt_limit = 0;
     var current = window.location.pathname.substr(14); 
-    var now_page = parseInt(current / 6);
-
+    var now_page = parseInt((current - 1) / 5);
+    var onoff = 1;
     $(document).ready(function(){
       console.log(information);
       $('#M' + $('.content').attr('id')).attr('class','active');
@@ -64,7 +65,45 @@ block script
      $('#P' + current).css('color','black');
       if(parseInt(page_list) > now_page)
         $('.page').append("<a href='javascript:void(0);' id=next>下一页</a>");
+     $('')
     });
+    $(document).on('change','#auditsw',function(){
+       if(onoff == 1){
+         onoff = 0;
+         console.log('ha');
+         $('#msgtable').css('display','none');
+         $('#multipass').css('display','none');
+         $('.page').css('display','none');
+         $.ajax({
+           type:'PUT',
+           data:{'review_flag': false},
+           datatype:'json',
+           url:'/activity/review_flag',
+           success: function(data){
+           
+           },
+           error: function(data){
+           }
+         });
+       }
+       else if(onoff == 0){
+         onoff = 1;
+         $('#msgtable').css('display','block');
+         $('#multipass').css('display','block');
+         $('.page').css('display','block');
+         $.ajax({
+           type:'PUT',
+           data:{'review_flag': true},
+           datatype:'json',
+           url:'/activity/review_flag',
+           success: function(data){
+           
+           },
+           error: function(data){
+           }
+         });
+       }
+    })
     $(document).on('click','#next',function(){
       now_page++;
       cnt_limit = 0;
@@ -85,19 +124,7 @@ block script
       now_page--;
       cnt_limit = 0;
       $('.page').empty();
-      //if(now_page > 0 )
-      // $('.page').append("<a href='javascript:void(0);' id='prev'>上一页&nbsp&nbsp&nbsp</a>");
-      //for(var i = now_page * 5; i < page_num; i++){
-      //  $('.page').append("<a class='pagenum' href='javascript:void(0);' id=P" + (i + 1) + ">" + (i + 1) + "&nbsp&nbsp&nbsp</a>");
-       // if(cnt_limit ==4){
-        //  break;
-       // }
-       // cnt_limit++;
-     // }
       window.location = '/msglist/page/' + (current - 1);
-      //$('#P' + (now_page * 5 + 1)).css('color','black');
-      //if(parseInt(page_list) > now_page)
-        //$('.page').append("<a href='javascript:void(0);' id=next>下一页</a>");
     });
     $(document).on('click','.pagenum',function(){
       $('.pagenum').each(function(){
@@ -106,7 +133,15 @@ block script
       $(this).css('color','black');
       window.location = '/msglist/page/' + this.id.substr(1);
     });
-      
+    $(document).on('click','.black',function(){
+      var getid = this.id.substr(5,this.id.length - 1);
+      console.log(getid);
+      msg_list.forEach((msg) =>{
+        if(msg != null)
+         if(getid % 16 == msg.id)
+           socket.emit('passReview', msg);
+      })
+    }) 
     $(function() {
       var data = {'activity_id': activity_id};
       socket.emit('joinActivity', data);
@@ -128,7 +163,7 @@ block script
            $('#list' + msg.id).append("<td><img src= /images/activity/" + msg.activity_id + '/fromuser/' + msg.content + ".png width='50px' height:'50px' ></td>");
          if(msg.review_flag == false){  
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:orange;'>WAITING</a></td>");
-            $('#list' + msg.id).append("<td id=btn" + msg.id + "><button class='pass btn btn-success btn-fill' id=" + msg.id + ">通过</button></td>"); 
+            $('#list' + msg.id).append("<td id=btn" + msg.id + " style='padding:5px'><button class='pass btn btn-success btn-fill' id=" + msg.id + ">通过</button>&nbsp&nbsp<button class='black btn btn-danger btn-fill' id=black" + msg.id + ">拉入黑名单</button></td>"); 
          }
          else{
             $('#list' + msg.id).append("<td><a href='javascript:;' class=admit id=permit" + msg.id + " style='color:GREEN;'>PASS</a></td>"); 
@@ -147,19 +182,24 @@ block script
         console.log(this.id);
         var getid = this.id;
         if(getid > 15){
-          msg_list[getid % 16].review_flag = true;
-          socket.emit('passReview', msg_list[getid % 16]);
+           console.log(getid)
+           msg_list.forEach((msg) =>{
+              if(getid == msg.id)
+               socket.emit('passReview', msg);
+           })
         }
         else{
-          msg_list[getid % 16 - 1].review_flag = true;
-          socket.emit('passReview', msg_list[getid % 16 - 1]);
+           msg_list.forEach((msg) =>{
+              if(getid % 16 == msg.id)
+               socket.emit('passReview', msg);
+           })
         }
         $('#btn' + this.id).remove();
         $('#list' + this.id).append("<td style='color:GREEN;'>已通过</td>");
         $('#permit' + this.id).text('PASS');
         $('#check' + this.id).remove();
         $('#permit' + this.id).css('color','green');
-    })
+    });
     $(document).on('click','input.check',function(){
       if(this.id == 'all'){
         if(this.checked == 1){
@@ -208,3 +248,4 @@ block script
        $(this).css('color','green');
       }
     })
+   

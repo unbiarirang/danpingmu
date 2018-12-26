@@ -174,7 +174,7 @@ div.nav ul {
 }
 
 div.nav ul:first-child {
-	margin-left: -60px;
+	margin-left: -200px;
 }
 
 div.nav ul li { margin: -2px 0 0;

@@ -19,6 +19,11 @@ block contents
                             label 抽奖说明
                             input.form-control(type='text' id='subtitle')
                       .row
+                        .col-md-5
+                          .form-group
+                            label 抽奖时长
+                            input.form-control(type='text' id='time')
+                      .row
                         .col-md-3
                           .form-group
                             label 中奖人数
@@ -42,15 +47,21 @@ block script
             $('#title').val(information.title);
             $('#subtitle').val(information.sub_title);
             $('#winnernum').val(information.winner_num);
+            $('#time').val(information.duration);
         })
         $(document).on('click','#create',function(){
             var title = $('#title').val();
             var subtitle = $('#subtitle').val();
             var winnernum = $('#winnernum').val();
+            var runningtime = $('#time').val();
+            if(winnernum == "" || subtitle == "" || title == "" || runningtime == ""){
+              alert("输入不能有空");
+              return;
+            }
             $.ajax({
                url:'/lottery',
                type:'PUT',
-               data: {'title': title,'sub_title': subtitle,'winner_num':winnernum},
+               data: {'title': title, 'sub_title': subtitle, 'winner_num': winnernum, 'duration': runningtime},
                datatype:"json",
                success: function(data){
                  window.location = '/lottery/list';

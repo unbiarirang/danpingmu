@@ -1246,7 +1246,6 @@ fieldset[disabled] .btn-neutral.active {
 .table > thead > tr > td,
 .table > tbody > tr > td,
 .table > tfoot > tr > td {
-    padding: 12px 8px;
     vertical-align: middle;
 }
 

@@ -26,7 +26,8 @@ html(lang='en')
         .sidebar-wrapper
           .logo
             .simple-text
-              | 弹屏目
+              a(href="/" style="color:white")
+               弹屏目
           ul.nav
             li
               a(href='/activity/list')
@@ -42,10 +43,10 @@ html(lang='en')
             .collapse.navbar-collapse
               ul.nav.navbar-nav.navbar-right
                 li
-                  a(href='')
+                  a(href='/')
                     p Home
                 li
-                  a(href='#')
+                  a(href='javascript:void(0)' id='logout')
                     p Log out
                 li.separator.hidden-lg.hidden-md
         .content
@@ -107,7 +108,7 @@ html(lang='en')
                       img.profile(src='/assets/img/faces/face-0.jpg')
                       .info
                         .name Anonymous
-                        #show.content Hello World!
+                        #show.contents Hello World!
 block script
     script(src='/assets/js/jquery.3.2.1.min.js', type='text/javascript')
     script(src='/assets/js/bootstrap.min.js', type='text/javascript')
@@ -141,6 +142,21 @@ block script
       $(document).ready(function(){
         $('#M' + $('.content').attr('id')).attr('class','active');
         bg_path = "/images/testbg4.gif";
+      });
+      $(document).on('click','#logout',function(){
+        $.ajax({
+          url: '/auth/logout',
+          type:'post',
+          data:{'cmd': 'logout'},
+          datatype:'json',
+          success:function(data){
+            alert("成功登出！");
+            window.location = "/";
+          },
+          error:function(data){
+            alert("您已登出");
+          }
+        })
       })
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
@@ -278,10 +294,10 @@ block script
       height: 20%;
       color:white;
       text-align:left;
-      font-size: 30%; 
+      font-size: 2.3vh; 
       overflow: auto;
       }
-      div.content{
+      div.contents{
       position: relative;
       width: 100%;
       height: 80%;

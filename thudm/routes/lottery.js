@@ -84,6 +84,7 @@ router.get('/:lottery_id/draw', (req, res, next) => {
             lottery.status = 'OVER';
             lottery.save();
             
+            sendData.duration = lottery.duration;
             //sendData.data = data;
             sendData.result = result;
             sendData.users = JSON.stringify(users);

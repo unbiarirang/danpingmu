@@ -73,16 +73,17 @@ router.post('/', (req, res, next) => {
             // Send empty response
             res.send("");
 
-            let activity_id, pic_url, msg_id;
+            let activity_id, pic_url, msg_id, review_flag;
             utils.get_user_info(req)
                 .then(user_info => {
                     activity_id = user_info.activity_id;
                     // if (!activity_id) return;
                     if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
 
+                    let room = utils.get_room_info(req, activity_id);
+                    review_flag = room.activity.review_flag;
                     pic_url = utils.get_wechat_input(req, 'picurl');
                     msg_id = utils.get_wechat_input(req, 'msgid');
-                    let room = utils.get_room_info(req, activity_id);
                     let msg_obj = {
                         "activity_id": activity_id,
                         "open_id": user_info.open_id,
