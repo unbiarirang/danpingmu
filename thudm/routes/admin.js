@@ -20,8 +20,7 @@ router.use('/vote', vote_router);
 router.use('/lottery', lottery_router);
 
 router.get('/', (req, res, next) => {
-    console.log(req.session.id);
-    return res.render('index',{id: req.session});
+    return res.render('index', { id: req.session });
 });
 
 router.get('/screen', (req, res, next) => {
@@ -58,6 +57,7 @@ router.get('/msglist', (req, res, next) => {
 router.get('/msglist/page/:page_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
+
     let rsmq = req.app.get('rsmq');
     let activity_id = req.session.activity_id;
     let page_id = req.params.page_id;

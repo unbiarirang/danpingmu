@@ -136,6 +136,17 @@ describe('GET /lottery/list', () => {
                 }, 500);
             });
     });
+
+    test('It should login to get lottery list that the activity has', (done) => {
+        return request(app)
+            .get('/lottery/list')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(401);
+                    done();
+                }, 500);
+            });
+    });
 });
 
 describe('GET /lottery/create', () => {

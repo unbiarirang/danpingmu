@@ -22,8 +22,7 @@ router.post('/', (req, res, next) => {
                     let activity_id = user_info.activity_id;
 
                     // User not belong to any activityactivity_id;
-                    // if (!activity_id) return;
-                    if (!activity_id) activity_id = '5c26319728467974c7186ff7';// FIXME: for test
+                    if (!activity_id) return;
                     let room = utils.get_room_info(req, activity_id);
                     let content = utils.get_wechat_input(req, 'content');
                     content = utils.filter_content(content);
@@ -76,8 +75,7 @@ router.post('/', (req, res, next) => {
             utils.get_user_info(req)
                 .then(user_info => {
                     activity_id = user_info.activity_id;
-                    // if (!activity_id) return;
-                    if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                    if (!activity_id) return;
 
                     let room = utils.get_room_info(req, activity_id);
                     review_flag = room.activity.review_flag;
@@ -146,7 +144,6 @@ router.post('/', (req, res, next) => {
                         res.send(xml);
                     });
             }
-            // FIXME: case of just subscribe activity_id=undefined
             else if (event === 'subscribe') {
                 let activity_id = event_key.split('_')[1];
                 utils.update_user_info(req, { activity_id: activity_id });
@@ -169,9 +166,8 @@ router.post('/', (req, res, next) => {
                             .then(user_info => {
                                 open_id = user_info.open_id;
                                 let activity_id = user_info.activity_id;
-                                //if (!activity_id) return res.send("");
+                                if (!activity_id) return res.send("");
 
-                                if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                                 let room = utils.get_room_info(req, activity_id);
                                 return utils.get_vote_info(room);
                             })
@@ -203,9 +199,8 @@ router.post('/', (req, res, next) => {
                             })
                             .then(user_info => {
                                 let activity_id = user_info.activity_id;
-                                //if (!activity_id) return res.send("");
+                                if (!activity_id) return res.send("");
 
-                                if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                                 let room = utils.get_room_info(req, activity_id);
                                 data.media_id = room.activity.list_media_id;
 

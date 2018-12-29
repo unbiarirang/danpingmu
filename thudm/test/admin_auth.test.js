@@ -6,13 +6,13 @@ const models = require('../models/models');
 let test_session = session(app);
 let auth_session = null;
 
-const input_id = 'bbb';
-const input_pw = '12345678';
+const admin_id = 'bbb';
+const admin_pw = '12345678';
 const wrong_input_id = 'wrongid';
 const wrong_input_pw = 'wrongpw';
 
 describe('GET /auth/login/', () => {
-    test('It should return login page', (done) => {
+    test('It should return login page before login', (done) => {
         return test_session
             .get('/auth/login/')
             .then(res => {
@@ -27,7 +27,7 @@ describe('POST /auth/login/', () => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: wrong_input_id, input_pw: input_pw })
+            .send({ input_id: wrong_input_id, input_pw: admin_pw })
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -38,7 +38,7 @@ describe('POST /auth/login/', () => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: wrong_input_pw })
+            .send({ input_id: admin_id, input_pw: wrong_input_pw })
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -49,10 +49,19 @@ describe('POST /auth/login/', () => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: admin_id, input_pw: admin_pw })
             .then(res => {
                 expect(res.statusCode).toBe(302);
                 auth_session = test_session;
+                done();
+            });
+    });
+
+    test('It should return login page after login', (done) => {
+        return auth_session
+            .get('/auth/login/')
+            .then(res => {
+                expect(res.statusCode).toBe(200);
                 done();
             });
     });
@@ -110,6 +119,17 @@ describe('POST /auth/signup/', () => {
                     expect(res.statusCode).toBe(403);
                     done();
                 }, 500);
+            });
+    });
+});
+
+describe('POST /auth/logout/', () => {
+    test('It should logout', (done) => {
+        return test_session
+            .post('/auth/logout/')
+            .then(res => {
+                expect(res.statusCode).toBe(200);
+                done();
             });
     });
 });

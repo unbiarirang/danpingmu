@@ -1,36 +1,97 @@
 const request = require('supertest');
 const session = require('supertest-session');
+const fs = require('fs-extra');
 const app = require('../app_test');
 const models = require('../models/models');
 const utils = require('../common/utils');
 
 let admin_session = null;
 
-const input_id = 'bbb';
-const input_pw = '12345678';
-const activity_id = '5c238c720b380cd6109ed126';
+const admin_id = 'bbb';
+const admin_pw = '12345678';
+const title = 'test activity';
+const sub_title = 'sub title';
+let activity_id;
 const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
-const open_id = 'testopenid';
+const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc'
 const word = 'xxx';
+const wrong_type_word = { word: 'xxx' };
 
-describe('POST /auth/login/', () => {
+describe('Set up before test', () => {
     test_session = session(app);
+
+    beforeAll(done => {
+        fs.copy('public/images/list.png', 'public/images/temp/list.png')
+            .then(() => { done(); });
+    });
 
     test('It should login success', (done) => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: admin_id, input_pw: admin_pw })
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(302);
                     admin_session = test_session;
-                    // admin session get one actiivty information
-                    admin_session
-                        .get('/activity/' + activity_id)
-                        .then(() => {
-                            done();
-                        });
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should create new Activity', (done) => {
+        return admin_session
+            .post('/activity')
+            .send({
+                title: title,
+                sub_title: sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
+                bg_img_url: '/images/temp/list.png',
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should get the Activity information', (done) => {
+        models.Activity.findOne({ title: title })
+            .then(act => {
+                activity_id = act._id.toString();
+                // admin session get one actiivty information
+                admin_session
+                    .get('/activity/' + activity_id)
+                    .then(() => {
+                        done();
+                    });
+            });
+    });
+
+    test('It should send a message', (done) => {
+        utils.load_activities(app)
+            .then(() => {
+                utils.update_user_info({ app: app, query: { openid: open_id } }, { activity_id: activity_id });
+            })
+            .then(() => {
+                return request(app)
+                    .post('/wechat?signature=123&timestamp=123&nonce=123&openid=' + open_id)
+                    .type('xml')
+                    .send('<xml>' +
+                        '<ToUserName>testuser</ToUserName>' +
+                        '<FromUserName>testuser</FromUserName>' +
+                        '<CreateTime>1348831860</CreateTime>' +
+                        '<MsgType>text</MsgType>' +
+                        '<Content>testcontent</Content>' +
+                        '<MsgId>1234567890</MsgId>' +
+                        '</xml>');
+            })
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
                 }, 500);
             });
     });
@@ -110,10 +171,58 @@ describe('GET /msglist', () => {
 });
 
 describe('GET /msglist/page/:page_id', () => {
-    test('It should return msglist page', (done) => {
+    test('It should return messages from redis', (done) => {
         const page_id = 1;
         return admin_session
             .get('/msglist/page/' + page_id)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should return messages from mongoDB', (done) => {
+        const page_id = 1;
+        return admin_session
+            .get('/msglist/page/' + page_id)
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It needs login to return msglist page', (done) => {
+        const page_id = 1;
+        return request(app)
+            .get('/msglist/page/' + page_id)
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should send a message', (done) => {
+        utils.load_activities(app)
+            .then(() => {
+                utils.update_user_info({ app: app, query: { openid: open_id } }, { activity_id: activity_id });
+            })
+            .then(() => {
+                return request(app)
+                    .post('/wechat?signature=123&timestamp=123&nonce=123&openid=' + open_id)
+                    .type('xml')
+                    .send('<xml>' +
+                        '<ToUserName>testuser</ToUserName>' +
+                        '<FromUserName>testuser</FromUserName>' +
+                        '<CreateTime>1348831860</CreateTime>' +
+                        '<MsgType>text</MsgType>' +
+                        '<Content>testcontent</Content>' +
+                        '<MsgId>1234567890</MsgId>' +
+                        '</xml>');
+            })
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
@@ -198,6 +307,17 @@ describe('PUT /blacklist', () => {
                 expect(res.statusCode).toBe(401);
             });
     });
+
+    test('It fails to update blacklist with wrong type word', () => {
+        return admin_session
+            .put('/blacklist')
+            .send({
+                blocked_word: wrong_type_word
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(500);
+            });
+    });
 });
 
 describe('DELETE /blacklist', () => {
@@ -239,6 +359,17 @@ describe('DELETE /blacklist', () => {
             })
             .then(res => {
                 expect(res.statusCode).toBe(401);
+            });
+    });
+
+    test('It fails to delete wrong type word but it\'s ok', () => {
+        return admin_session
+            .delete('/blacklist')
+            .send({
+                blocked_word: wrong_type_word
+            })
+            .then(res => {
+                expect(res.statusCode).toBe(200);
             });
     });
 });
@@ -287,5 +418,13 @@ describe('GET /ticket', () => {
             .then(res => {
                 expect(res.statusCode).toBe(500);
             });
+    });
+});
+
+afterAll(() => {
+    models.Activity.deleteOne({ title: title })
+        .then(() => {});
+    app.get('redis').flushall(() => {
+        console.log('flushall redis');
     });
 });

@@ -235,6 +235,9 @@ router.post('/', (req, res, next) => {
             if (vote.pic_urls) {
                 let chain = [];
                 vote.pic_urls.forEach(url => {
+                    if (url.indexOf('anonymous.jpg') >= 0)
+                        return urls.push(url);
+
                     let real_url = '/images/activity/' + vote.activity_id
                             + '/' + vote._id.toString() + url.slice(url.lastIndexOf('/'));
                     chain.push(fs.copy('public' + url,

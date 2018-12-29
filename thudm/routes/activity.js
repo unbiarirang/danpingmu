@@ -135,17 +135,6 @@ const updateActivity = (act, req) => {
     return act.save();
 }
 
-// For test
-router.post('/:activity_id/create/queue', (req, res, next) => {
-    let activity_id = req.params.activity_id;
-    let rsmq = req.app.get('rsmq');
-    rsmq.createQueue({ qname: activity_id })
-        .then(() => {
-            console.log("QUEUE created");
-            res.sendStatus(200);
-        });
-});
-
 // Create activity
 router.post('/', (req, res, next) => {
     if (!req.session.login)
@@ -155,7 +144,7 @@ router.post('/', (req, res, next) => {
         .then(act => {
             let activity_id = act._id.toString();
             let bg_img_url = act.bg_img_url;
-            let real_bg_img_url = bg_img_url ? '/images/activity' + activity_id + bg_img_url.slice(bg_img_url.lastIndexOf('/')) : '';
+            let real_bg_img_url = bg_img_url ? '/images/activity/' + activity_id + bg_img_url.slice(bg_img_url.lastIndexOf('/')) : '';
 
             req.session.activity_id = activity_id;
             utils.load_activity(req, activity_id);
@@ -173,16 +162,18 @@ router.post('/', (req, res, next) => {
                     return fs.mkdirAsync('public/images/activity/' + activity_id + '/fromuser');
                 })
                 .then(() => {
-                    if (real_bg_img_url)
-                        return fs.copy('public' + bg_img_url,
-                                       'public' + real_bg_img_url)
-                            .then(() => {
-                                return fs.remove('public' + bg_img_url)
-                            })
-                            .then(() => {
-                                act.bg_img_url = real_bg_img_url;
-                                return act.save();
-                            });
+                    if (!real_bg_img_url || bg_img_url.indexOf('anonymous.jpg') >= 0)
+                        return act.save();
+
+                    return fs.copy('public' + bg_img_url,
+                                   'public' + real_bg_img_url)
+                        .then(() => {
+                            return fs.remove('public' + bg_img_url)
+                        })
+                        .then(() => {
+                            act.bg_img_url = real_bg_img_url;
+                            return act.save();
+                        });
                 })
                 .then(() => {
                     console.log('mkdir');
