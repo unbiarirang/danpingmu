@@ -41,7 +41,7 @@ body,input,textarea {
 font:12px/20px "Helvetica Neue", Helvetica, Arial, sans-serif;
 background:#FFF;
 color:#000;
-background: url("./images/bg.jpg") repeat scroll 0 0 transparent;
+background: url("/images/index/bg.jpg") repeat scroll 0 0 transparent;
 }
 
 .clear {clear: both}

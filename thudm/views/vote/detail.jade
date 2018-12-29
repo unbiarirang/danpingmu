@@ -33,7 +33,7 @@ block contents
                   .image
                   .content
                     .author
-                      img.avatar.border-gray(id='sample' src='/assets/img/faces/face-0.jpg', alt='...')
+                      img.avatar.border-gray(id='sample' src='/images/anonymous.jpg', alt='...')
                     .row
                       .col-md-9
                         .form-group
@@ -77,8 +77,9 @@ block script
         for(var i = 0; i < options.length; i++){
           $('#CandyArray0').append('<div class = Candidates id = ' + CandyNum + '></div>');
           $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
-          var path = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
-          path = path.substr(0,path.length - 2);
+          //var path = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
+          //path = path.substr(0,path.length - 2);
+          path = pic_urls[i];
           console.log(path);
           $('#pic' + CandyNum).css('background-image','url(' + path + ')');
           $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + options[CandyNum] + '</div>');

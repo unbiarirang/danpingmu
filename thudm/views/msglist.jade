@@ -137,11 +137,23 @@ block script
       var getid = this.id.substr(5,this.id.length - 1);
       console.log(getid);
       msg_list.forEach((msg) =>{
-        if(msg != null)
-         if(getid % 16 == msg.id)
-           socket.emit('passReview', msg);
+        if(msg == null)
+          return;
+        if(getid == msg.id){
+          $.ajax({
+            type: "PUT",
+            data: {"blocked_id": msg.open_id},
+            datatype: "json",
+            url: "/blacklist",
+            success: function(data){
+              alert("拉入成功！");
+            },
+            error: function(data){
+            }
+          }); 
+        }
       })
-    }) 
+    });
     $(function() {
       var data = {'activity_id': activity_id};
       socket.emit('joinActivity', data);
@@ -184,6 +196,7 @@ block script
         if(getid > 15){
            console.log(getid)
            msg_list.forEach((msg) =>{
+             if(msg != null)
               if(getid == msg.id)
                socket.emit('passReview', msg);
            })

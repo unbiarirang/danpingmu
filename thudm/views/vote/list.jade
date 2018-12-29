@@ -38,7 +38,7 @@ block script
         $('#M' + $('.content').attr('id')).attr('class','active');
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
-          $('#tr' + cnt).append($("<td>").text(cnt));
+          $('#tr' + cnt).append($("<td style='width:5%'>").text(cnt));
           if (act.status == 'OVER' || act.status == 'ONGOING')
             $('#tr' + cnt).append("<td>" + act.title + "</td>");
           else

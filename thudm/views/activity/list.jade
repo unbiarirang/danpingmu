@@ -21,8 +21,6 @@ html
     .wrapper
       .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
         //
-          Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
-          Tip 2: you can also add an image using data-image tag
         .sidebar-wrapper
           .logo
             .simple-text
@@ -82,8 +80,8 @@ html
         var cnt = 0;
         console.log(activities);
         activities.forEach((act) =>{
-          $('tbody').append("<tr id=tr" + cnt + "></tr>");
-          $('#tr' + cnt).append($("<td>").text(cnt));
+          $('tbody').append("<tr id=tr" + (cnt + 1) + "></tr>");
+          $('#tr' + cnt).append($("<td style='width:5%;'>").text(cnt));
           if(act.status == 'ONGOING')
             $('#tr' + cnt).append("<td><a href=/activity/" + activities[cnt]._id + " class=act_title >" + act.title + "</a></td>");
           else
@@ -91,7 +89,7 @@ html
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
           if(act.status == "ONGOING"){
-            $('#tr' + cnt).append("<td><button class='finish button btn btn-danger btn-fill' id=" + cnt + ">结束</button></td>");
+            $('#tr' + cnt).append("<td style='padding:5px'><button class='finish button btn btn-danger btn-fill' id=" + cnt + ">结束</button></td>");
           }
           else{
             $('#tr' + cnt).append("<td id=notice" + cnt + ">活动已结束</td>");
