@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const rp = require('request-promise');
-const fs = require('fs');
-const promise = require('bluebird');
-promise.promisifyAll(fs);
+const fs = require('fs-extra');
 const errors = require('../common/errors');
 const utils = require('../common/utils');
 const consts = require('../common/consts');
@@ -107,7 +105,6 @@ router.put('/review_flag', (req, res, next) => {
 
     let activity_id = req.session.activity_id;
     let room = utils.get_room_info(req, activity_id);
-    console.log(room);
 
     room.activity.review_flag = req.body.review_flag;
     room.activity.save()
@@ -157,6 +154,9 @@ router.post('/', (req, res, next) => {
     createActivity(req)
         .then(act => {
             let activity_id = act._id.toString();
+            let bg_img_url = act.bg_img_url;
+            let real_bg_img_url = bg_img_url ? '/images/activity' + activity_id + bg_img_url.slice(bg_img_url.lastIndexOf('/')) : '';
+
             req.session.activity_id = activity_id;
             utils.load_activity(req, activity_id);
 
@@ -173,8 +173,24 @@ router.post('/', (req, res, next) => {
                     return fs.mkdirAsync('public/images/activity/' + activity_id + '/fromuser');
                 })
                 .then(() => {
+                    if (real_bg_img_url)
+                        return fs.copy('public' + bg_img_url,
+                                       'public' + real_bg_img_url)
+                            .then(() => {
+                                return fs.remove('public' + bg_img_url)
+                            })
+                            .then(() => {
+                                act.bg_img_url = real_bg_img_url;
+                                return act.save();
+                            });
+                })
+                .then(() => {
                     console.log('mkdir');
                     return res.send(act);
+                })
+                .catch(err => {
+                    console.error(err);
+                    next(err);
                 });
         })
         .catch(err => {
@@ -190,8 +206,29 @@ router.put('/', (req, res, next) => {
 
     let activity_id = req.session.activity_id;
     let room = utils.get_room_info(req, activity_id);
+    let activity, bg_img_url, real_bg_img_url;
 
     updateActivity(room.activity, req)
+        .then(act => {
+            activity = act;
+            bg_img_url = activity.bg_img_url;
+
+            if (bg_img_url && bg_img_url.indexOf(consts.STORE_IMG_PATH) >= 0) {
+                real_bg_img_url = '/images/activity/' + activity_id + bg_img_url.slice(bg_img_url.lastIndexOf('/'));
+
+                return fs.copy('public' + bg_img_url,
+                               'public' + real_bg_img_url)
+                            .then(() => {
+                                return fs.remove('public' + bg_img_url)
+                            })
+                            .then(() => {
+                                activity.bg_img_url = real_bg_img_url;
+                                return activity.save();
+                            })
+            }
+
+            return activity;
+        })
         .then(act => {
             utils.update_room_info(req, { activity: act });
             return res.send(act);

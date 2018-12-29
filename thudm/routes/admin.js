@@ -168,8 +168,10 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
             sendData.msg_list = msg_list;
             sendData.msg_total_num = totalsent;
             sendData.activity_id = activity_id;
+            sendData.review_flag =
+                utils.get_room_info(req, activity_id).activity.review_flag;
 
-            res.render('msglist', { items: sendData});
+            res.render('msglist', { items: sendData });
         })
         .catch(err => {
             console.log(err);

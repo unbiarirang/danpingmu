@@ -7,7 +7,7 @@ const consts = require('../common/consts');
 const fs = require('fs-extra');
 
 let admin_session = null;
-const activity_id = '5c238c720b380cd6109ed126';
+const activity_id = "5c2614face51b871ae56977a";
 const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
 const admin_id = 'bbb';
 const title = 'test activity';

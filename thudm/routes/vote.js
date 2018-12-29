@@ -4,6 +4,7 @@ const assert = require('assert');
 const fs = require('fs-extra');
 const errors = require('../common/errors');
 const utils = require('../common/utils');
+const consts = require('../common/consts');
 const models = require('../models/models');
 const Vote = models.Vote;
 
@@ -225,9 +226,36 @@ const updateVote = (vote, req) => {
 router.post('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
-    console.log(req.title);
+
+    let vote;
+    let urls = [];
     createVote(req)
-        .then(vote => {
+        .then(_vote => {
+            vote = _vote;
+            if (vote.pic_urls) {
+                let chain = [];
+                vote.pic_urls.forEach(url => {
+                    let real_url = '/images/activity/' + vote.activity_id
+                            + '/' + vote._id.toString() + url.slice(url.lastIndexOf('/'));
+                    chain.push(fs.copy('public' + url,
+                                   'public' + real_url)
+                        .then(() => {
+                            return fs.remove('public' + url);
+                        })
+                        .then(() => {
+                            urls.push(real_url);
+                        })
+                    );
+                });
+
+                return Promise.all(chain)
+                    .then(() => {
+                        vote.pic_urls = urls;
+                        vote.save();
+                    });
+            }
+        })
+        .then(() => {
             req.session.vote_id = vote._id;
             return res.send(vote);
         })
@@ -242,13 +270,43 @@ router.put('/', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
 
+    let vote;
     let vote_id = req.session.vote_id;
 
     Vote.findById(vote_id)
-        .then(vote => {
-            if (!vote)
+        .then(_vote => {
+            if (!_vote)
                 throw new errors.NotExistError('No voting Activity exists.');
 
+            vote = _vote;
+            let urls = [];
+
+            if (vote.pic_urls) {
+                let chain = [];
+                vote.pic_urls.forEach(url => {
+                    let real_url = '/images/activity/' + vote.activity_id
+                            + '/' + vote._id.toString() + url.slice(url.lastIndexOf('/'));
+                    console.log(real_url);
+                    if (url.indexOf(consts.STORE_IMG_PATH) >= 0)
+                        chain.push(fs.copy('public' + url,
+                                       'public' + real_url)
+                            .then(() => {
+                                return fs.remove('public' + url);
+                            })
+                            .then(() => {
+                                urls.push(real_url);
+                            })
+                        );
+                    else urls.push(url);
+                });
+
+                return Promise.all(chain)
+                    .then(() => {
+                        vote.pic_urls = urls;
+                    });
+            }
+        })
+        .then(() => {
             return updateVote(vote, req);
         })
         .then(vote => {
