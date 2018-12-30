@@ -16,7 +16,6 @@ html
           window.location = '/screen';
         });
         candidate.options = JSON.parse(candidate.options);
-        candidate.pic_urls = JSON.parse(candidate.pic_urls);
         $('div.theme').text(candidate.title); 
         console.log(candidate);
         for(var i = 0; i < candidate.options.length; i++){

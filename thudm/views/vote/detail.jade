@@ -72,7 +72,7 @@ block script
         var option_num = 0;
         var options = new Array();
         options = JSON.parse(information.options);
-        pic_urls = JSON.parse(information.pic_urls);
+        pic_urls = information.pic_urls;
         console.log(pic_urls);
         for(var i = 0; i < options.length; i++){
           $('#CandyArray0').append('<div class = Candidates id = ' + CandyNum + '></div>');

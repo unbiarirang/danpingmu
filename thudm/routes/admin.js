@@ -198,7 +198,9 @@ router.put('/blacklist', (req, res, next) => {
         throw new errors.NotLoggedInError();
 
     let activity_id = req.session.activity_id;
-    let blocked_id = JSON.parse(req.body.blocked_id);
+    let blocked_id = req.body.blocked_id;
+    try { blocked_id = JSON.parse(blocked_id); }
+    catch(e) {}
     let blocked_open_id = blocked_id ? blocked_id.open_id : '';
     let blocked_nickname = blocked_id ? blocked_id.nickname: '';
     let blocked_word = req.body.blocked_word;

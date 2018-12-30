@@ -270,7 +270,7 @@ describe('PUT /blacklist', () => {
         return admin_session
             .put('/blacklist')
             .send({
-                blocked_id: { open_id: open_id, nickname: 'testnickname'}
+                blocked_id: JSON.stringify({ open_id: open_id, nickname: 'testnickname' })
             })
             .then(res => {
                 setTimeout(() => {
@@ -423,7 +423,7 @@ describe('GET /ticket', () => {
 });
 
 afterAll(() => {
-    models.Activity.deleteOne({ title: title })
+    models.Activity.deleteMany({ title: title })
         .then(() => {});
     app.get('redis').flushall(() => {
         console.log('flushall redis');

@@ -233,17 +233,16 @@ router.post('/', (req, res, next) => {
         .then(_vote => {
             vote = _vote;
             if (vote.pic_urls) {
-                let pic_urls = JSON.parse(vote.pic_urls);
                 let chain = [];
-                console.log('@@@@', pic_urls);
+                let pic_urls;
+                try { pic_urls = JSON.parse(vote.pic_urls); }
+                catch(e) { pic_urls = vote.pic_urls; }
                 pic_urls.forEach(url => {
-                    console.log('@@@@', url);
-                    if (url.indexOf('anonymous.jpg') >= 0)
+                    if (url.indexOf(consts.DEFAULT_CAND_IMG) >= 0)
                         return urls.push(url);
 
                     let real_url = '/images/activity/' + vote.activity_id
                             + '/' + vote._id.toString() + url.slice(url.lastIndexOf('/'));
-                    console.log('@@@@', real_url);
                     chain.push(fs.copy('public' + url,
                                    'public' + real_url)
                         .then(() => {

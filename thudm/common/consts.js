@@ -6,6 +6,8 @@ module.exports = Object.freeze({
     SESSION_EXPIRE_MSEC         : 3*24*60*60*1000,  // 3 days
     MAX_IMG_SIZE                : 2*1024*1024,      // 2 MB
     STORE_IMG_PATH              : '/images/temp',
+    DEFAULT_BG_IMG              : 'default_bg.gif',
+    DEFAULT_CAND_IMG            : 'anonymous.jpg',
     WECHAT_MENU                 : {
         "button": [
             {

@@ -162,7 +162,7 @@ router.post('/', (req, res, next) => {
                     return fs.mkdirAsync('public/images/activity/' + activity_id + '/fromuser');
                 })
                 .then(() => {
-                    if (!real_bg_img_url || bg_img_url.indexOf('anonymous.jpg') >= 0)
+                    if (!real_bg_img_url || bg_img_url.indexOf(consts.DEFAULT_BG_IMG) >= 0)
                         return act.save();
 
                     return fs.copy('public' + bg_img_url,
