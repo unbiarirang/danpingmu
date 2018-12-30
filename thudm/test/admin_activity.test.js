@@ -294,7 +294,7 @@ describe('GET /activity/:activity_id and GET /activity/detail', () => {
     });
 });
 
-describe('POST /activity/upload/list', () => {
+describe.skip('POST /activity/upload/list', () => {
     const src_path = 'public/images/list.png'; // dummy image
     const dest_path = consts.STORE_IMG_PATH
                       + '/' + admin_id + '_list.png';

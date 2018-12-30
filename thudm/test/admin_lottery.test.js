@@ -6,8 +6,8 @@ const utils = require('../common/utils');
 
 let admin_session = null;
 
-const input_id = 'bbb';
-const input_pw = '12345678';
+const admin_id = 'bbb';
+const admin_pw = '12345678';
 const activity_id = '5c03ba2fec64483fe182a7d2';
 const lottery_id = '5c18e4841b2ff83af2c56309';
 const lottery_id_draw_2 = '5c13e3f82e42b62b621dfffd';
@@ -20,7 +20,7 @@ const login = () => {
         test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: admin_id, input_pw: admin_pw })
             .then(res => {
                 return setTimeout(() => {
                     expect(res.statusCode).toBe(302);
@@ -43,7 +43,7 @@ describe('POST /auth/login/', () => {
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: admin_id, input_pw: admin_pw })
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(302);

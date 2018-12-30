@@ -199,12 +199,14 @@ router.put('/blacklist', (req, res, next) => {
 
     let activity_id = req.session.activity_id;
     let blocked_id = req.body.blocked_id;
+    let blocked_open_id = blocked_id ? blocked_id.open_id : '';
+    let blocked_nickname = blocked_id ? blocked_id.nickname: '';
     let blocked_word = req.body.blocked_word;
 
     let room = utils.get_room_info(req, activity_id);
 
     if (blocked_id)
-        room.activity.blacklist_user.push(blocked_id);
+        room.activity.blacklist_user.push([blocked_open_id, blocked_nickname].toString());
     if (blocked_word)
         room.activity.blacklist_word.push(blocked_word);
 
@@ -231,12 +233,13 @@ router.delete('/blacklist', (req, res, next) => {
 
     let room = utils.get_room_info(req, activity_id);
 
-    let blacklist_user = room.activity.blacklist_user;
+    let blacklist_user =
+        room.activity.blacklist_user.map(e => { return e.slice(0, e.indexOf(',')); });
     let blacklist_word = room.activity.blacklist_word;
 
     let index = blacklist_user.indexOf(blocked_id);
     if (index >= 0)
-        blacklist_user.splice(index, 1);
+        room.activity.blacklist_user.splice(index, 1);
     index = blacklist_word.indexOf(blocked_word);
     if (index >= 0)
         blacklist_word.splice(index, 1);
