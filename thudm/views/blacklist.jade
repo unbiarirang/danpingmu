@@ -59,12 +59,11 @@ block script
       var cntU = 0;
       var cntW = 0;
       $(document).ready(function(){
-        console.log(userlist);
         $('#M' + $('.content').attr('id')).attr('class','active');
         userlist.forEach((user) =>{
           $('#userlist').append("<tr id=trU" + cntU + "></tr>");
           $("#trU" + cntU).append("<td><input type='checkbox' class='check checkU' id=U" + cntU + ">");
-          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user.nickname + "</td>")
+          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user.slice(user.indexOf(',') + 1) + "</td>")
           $("#trU" + cntU).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = U" + cntU + ">删除</button></td>");
           cntU++;
         }) 
@@ -125,19 +124,18 @@ block script
       $(document).on('click','.deleteU',function(){
         if(this.id == 'deleteuser'){
           $('.checkU').each(function(){
-            var getid = this.id;
+            var getid = this.id.substr(1);
             if(this.checked == 1){
                console.log(getid);
-               //var userid = $('#name' + getid).text();
-               var userid = userlist[getid].open_id;
-               console.log(userid);
+               var userid = userlist[getid].slice(0,userlist[getid].indexOf(','));
+               console.log(userlist);
                $.ajax({
                  type:"DELETE",
                  data:{'blocked_id':userid},
                  datatype:"json",
                  url:"/blacklist",
                  success: function(data){
-                   $('#tr' + getid).remove();
+                   $('#trU' + getid).remove();
                  },
                  error: function(data){
                  }
@@ -146,16 +144,19 @@ block script
           });
         }
         else{
-          var getid = this.id;
-          var userid = $('#name' + getid).text();
+          var getid = this.id.substr(1);
+          console.log(getid);
+          console.log(userlist[getid]);
+          var userid = userlist[getid].slice(0,userlist[getid].indexOf(','));
           console.log(userid);
+          
           $.ajax({
             type:"DELETE",
             data:{'blocked_id':userid},
             datatype:"json",
             url:"/blacklist",
             success: function(data){
-              $('#tr' + getid).remove();
+              $('#trU' + getid).remove();
             },
             error: function(data){
             }
