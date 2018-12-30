@@ -85,29 +85,45 @@ block script
         $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
  
         $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
+        var formData = new FormData($('#upload')[0]);
+        console.log(formData);
+        $.ajax({
+          url: '/vote/upload/candidate?id=' + NumberAdded,
+          type: 'post',
+          data: formData,
+          contentType: false,
+          processData: false,
+          async: false,
+          success:function(data){
+            console.log(data);
+            $('#sample').attr('src', data);
+            NumberAdded++;
+          },
+          error:{
+          }
+        });
         CandyNum++;
       });
       $(document).on('click','.DeleteCandy',function(){
         $('#' + this.id).remove();
       });
       $('#candidate_image').on('change',function(){
-         var formData = new FormData($('#upload')[0]);
-         console.log(formData);
-         $.ajax({
-           url: '/vote/upload/candidate?id=' + NumberAdded,
-           type: 'post',
-           data: formData,
-           contentType: false,
-           processData: false,
-           async: false,
-           success:function(data){
-             console.log(data);
-             $('#sample').attr('src', data);
-             NumberAdded++;
-           },
-           error:{
-           }
-         });
+        var formData = new FormData($('#upload')[0]);
+        console.log(formData);
+        $.ajax({
+          url: '/vote/upload/candidate?id=' + NumberAdded,
+          type: 'post',
+          data: formData,
+          contentType: false,
+          processData: false,
+          async: false,
+          success:function(data){
+            console.log(data);
+            $('#sample').attr('src', data);
+          },
+          error:{
+          }
+        });
       });
       $(document).on('click','#create',function(){
         var title = $('#title').val();
