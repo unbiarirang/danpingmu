@@ -203,6 +203,9 @@ input:focus {
 
 .sidebar .nav a,
 .table > tbody > tr .td-actions .btn {
+    ::-webkit-scrollbar{
+    display:none;
+    }
     -webkit-transition: all 150ms ease-in;
     -moz-transition: all 150ms ease-in;
     -o-transition: all 150ms ease-in;

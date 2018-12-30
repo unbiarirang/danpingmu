@@ -48,7 +48,7 @@ block script
           if(act.status == 'READY')
             $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='start btn btn-success btn-fill' id=" + cnt + ">开始</button></td>");
           else if (act.status == 'ONGOING')
-            $('#tr' + cnt).append('<td id = btn' + cnt + " style='padding:5px'><button class='display btn btn-info btn-fill' id=dis" + cnt + ">显示</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>'); 
+            $('#tr' + cnt).append('<td id = btn' + cnt + " style='padding:5px'><button class='display btn btn-info btn-fill' id=dis" + cnt + ">显示结果</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>'); 
           else if (act.status == 'OVER')
             $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='result btn btn-info btn-fill' id=" + cnt + ">查看结果</button></td>");
           console.log(act._id);

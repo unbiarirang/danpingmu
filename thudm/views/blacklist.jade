@@ -59,11 +59,12 @@ block script
       var cntU = 0;
       var cntW = 0;
       $(document).ready(function(){
+        console.log(userlist);
         $('#M' + $('.content').attr('id')).attr('class','active');
         userlist.forEach((user) =>{
           $('#userlist').append("<tr id=trU" + cntU + "></tr>");
           $("#trU" + cntU).append("<td><input type='checkbox' class='check checkU' id=U" + cntU + ">");
-          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user + "</td>")
+          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user.nickname + "</td>")
           $("#trU" + cntU).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = U" + cntU + ">删除</button></td>");
           cntU++;
         }) 
@@ -127,7 +128,8 @@ block script
             var getid = this.id;
             if(this.checked == 1){
                console.log(getid);
-               var userid = $('#name' + getid).text();
+               //var userid = $('#name' + getid).text();
+               var userid = userlist[getid].open_id;
                console.log(userid);
                $.ajax({
                  type:"DELETE",
