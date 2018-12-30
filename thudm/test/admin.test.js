@@ -270,11 +270,12 @@ describe('PUT /blacklist', () => {
         return admin_session
             .put('/blacklist')
             .send({
-                blocked_id: open_id
+                blocked_id: { open_id: open_id, nickname: 'testnickname'}
             })
             .then(res => {
                 setTimeout(() => {
-                    expect(JSON.parse(res.text).blacklist_user).toContain(open_id);
+                    expect(JSON.parse(res.text).blacklist_user)
+                        .toContain(open_id + ',testnickname');
                     expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
