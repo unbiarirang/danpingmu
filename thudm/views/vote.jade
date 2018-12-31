@@ -11,17 +11,13 @@ html(lang="zh-CN")
           var title = !{title != null? JSON.stringify(title): 'null'};
           var _id = !{_id != null? JSON.stringify(_id): 'null'};
           options = JSON.parse(options);
-          pic_urls = JSON.parse(pic_urls);
+          //pic_urls = JSON.parse(pic_urls);
           console.log("options = ",options);
           console.log("pic_urls = ",pic_urls);
           console.log("title = ",title); 
           console.log("vote_id = ", _id);
 
           $(document).ready(function(){
-              for(var i = 0; i < pic_urls.length; i++){
-                pic_urls[i] = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
-                pic_urls[i] = pic_urls[i].substr(0, pic_urls[i].length -2);
-              }
               var op_num = options.length;
               var candy_num = 0;
               var line_num;
