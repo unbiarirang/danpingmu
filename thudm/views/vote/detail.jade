@@ -33,7 +33,7 @@ block contents
                   .image
                   .content
                     .author
-                      img.avatar.border-gray(id='sample' src='/assets/img/faces/face-0.jpg', alt='...')
+                      img.avatar.border-gray(id='sample' src='/images/anonymous.jpg', alt='...')
                     .row
                       .col-md-9
                         .form-group
@@ -72,17 +72,18 @@ block script
         var option_num = 0;
         var options = new Array();
         options = JSON.parse(information.options);
-        pic_urls = JSON.parse(information.pic_urls);
+        NumberAdded = options.length;
+        pic_urls = information.pic_urls;
         console.log(pic_urls);
         for(var i = 0; i < options.length; i++){
           $('#CandyArray0').append('<div class = Candidates id = ' + CandyNum + '></div>');
           $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
-          var path = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
-          path = path.substr(0,path.length - 2);
+          //var path = pic_urls[i].slice(pic_urls[i].indexOf('/images'));
+          //path = path.substr(0,path.length - 2);
+          path = pic_urls[i];
           console.log(path);
           $('#pic' + CandyNum).css('background-image','url(' + path + ')');
           $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + options[CandyNum] + '</div>');
-          $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class = "glyphicon glyphicon-remove" style="color: red;"></span>');
           CandyNum++;
         }
         $('#M' + $('.content').attr('id')).attr('class','active');
@@ -100,7 +101,23 @@ block script
         $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
         $('#pic' + CandyNum).css("background-image","url(" + Profile +")");
         $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
-        $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
+        var formData = new FormData($('#upload')[0]);
+        console.log(formData);
+        $.ajax({
+          url: '/vote/upload/candidate?id=' + NumberAdded,
+          type: 'post',
+          data: formData,
+          contentType: false,
+          processData: false,
+          async: false,
+          success:function(data){
+            console.log(data);
+            $('#sample').attr('src', data);
+            NumberAdded++;
+          },
+          error:{
+          }
+        });
         CandyNum++;
       });
       $(document).on('click','a.DeleteCandy',function(){
@@ -120,7 +137,6 @@ block script
            success:function(data){
              console.log(data);
              $('#sample').attr('src', data);
-             NumberAdded++;
            },
            error:{
            }

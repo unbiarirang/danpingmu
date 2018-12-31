@@ -55,6 +55,11 @@ block script
               alert("输入不能有空");
               return;
             }
+            if(/^[0-9]+$/.test(runningtime) &&/^[0-9]+$/.test(winnernum)){
+            }
+            else{
+              alert("输入格式有误！");
+            }
             $.ajax({
                url:'/lottery',
                type:'post',

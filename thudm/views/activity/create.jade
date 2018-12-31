@@ -21,8 +21,6 @@ html(lang='en')
     .wrapper
       .sidebar(data-color='purple', data-image='/assets/img/eye.jpg')
         //
-          Tip 1: you can change the color of the sidebar using: data-color="blue | azure | green | orange | red | purple"
-          Tip 2: you can also add an image using data-image tag
         .sidebar-wrapper
           .logo
             .simple-text
@@ -32,11 +30,11 @@ html(lang='en')
             li
               a(href='/activity/list')
                 i.pe-7s-graph
-                p 活动列表
+                h5 活动列表
             li.active
               a(href='/activity/create')
                 i.pe-7s-magic-wand
-                p 创建节目
+                h5 创建节目
       .main-panel
         nav.navbar.navbar-default.navbar-fixed
           .container-fluid
@@ -76,30 +74,33 @@ html(lang='en')
                         .col-md-12
                           .form-group
                             label 弹幕颜色
-                            .ColorArray
-                              #0.ColorBox
-                                #C0.SetColor(style='background:#5eb3c8;')
-                              #1.ColorBox(style='left:50px;')
-                                #C1.SetColor(style='background:#ff80c0;')
-                              #2.ColorBox(style='left:100px;')
-                                #C2.SetColor(style='background:#6b4d9d;')
-                              #3.ColorBox(style='left:150px;')
-                                #C3.SetColor(style='background:#008040;')
-                              #4.ColorBox(style='left:200px;')
-                                #C4.SetColor(style='background:#0080c0;')
-                            br
-                            br
-                            .ColorArray
-                              #5.ColorBox
-                                #C5.SetColor(style='background:#e26b6b;')
-                              #6.ColorBox(style='left:50px;')
-                                #C6.SetColor(style='background:#d1ce5c;')
-                              #7.ColorBox(style='left:100px;')
-                                #C7.SetColor(style='background:#66dbbb;')
-                              #8.ColorBox(style='left:150px;')
-                                #C8.SetColor(style='background:#ff8000;')
-                              #9.ColorBox(style='left:200px;')
-                                #C9.SetColor(style='background:#408080;')
+                            .card
+                             .content
+                              .ColorArray
+                               #0.ColorBox
+                                 #C0.SetColor(style='background:#5eb3c8;')
+                               #1.ColorBox(style='left:50px;')
+                                 #C1.SetColor(style='background:#ff80c0;')
+                               #2.ColorBox(style='left:100px;')
+                                 #C2.SetColor(style='background:#6b4d9d;')
+                               #3.ColorBox(style='left:150px;')
+                                 #C3.SetColor(style='background:#008040;')
+                               #4.ColorBox(style='left:200px;')
+                                 #C4.SetColor(style='background:#0080c0;')
+                              br
+                              br
+                              .ColorArray
+                               #5.ColorBox
+                                 #C5.SetColor(style='background:#e26b6b;')
+                               #6.ColorBox(style='left:50px;')
+                                 #C6.SetColor(style='background:#d1ce5c;')
+                               #7.ColorBox(style='left:100px;')
+                                 #C7.SetColor(style='background:#66dbbb;')
+                               #8.ColorBox(style='left:150px;')
+                                 #C8.SetColor(style='background:#ff8000;')
+                               #9.ColorBox(style='left:200px;')
+                                 #C9.SetColor(style='background:#408080;')
+                             br 
                       #create.button.btn.btn-info.btn-fill(type='submit') 创建
                       .clearfix
               .col-md-4
@@ -120,6 +121,7 @@ block script
     script(src='/assets/js/light-bootstrap-dashboard.js?v=1.4.0')
     // Light Bootstrap Table DEMO methods, don't include it in your project!
     script.
+      var uploadnow = 0;
       var ColorList = new Array();
       var bg_path;
       for(var i = 0; i < 10; i++)
@@ -141,7 +143,7 @@ block script
       })
       $(document).ready(function(){
         $('#M' + $('.content').attr('id')).attr('class','active');
-        bg_path = "/images/testbg4.gif";
+        bg_path = "/images/default_bg.gif";
       });
       $(document).on('click','#logout',function(){
         $.ajax({
@@ -161,6 +163,8 @@ block script
       $('#bg_image').on('change',function(){
           var filePath = $(this).val();
           var formData = new FormData($("#uploadfile")[0]);
+          $('#create').attr('disabled',true);
+          uploadnow = 1;
           $.ajax({
               url:'/activity/upload/bg',
               type:'POST',
@@ -184,6 +188,8 @@ block script
                  });
                 bg_path = data;
                 $('#bg').css('background-image','url(' + data + ')');
+                $('#create').attr('disabled',false);
+                uploadnow = 0;
               },
               error: function(data){
                 $.notify({
@@ -197,6 +203,8 @@ block script
                       align:'center'
                     }
                 });
+                $('#create').attr('disabled',false);
+                uploadnow = 0;
               }
           });
           $(document).ready(function(){
@@ -216,6 +224,8 @@ block script
       
       $(function(){
         $('#create').click(function(){
+          if(uploadnow == 1)
+            return;
           var ActTitle = $('#Title').val();
           var ActSubTitle = $('#SubTitle').val(); 
           var ColorNum = 0;
@@ -271,7 +281,7 @@ block script
       height:20px;
       }
       div.example{
-      background: url(/images/testbg4.gif);
+      background: url(/images/default_bg.gif);
       background-size:100% 100%;
       background-repeat:no-repeat;
       width:100%;

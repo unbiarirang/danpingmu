@@ -1,0 +1,87 @@
+      ::-webkit-scrollbar{
+      display:none;
+      }
+      button{
+      position: absolute;
+      }
+      img.picture{
+      position: absolute;
+      left:5%;
+      top:5%;
+      width:90%;
+      height:90%;
+      border-radius: 20px;
+      }
+      div.DM {
+      background: rgba(0, 0, 0, 0.3);
+      width: 55vw;
+      height: 18vh;
+      bottom: -20vh;
+      left:15%;
+      position:absolute;
+      text-align: center;
+      color: white;
+      border-radius: 20px;
+      }
+      div.pic_slot{
+      background: rgba(0, 0, 0, 0.3);
+      width: 26vw;
+      height: 54.6vh;
+      bottom: 0px;
+      right:1vw;
+      bottom:1vw;
+      position:absolute;
+      text-align: center;
+      color: white;
+      border-radius: 20px;
+      }
+      div.name{
+      position: relative;
+      width: 100%;
+      height: 20%;
+      color:white;
+      text-align:left;
+      font-size: 1.5vw;
+      overflow: auto;
+      }
+      div.content{
+      position: relative;
+      width: 100%;
+      height: 80%;
+      color:white;
+      text-align:left;
+      font-size: 2.8vw;
+      display:block;
+      overflow: auto;
+      word-break: break-all;
+      word-wrap: break-word;
+      }
+      img.profile{
+      position: relative;
+      float:left;
+      width: 20%;
+      height: 100%;
+      border-radius: 10px;
+      }
+      div.info{
+        position:relative;
+        float:left;
+        width: 80%;
+        height: 100%;
+      }
+      div.total {
+      float:left;
+      width: 50%;
+      height: 100%;
+      position:relative;
+      left:1%;
+      text-align: center;
+      color: white;
+      }
+      body, html {
+      background-size:100% 100%;
+      background-repeat:no-repeat;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      }

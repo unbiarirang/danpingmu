@@ -14,18 +14,7 @@ block contents
                       input.form-control(type='text' id='word')
                     button.makeit.btn.btn-info.btn-fill(type='submit' id='addword') 添加
                  
-              .col-md-6
-               .card
-                .header 
-                  h4.title 添加黑名单
-                .content
-                 .row
-                  .col-md-5
-                   .form-group
-                     label 名字
-                     input.form-control(type='text' id='user')
-                   button.btn.btn-info.btn-fill(type='submit' id='adduser') 添加
-              .col-md-6
+             .col-md-6
                 .card.card-plain
                   .header
                     h4.title 过滤词
@@ -74,7 +63,7 @@ block script
         userlist.forEach((user) =>{
           $('#userlist').append("<tr id=trU" + cntU + "></tr>");
           $("#trU" + cntU).append("<td><input type='checkbox' class='check checkU' id=U" + cntU + ">");
-          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user + "</td>")
+          $("#trU" + cntU).append("<td id=nameU" + cntU + ">" + user.slice(user.indexOf(',') + 1) + "</td>")
           $("#trU" + cntU).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = U" + cntU + ">删除</button></td>");
           cntU++;
         }) 
@@ -103,7 +92,7 @@ block script
             $('#wordlist').append("<tr id=trW" + cntW + "></tr>");
             $("#trW" + cntW).append("<td><input type='checkbox' class='check checkW' id=W" + cntW + ">");
             $("#trW" + cntW).append("<td id=wordW" + cntW + ">" + word + "</td>")
-            $("#trW" + cntW).append("<td><button class='deleteU btn btn-danger btn-fill' style='float:right' id = W" + cntW + ">删除</button></td>");
+            $("#trW" + cntW).append("<td><button class='deleteW btn btn-danger btn-fill' style='float:right' id = W" + cntW + ">删除</button></td>");
             cntW++;
           },
           error: function(data){
@@ -135,18 +124,18 @@ block script
       $(document).on('click','.deleteU',function(){
         if(this.id == 'deleteuser'){
           $('.checkU').each(function(){
-            var getid = this.id;
+            var getid = this.id.substr(1);
             if(this.checked == 1){
                console.log(getid);
-               var userid = $('#name' + getid).text();
-               console.log(userid);
+               var userid = userlist[getid].slice(0,userlist[getid].indexOf(','));
+               console.log(userlist);
                $.ajax({
                  type:"DELETE",
                  data:{'blocked_id':userid},
                  datatype:"json",
                  url:"/blacklist",
                  success: function(data){
-                   $('#tr' + getid).remove();
+                   $('#trU' + getid).remove();
                  },
                  error: function(data){
                  }
@@ -155,16 +144,19 @@ block script
           });
         }
         else{
-          var getid = this.id;
-          var userid = $('#name' + getid).text();
+          var getid = this.id.substr(1);
+          console.log(getid);
+          console.log(userlist[getid]);
+          var userid = userlist[getid].slice(0,userlist[getid].indexOf(','));
           console.log(userid);
+          
           $.ajax({
             type:"DELETE",
             data:{'blocked_id':userid},
             datatype:"json",
             url:"/blacklist",
             success: function(data){
-              $('#tr' + getid).remove();
+              $('#trU' + getid).remove();
             },
             error: function(data){
             }

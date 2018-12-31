@@ -7,9 +7,10 @@ const consts = require('../common/consts');
 const fs = require('fs-extra');
 
 let admin_session = null;
-const activity_id = '5c238c720b380cd6109ed126';
+let activity_id;
 const wrong_activity_id = 'aaa3ba2fec64483fe182a7d2';
 const admin_id = 'bbb';
+const admin_pw = '12345678';
 const title = 'test activity';
 const sub_title = 'sub title';
 const changed_sub_title = 'changed sub title';
@@ -17,81 +18,14 @@ const changed_sub_title = 'changed sub title';
 describe('POST /auth/login/', () => {
     let test_session = session(app);
     test('It should login success', (done) => {
-        const input_id = 'bbb';
-        const input_pw = '12345678';
         return test_session
             .post('/auth/login/')
             .type('form')
-            .send({ input_id: input_id, input_pw: input_pw })
+            .send({ input_id: admin_id , input_pw: admin_pw })
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(302);
                     admin_session = test_session;
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /activity/:wrong_activity_id and GET /activity/detail', () => {
-    test('It should redirect to /activity/detail', (done) => {
-        return admin_session
-            .get('/activity/' + wrong_activity_id)
-            .then(res => {
-                expect(res.statusCode).toBe(302);
-                done();
-            });
-    });
-
-    test('It should fail to return activity information with the activity id', (done) => {
-        return admin_session
-            .get('/activity/detail')
-            .then(res => {
-                setTimeout(() => {
-                    expect(res.statusCode).toBe(204);
-                    done();
-                }, 500);
-            });
-    });
-});
-
-describe('GET /activity/:activity_id and GET /activity/detail', () => {
-    test('It needs login to get activity detail', (done) => {
-        return request(app)
-            .get('/activity/' + activity_id)
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-                done();
-            });
-    });
-
-    test('It should redirect to /activity/detail', (done) => {
-        return admin_session
-            .get('/activity/' + activity_id)
-            .then(res => {
-                expect(res.statusCode).toBe(302);
-                done();
-            });
-    });
-
-    test('It needs login to get activity information with the activity id', (done) => {
-        return request(app)
-            .get('/activity/detail')
-            .then(res => {
-                expect(res.statusCode).toBe(401);
-                done();
-            });
-    });
-
-    test('It should get activity information with the activity id', (done) => {
-        return admin_session
-            .get('/activity/detail')
-            .then(res => {
-                setTimeout(() => {
-                    //expect(res.text).toMatch('admin_id');
-                    //expect(res.text).toMatch('title');
-                    //expect(res.text).toMatch('status');
-                    expect(res.statusCode).toBe(200);
                     done();
                 }, 500);
             });
@@ -129,7 +63,12 @@ describe('GET /activity/create', () => {
     });
 });
 
-describe('POST /activity and PUT /activity', () => {
+describe('POST /activity', () => {
+    beforeAll(done => {
+        fs.copy('public/images/list.png', 'public/images/temp/list.png')
+            .then(() => { done(); });
+    });
+
     test('It should create new Activity', (done) => {
         return admin_session
             .post('/activity')
@@ -138,7 +77,7 @@ describe('POST /activity and PUT /activity', () => {
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
+                bg_img_url: '/images/temp/list.png',
             })
             .then(res => {
                 setTimeout(() => {
@@ -183,15 +122,22 @@ describe('POST /activity and PUT /activity', () => {
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
+                bg_img_url: '/images/temp/list.png',
             })
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
             });
     });
+});
 
-    test('It should update the Activity', (done) => {
+describe('PUT /activity', () => {
+    beforeAll(done => {
+        fs.copy('public/images/list.png', 'public/images/temp/list.png')
+            .then(() => { done(); });
+    });
+
+    test('It should update the Activity with new image)', (done) => {
         return admin_session
             .put('/activity')
             .send({
@@ -199,7 +145,36 @@ describe('POST /activity and PUT /activity', () => {
                 sub_title: changed_sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
+                bg_img_url: '/images/temp/list.png',
+            })
+            .then(res => {
+                setTimeout(() => {
+                    let result = JSON.parse(res.text);
+                    let keys = Object.keys(result);
+                    expect(keys).toContain('title');
+                    expect(keys).toContain('sub_title');
+                    expect(keys).toContain('bullet_color_num');
+                    expect(keys).toContain('bullet_colors');
+                    expect(keys).toContain('blacklist_user');
+                    expect(keys).toContain('blacklist_word');
+                    expect(keys).toContain('status');
+                    expect(keys).toContain('review_flag');
+                    expect(result.title).toBe(title);
+                    expect(result.sub_title).toBe(changed_sub_title);
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
+            });
+    });
+
+    test('It should update the Activity without new image)', (done) => {
+        return admin_session
+            .put('/activity')
+            .send({
+                title: title,
+                sub_title: changed_sub_title,
+                bullet_color_num: 3,
+                bullet_colors: [ 'red', 'yellow', 'white' ],
             })
             .then(res => {
                 setTimeout(() => {
@@ -243,11 +218,78 @@ describe('POST /activity and PUT /activity', () => {
                 sub_title: sub_title,
                 bullet_color_num: 3,
                 bullet_colors: [ 'red', 'yellow', 'white' ],
-                bg_img_url: 'some.url',
+                bg_img_url: '/images/temp/list.png',
             })
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
+            });
+    });
+});
+
+describe('GET /activity/:wrong_activity_id and GET /activity/detail', () => {
+    test('It should redirect to /activity/detail', (done) => {
+        return admin_session
+            .get('/activity/' + wrong_activity_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+
+    test('It should fail to return activity information with the activity id', (done) => {
+        return admin_session
+            .get('/activity/detail')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(204);
+                    done();
+                }, 500);
+            });
+    });
+});
+
+describe('GET /activity/:activity_id and GET /activity/detail', () => {
+    beforeAll(done => {
+        models.Activity.findOne({ title: title })
+            .then(act => { activity_id = act._id; done(); });
+    });
+
+    test('It needs login to get activity detail', (done) => {
+        return request(app)
+            .get('/activity/' + activity_id)
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should redirect to /activity/detail', (done) => {
+        return admin_session
+            .get('/activity/' + activity_id)
+            .then(res => {
+                expect(res.statusCode).toBe(302);
+                done();
+            });
+    });
+
+    test('It needs login to get activity information with the activity id', (done) => {
+        return request(app)
+            .get('/activity/detail')
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
+    });
+
+    test('It should get activity information with the activity id', (done) => {
+        return admin_session
+            .get('/activity/detail')
+            .then(res => {
+                setTimeout(() => {
+                    expect(res.statusCode).toBe(200);
+                    done();
+                }, 500);
             });
     });
 });
@@ -340,17 +382,42 @@ describe('POST /activity/upload/bg', () => {
     });
 });
 
-describe('POST /activity/:activity_id/finish', () => {
-    let activitiy_id_to_finish;
-
-    beforeAll(done => {
-        models.Activity.findOne({ title: title })
-            .then(act => { activity_id_to_finish = act._id; done(); });
+describe('POST /activity/review_flag', () => {
+    test('It needs login to turn on or off the review_flag', (done) => {
+        return request(app)
+            .put('/activity/review_flag')
+            .send({ review_flag: true })
+            .then(res => {
+                expect(res.statusCode).toBe(401);
+                done();
+            });
     });
 
+    test('It should set the review_flag to true', (done) => {
+        return admin_session
+            .put('/activity/review_flag')
+            .send({ review_flag: true })
+            .then(res => {
+                expect(res.statusCode).toBe(200);
+                done();
+            });
+    });
+
+    test('It should fail to set the review_flag with wrong data type', (done) => {
+        return admin_session
+            .put('/activity/review_flag')
+            .send({ review_flag: 100 })
+            .then(res => {
+                expect(res.statusCode).toBe(500);
+                done();
+            });
+    });
+});
+
+describe('POST /activity/:activity_id/finish', () => {
     test('It needs login to finish and destroy the Activity', (done) => {
         return request(app)
-            .post('/activity/' + activity_id_to_finish + '/finish')
+            .post('/activity/' + activity_id + '/finish')
             .then(res => {
                 expect(res.statusCode).toBe(401);
                 done();
@@ -359,7 +426,7 @@ describe('POST /activity/:activity_id/finish', () => {
 
     test('It should finish and destroy the Activity', (done) => {
         return admin_session
-            .post('/activity/' + activity_id_to_finish + '/finish')
+            .post('/activity/' + activity_id + '/finish')
             .then(res => {
                 setTimeout(() => {
                     expect(res.statusCode).toBe(200);
@@ -367,9 +434,12 @@ describe('POST /activity/:activity_id/finish', () => {
                 }, 500);
             });
     });
+});
 
-    afterAll(() => {
-        models.Activity.deleteOne({ title: title })
-            .then(() => {});
+afterAll(() => {
+    models.Activity.deleteOne({ title: title })
+        .then(() => {});
+    app.get('redis').flushdb(() => {
+        console.log('flush redis');
     });
 });

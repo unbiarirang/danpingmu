@@ -37,7 +37,7 @@ block script
         console.log(activities);
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
-          $('#tr' + cnt).append($("<td>").text(cnt));
+          $('#tr' + cnt).append($("<td style='width:5%'>").text(cnt));
           if(act.status == 'OVER')  
             $('#tr' + cnt).append("<td>" + act.title + "</td>");
           else

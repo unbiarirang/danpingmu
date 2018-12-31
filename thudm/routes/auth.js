@@ -34,8 +34,6 @@ router.post('/login', (req, res, next) => {
                 // Login succeed, Creaste a new admin session
                 req.session.login = true;
                 req.session.admin_id = input_id;
-                //let sendData = { login: true };
-                //res.send(sendData);
                 res.redirect("/activity/list");
             });
         })
@@ -85,10 +83,6 @@ router.post('/signup', (req, res, next) => {
 router.post('/logout', (req, res, next) => {
     req.session.destroy();
     res.render('login', { login: false });
-});
-
-router.get('/find', (req, res, next) => {
-    res.send('/auth/find => render find id/password page');
 });
 
 module.exports = router;

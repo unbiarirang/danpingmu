@@ -11,7 +11,6 @@ router.post('/', (req, res, next) => {
     console.log(req.query, req.params, req.body);
 
     let msg_type = utils.get_wechat_input(req, 'msgtype');
-    let tmp_generated_id;
     switch (msg_type) {
         // User sent a text message
         case 'text':
@@ -23,8 +22,9 @@ router.post('/', (req, res, next) => {
                     let activity_id = user_info.activity_id;
 
                     // User not belong to any activityactivity_id;
-                    // if (!activity_id) return;
-                    if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72';// FIXME: for test
+                    //if (!activity_id) return;
+                    if (!activity_id)
+                        activity_id = '5c26319728467974c7186ff7';
                     let room = utils.get_room_info(req, activity_id);
                     let content = utils.get_wechat_input(req, 'content');
                     content = utils.filter_content(content);
@@ -35,10 +35,12 @@ router.post('/', (req, res, next) => {
                         || content === '[Unsupported Message]')
                         return;
 
+                    let review_flag = room.activity.review_flag;
+
                     let msg_obj = {
                         "activity_id": activity_id,
                         "open_id": open_id,
-                        "id": room.gen_id(req.app.get('redis')),
+                        "id": review_flag ? room.gen_id(req.app.get('redis')) : 0,
                         "type": "text",
                         "content": content,
                         "nickname": user_info.nickname,
@@ -46,11 +48,9 @@ router.post('/', (req, res, next) => {
                         "review_flag": false
                     };
 
-                    let review_flag = room.activity.review_flag;
-
                     // Display the message directly on the screen
                     if (!review_flag)
-                        return socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
+                        return socketApi.displayMessage(activity_id, msg_obj);
 
                     // Store the message in the redis for review
                     let rsmq = req.app.get('rsmq');
@@ -60,6 +60,10 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
+                        })
+                        .catch(err => {
+                            rsmq.createQueue({ qname: activity_id })
+                                .then(() => { console.log("QUEUE created"); });
                         });
                 })
                 .catch(err => {
@@ -77,24 +81,23 @@ router.post('/', (req, res, next) => {
             utils.get_user_info(req)
                 .then(user_info => {
                     activity_id = user_info.activity_id;
-                    // if (!activity_id) return;
-                    if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
+                    if (!activity_id) return;
 
                     let room = utils.get_room_info(req, activity_id);
                     review_flag = room.activity.review_flag;
                     pic_url = utils.get_wechat_input(req, 'picurl');
                     msg_id = utils.get_wechat_input(req, 'msgid');
+
                     let msg_obj = {
                         "activity_id": activity_id,
                         "open_id": user_info.open_id,
-                        "id": room.gen_id(req.app.get('redis')),
+                        "id": review_flag ? room.gen_id(req.app.get('redis')) : 0,
                         "type": "image",
                         "content": msg_id, // Save image as the msg_id
                         "nickname": user_info.nickname,
                         "head_img_url": user_info.head_img_url,
                         "review_flag": false
                     };
-                    console.log('Send to room', activity_id);
                     return msg_obj;
                 })
                 .then(msg_obj => {
@@ -106,7 +109,7 @@ router.post('/', (req, res, next) => {
                 .then(msg_obj => {
                     // Display the message directly on the screen
                     if (!review_flag)
-                        return socketApi.displayMessage(activity_id, JSON.stringify(msg_obj));
+                        return socketApi.displayMessage(activity_id, msg_obj);
 
                     let rsmq = req.app.get('rsmq');
                     return rsmq.sendMessage({
@@ -115,6 +118,10 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
+                        })
+                        .catch(err => {
+                            rsmq.createQueue({ qname: activity_id })
+                                .then(() => { console.log("QUEUE created"); });
                         });
                 })
                 .then(() => {
@@ -147,7 +154,6 @@ router.post('/', (req, res, next) => {
                         res.send(xml);
                     });
             }
-            // FIXME: case of just subscribe activity_id=undefined
             else if (event === 'subscribe') {
                 let activity_id = event_key.split('_')[1];
                 utils.update_user_info(req, { activity_id: activity_id });
@@ -170,9 +176,8 @@ router.post('/', (req, res, next) => {
                             .then(user_info => {
                                 open_id = user_info.open_id;
                                 let activity_id = user_info.activity_id;
-                                //if (!activity_id) return res.send("");
+                                if (!activity_id) return res.send("");
 
-                                if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                                 let room = utils.get_room_info(req, activity_id);
                                 return utils.get_vote_info(room);
                             })
@@ -204,9 +209,8 @@ router.post('/', (req, res, next) => {
                             })
                             .then(user_info => {
                                 let activity_id = user_info.activity_id;
-                                //if (!activity_id) return res.send("");
+                                if (!activity_id) return res.send("");
 
-                                if (!activity_id) activity_id = '5bfaca2ac045082acf9c5a72' // FIXME: for test
                                 let room = utils.get_room_info(req, activity_id);
                                 data.media_id = room.activity.list_media_id;
 

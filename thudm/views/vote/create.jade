@@ -33,7 +33,7 @@ block contents
                   .image
                   .content
                     .author
-                      img.avatar.border-gray(id='sample' src='/images/temp/face-0.jpg', alt='...')
+                      img.avatar.border-gray(id='sample' src='/images/anonymous.jpg', alt='...')
                     .row
                       .col-md-9
                         .form-group
@@ -85,29 +85,45 @@ block script
         $('#' + CandyNum).append('<div class = Name id=name' + CandyNum + '>' + Name + '</div>');
  
         $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
+        var formData = new FormData($('#upload')[0]);
+        console.log(formData);
+        $.ajax({
+          url: '/vote/upload/candidate?id=' + NumberAdded,
+          type: 'post',
+          data: formData,
+          contentType: false,
+          processData: false,
+          async: false,
+          success:function(data){
+            console.log(data);
+            $('#sample').attr('src', data);
+            NumberAdded++;
+          },
+          error:{
+          }
+        });
         CandyNum++;
       });
       $(document).on('click','.DeleteCandy',function(){
         $('#' + this.id).remove();
       });
       $('#candidate_image').on('change',function(){
-         var formData = new FormData($('#upload')[0]);
-         console.log(formData);
-         $.ajax({
-           url: '/vote/upload/candidate?id=' + NumberAdded,
-           type: 'post',
-           data: formData,
-           contentType: false,
-           processData: false,
-           async: false,
-           success:function(data){
-             console.log(data);
-             $('#sample').attr('src', data);
-             NumberAdded++;
-           },
-           error:{
-           }
-         });
+        var formData = new FormData($('#upload')[0]);
+        console.log(formData);
+        $.ajax({
+          url: '/vote/upload/candidate?id=' + NumberAdded,
+          type: 'post',
+          data: formData,
+          contentType: false,
+          processData: false,
+          async: false,
+          success:function(data){
+            console.log(data);
+            $('#sample').attr('src', data);
+          },
+          error:{
+          }
+        });
       });
       $(document).on('click','#create',function(){
         var title = $('#title').val();
@@ -115,9 +131,18 @@ block script
         var list = new Array();
         var pic_urls = new Array();
         var option_num;
+        if(title.length == "" || subtitle.length == ""){
+          alert('输入串不能有空');
+          return;
+        }
+          
         $('.Candidates').each(function(){
+          var img_path = $('#pic' + this.id).css('background-image');
           list.push($('#name' + this.id).text());
-          pic_urls.push($('#pic' + this.id).css('background-image'));
+          img_path = img_path.slice(img_path.indexOf('/images'));
+          img_path = img_path.substr(0, img_path.length - 2);
+          console.log(img_path);
+          pic_urls.push(img_path);
         });
         option_num = list.length;
         list = JSON.stringify(list);

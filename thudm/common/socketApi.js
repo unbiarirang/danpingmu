@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 
 socketApi.displayMessage = (activity_id, data) => {
     console.log('msg: ', data);
-    io.sockets.in(activity_id).emit('danmu', { data: data });
+    io.sockets.in(activity_id).emit('danmu', { 'data': data });
 };
 
 module.exports = socketApi;

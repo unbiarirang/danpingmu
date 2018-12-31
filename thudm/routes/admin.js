@@ -20,8 +20,7 @@ router.use('/vote', vote_router);
 router.use('/lottery', lottery_router);
 
 router.get('/', (req, res, next) => {
-    console.log(req.session.id);
-    return res.render('index',{id: req.session});
+    return res.render('index', { id: req.session });
 });
 
 router.get('/screen', (req, res, next) => {
@@ -58,6 +57,7 @@ router.get('/msglist', (req, res, next) => {
 router.get('/msglist/page/:page_id', (req, res, next) => {
     if (!req.session.login)
         throw new errors.NotLoggedInError();
+
     let rsmq = req.app.get('rsmq');
     let activity_id = req.session.activity_id;
     let page_id = req.params.page_id;
@@ -168,8 +168,10 @@ router.get('/msglist/page/:page_id', (req, res, next) => {
             sendData.msg_list = msg_list;
             sendData.msg_total_num = totalsent;
             sendData.activity_id = activity_id;
+            sendData.review_flag =
+                utils.get_room_info(req, activity_id).activity.review_flag;
 
-            res.render('msglist', { items: sendData});
+            res.render('msglist', { items: sendData });
         })
         .catch(err => {
             console.log(err);
@@ -197,12 +199,16 @@ router.put('/blacklist', (req, res, next) => {
 
     let activity_id = req.session.activity_id;
     let blocked_id = req.body.blocked_id;
+    try { blocked_id = JSON.parse(blocked_id); }
+    catch(e) {}
+    let blocked_open_id = blocked_id ? blocked_id.open_id : '';
+    let blocked_nickname = blocked_id ? blocked_id.nickname: '';
     let blocked_word = req.body.blocked_word;
 
     let room = utils.get_room_info(req, activity_id);
-
+    
     if (blocked_id)
-        room.activity.blacklist_user.push(blocked_id);
+        room.activity.blacklist_user.push([blocked_open_id, blocked_nickname].toString());
     if (blocked_word)
         room.activity.blacklist_word.push(blocked_word);
 
@@ -229,12 +235,13 @@ router.delete('/blacklist', (req, res, next) => {
 
     let room = utils.get_room_info(req, activity_id);
 
-    let blacklist_user = room.activity.blacklist_user;
+    let blacklist_user =
+        room.activity.blacklist_user.map(e => { return e.slice(0, e.indexOf(',')); });
     let blacklist_word = room.activity.blacklist_word;
 
     let index = blacklist_user.indexOf(blocked_id);
     if (index >= 0)
-        blacklist_user.splice(index, 1);
+        room.activity.blacklist_user.splice(index, 1);
     index = blacklist_word.indexOf(blocked_word);
     if (index >= 0)
         blacklist_word.splice(index, 1);
