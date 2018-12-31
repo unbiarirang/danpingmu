@@ -60,6 +60,10 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
+                        })
+                        .catch(err => {
+                            rsmq.createQueue({ qname: activity_id })
+                                .then(() => { console.log("QUEUE created"); });
                         });
                 })
                 .catch(err => {
@@ -114,6 +118,10 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
+                        })
+                        .catch(err => {
+                            rsmq.createQueue({ qname: activity_id })
+                                .then(() => { console.log("QUEUE created"); });
                         });
                 })
                 .then(() => {
