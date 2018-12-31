@@ -439,7 +439,7 @@ describe('POST /activity/:activity_id/finish', () => {
 afterAll(() => {
     models.Activity.deleteOne({ title: title })
         .then(() => {});
-    app.get('redis').flushall(() => {
-        console.log('flushall redis');
+    app.get('redis').flushdb(() => {
+        console.log('flush redis');
     });
 });
