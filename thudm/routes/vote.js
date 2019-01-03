@@ -108,8 +108,7 @@ router.get('/:vote_id/user', (req, res, next) => {
 // User vote for one option
 router.post('/:vote_id/votefor/:option_id', (req, res, next) => {
     const redis = req.app.get('redis');
-    const open_id = req.query.open_id; // FIXME: front should send open_id query string
-    //const open_id = 'o9T2M1c89iwXQ4RG7pdEOzfa55sc';
+    const open_id = req.query.open_id;
     const vote_id = req.params.vote_id;
     const option_id = req.params.option_id;
 
