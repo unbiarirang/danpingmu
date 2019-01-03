@@ -21,11 +21,8 @@ html()
       var users = information.users;
       var result = information.result;
       var socket = io();
-      console.log(information);
       var runningtime = information.duration;
       users = JSON.parse(users);
-      console.log('users', runningtime);
-      console.log('result', result[0]);
       for(var i = 0;i < users.length; i++){
         info.push(JSON.stringify(users[i][1]));
         //var temp = JSON.parse(info[i]).head_img_url;
@@ -42,7 +39,6 @@ html()
       var timerun = 0;
       var interval = setInterval(function(){
         timerun++;
-        console.log(timerun, runningtime);
         if(timerun == runningtime){
           $('div.tagBall').remove();
           for(var i = 0; i < result.length; i++){
@@ -68,7 +64,6 @@ html()
       },1000);
       var data = {'activity_id': JSON.parse(info[0]).activity_id};
       socket.emit('joinActivity', data);
-      console.log(JSON.parse(info[0]).activity_id);
       socket.on('quitLottery', function(data){
           window.location = '/screen';
       });

@@ -9,7 +9,6 @@ html
       var winner = new Array;
       var socket = io();
       $(document).ready(function(){
-        console.log(candidate);
         var data = {'activity_id': candidate.activity_id};
         socket.emit('joinActivity', data);
         socket.on('quitVote', function(data){
@@ -17,7 +16,6 @@ html
         });
         candidate.options = JSON.parse(candidate.options);
         $('div.theme').text(candidate.title); 
-        console.log(candidate);
         for(var i = 0; i < candidate.options.length; i++){
           winner[i] = i;
           if(candidate.result == null){
@@ -28,18 +26,14 @@ html
             candidate.result[i] = "0";
           }
         }
-        console.log(candidate.result);
         for(var i = 0; i < candidate.options.length; i++)
           for(var j = i; j < candidate.options.length; j++){
-            console.log("i",candidate.result[winner[i]],"j",candidate.result[winner[j]]);
             if(parseInt(candidate.result[winner[i]],10) < parseInt(candidate.result[winner[j]],10)){
               var temp = winner[i];
               winner[i] = winner[j];
               winner[j] = temp;
             }
-            console.log(winner);
           }
-         console.log(winner);
          for(var i = 0;i < candidate.options.length; i++){
            var path = candidate.pic_urls[i];
            $('#pic' + (i + 1)).attr('src', path);

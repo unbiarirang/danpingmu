@@ -47,7 +47,6 @@ block script
     var now_page = parseInt((current - 1) / 5);
     var onoff = 1;
     $(document).ready(function(){
-      console.log(information);
       $('#M' + $('.content').attr('id')).attr('class','active');
       page_num = parseInt(msg_total_num / 15);
       page_list = page_num / 5;
@@ -63,7 +62,6 @@ block script
         cnt_limit++;
       }
 
-      console.log($('#auditsw').attr('checked'));
       $('#P' + current).css('color','black');
       if(information.review_flag == false){
         $('#auditsw').bootstrapToggle('off');
@@ -75,7 +73,6 @@ block script
     $(document).on('change','#auditsw',function(){
        if(onoff == 1){
          onoff = 0;
-         console.log('ha');
          $('#msgtable').css('display','none');
          $('#multipass').css('display','none');
          $('.page').css('display','none');
@@ -149,7 +146,6 @@ block script
            nickname: msg.nickname
           };
           data = JSON.stringify(data);
-          console.log(data);
           $.ajax({
             type: "PUT",
             data: {"blocked_id": data,"blocked_word": msg.content},
@@ -157,7 +153,6 @@ block script
             url: "/blacklist",
             success: function(data){
               alert("拉入成功！");
-              console.log(data);
             },
             error: function(data){
             }
@@ -168,8 +163,6 @@ block script
     $(function() {
       var data = {'activity_id': activity_id};
       socket.emit('joinActivity', data);
-      console.log('activity_id: ', activity_id);
-      console.log('msg_list: ', msg_list);
   
       msg_list.forEach((msg) => {
          if(msg == null)
@@ -195,17 +188,14 @@ block script
      });
   
       socket.on('review', function(data) {
-        console.log('on review: ', data);
         msg_obj = JSON.parse(data.msg);
         $("#messages").append($('<li>').text(msg_obj.content));
         socket.emit('passReview', data);
       });
     });
     $(document).on('click','.pass',function(){
-        console.log(this.id);
         var getid = this.id;
         if(getid > 15){
-           console.log(getid)
            msg_list.forEach((msg) =>{
              if(msg != null)
               if(getid == msg.id)
@@ -247,9 +237,7 @@ block script
     $(document).on('click','.totalpass',function(){
       $('.check').each(function(){
         if(this.checked == 1 && this.id != 'all'){ 
-          console.log('id',this.id);
           var getid = this.id.substr(5);
-          console.log('getid',getid);
           if(getid > 15){
             msg_list[getid % 16].review_flag = true;
             socket.emit('passReview', msg_list[getid % 16]);

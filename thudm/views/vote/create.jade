@@ -77,7 +77,6 @@ block script
         }
           
         Profile = $('#sample').attr('src');
-        console.log(Profile);
  
         $('#CandyArray0').append('<div class = Candidates id = '+ CandyNum +'></div>');
         $('#' + CandyNum).append('<div class = Profile id = pic' + CandyNum + '></div>');
@@ -86,7 +85,6 @@ block script
  
         $('#' + CandyNum).append('<a href = "javascript:;" class = DeleteCandy id = ' + CandyNum + '><span class="glyphicon glyphicon-remove" style="color: red;"></span>');
         var formData = new FormData($('#upload')[0]);
-        console.log(formData);
         $.ajax({
           url: '/vote/upload/candidate?id=' + NumberAdded,
           type: 'post',
@@ -95,7 +93,6 @@ block script
           processData: false,
           async: false,
           success:function(data){
-            console.log(data);
             $('#sample').attr('src', data);
             NumberAdded++;
           },
@@ -109,7 +106,6 @@ block script
       });
       $('#candidate_image').on('change',function(){
         var formData = new FormData($('#upload')[0]);
-        console.log(formData);
         $.ajax({
           url: '/vote/upload/candidate?id=' + NumberAdded,
           type: 'post',
@@ -118,7 +114,6 @@ block script
           processData: false,
           async: false,
           success:function(data){
-            console.log(data);
             $('#sample').attr('src', data);
           },
           error:{
@@ -141,7 +136,6 @@ block script
           list.push($('#name' + this.id).text());
           img_path = img_path.slice(img_path.indexOf('/images'));
           img_path = img_path.substr(0, img_path.length - 2);
-          console.log(img_path);
           pic_urls.push(img_path);
         });
         option_num = list.length;

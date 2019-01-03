@@ -13,7 +13,6 @@ html(xmlns='http://www.w3.org/1999/xhtml')
     link(rel='stylesheet', type='text/css', href='js/fancybox/jquery.fancybox-1.3.4.css', media='screen')
     script.
       var id = !{id !=null? JSON.stringify(id):'null'};
-      console.log(id);
       $(document).ready(function() {
         $("a#fancybox").fancybox();
         if(id.login == true){
@@ -23,7 +22,6 @@ html(xmlns='http://www.w3.org/1999/xhtml')
         }
         $('#log').click(function(){
           if(id.login == true){
-            console.log('ha');
             $.ajax({
               url: '/auth/logout',
               type: 'post',

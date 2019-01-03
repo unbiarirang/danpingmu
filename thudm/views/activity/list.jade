@@ -78,7 +78,6 @@ html
      var activities = !{items != null? JSON.stringify(items): 'null'}; 
      $(document).ready(function(){
         var cnt = 0;
-        console.log(activities);
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + (cnt + 1) + "></tr>");
           $('#tr' + cnt).append($("<td style='width:5%;'>").text(cnt));
@@ -95,7 +94,6 @@ html
             $('#tr' + cnt).append("<td id=notice" + cnt + ">活动已结束</td>");
             $('#notice' + cnt).css({'color':'red'});
           }
-          console.log(act._id);
           if(act.status == 'OVER')
               $('#td' + cnt).css({'color':'red'});
           else
@@ -119,7 +117,6 @@ html
         })
       })
       $(document).on('click','.finish',function(){
-        console.log(activities[this.id]._id);
         $.ajax({
           url: '/activity/' + activities[this.id]._id + '/finish',
           type: 'post',
