@@ -317,7 +317,6 @@ describe('GET /lottery/:lottery_id/result', () => {
             .set('Accept', 'application/json')
             .then(res => {
                 setTimeout(() => {
-                    console.log('@@@@@', res.text);
                     expect(res.text).toMatch('{"duration":20,"status":"OVER","result":[{"open_id":"o9T2M1c89iwXQ4RG7pdEOzfa55sc"}],"_id":"5c18e4841b2ff83af2c56309","activity_id":"5c03ba2fec64483fe182a7d2","title":"draw 1","sub_title":"changed sub title","winner_num":3');
                     expect(res.statusCode).toBe(200);
                     done();

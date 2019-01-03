@@ -574,7 +574,7 @@ describe('POST /vote/:vote_id/finish', () => {
 afterAll(() => {
     models.Vote.deleteMany({ title: title })
         .then(() => {});
-    app.get('redis').flushall(() => {
-        console.log('flushall redis');
+    app.get('redis').flushdb(() => {
+        console.log('flush redis');
     });
 });

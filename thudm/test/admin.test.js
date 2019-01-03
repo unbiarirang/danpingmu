@@ -425,7 +425,7 @@ describe('GET /ticket', () => {
 afterAll(() => {
     models.Activity.deleteMany({ title: title })
         .then(() => {});
-    app.get('redis').flushall(() => {
-        console.log('flushall redis');
+    app.get('redis').flushdb(() => {
+        console.log('flush redis');
     });
 });

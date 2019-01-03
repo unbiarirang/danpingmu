@@ -21,10 +21,9 @@ router.post('/', (req, res, next) => {
                 .then(user_info => {
                     let activity_id = user_info.activity_id;
 
-                    // User not belong to any activityactivity_id;
-                    //if (!activity_id) return;
-                    if (!activity_id)
-                        activity_id = '5c26319728467974c7186ff7';
+                    // User not belong to any activity
+                    if (!activity_id) return;
+
                     let room = utils.get_room_info(req, activity_id);
                     let content = utils.get_wechat_input(req, 'content');
                     content = utils.filter_content(content);
@@ -60,10 +59,6 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
-                        })
-                        .catch(err => {
-                            rsmq.createQueue({ qname: activity_id })
-                                .then(() => { console.log("QUEUE created"); });
                         });
                 })
                 .catch(err => {
@@ -118,10 +113,6 @@ router.post('/', (req, res, next) => {
                         })
                         .then(data => {
                             console.log("RSMQ data sent", data);
-                        })
-                        .catch(err => {
-                            rsmq.createQueue({ qname: activity_id })
-                                .then(() => { console.log("QUEUE created"); });
                         });
                 })
                 .then(() => {

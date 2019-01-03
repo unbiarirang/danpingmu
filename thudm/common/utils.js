@@ -243,7 +243,7 @@ const _get_user_info = (req) => {
 const get_user_info = (req) => {
     let user_info = _get_user_info(req);
     console.log('get_user_info');
-    // FIXME: temp
+    // dummy user info
     //return Promise.resolve({ nickname: 'tempnickname', head_img_url: 'headimgurl' });
     if (user_info.nickname === undefined || user_info.head_img_url === undefined)
         return request_user_info(req).then(get_user_info);
@@ -433,11 +433,9 @@ const upload_list_image = (req, file_path) => {
                     if (JSON.parse(res).errcode)
                         return reject(new errors.WeChatResError(JSON.parse(res).errmsg));
 
-                    console.log('@@@@@@res:', res);
                     let activity_id = req.session.activity_id;
                     let room = get_room_info(req, activity_id);
                     room.activity.list_media_id = JSON.parse(res).media_id;
-                    console.log('@@@@@@room:', room);
                     resolve(room.activity.save());
                 });
             })
@@ -451,7 +449,6 @@ exports.upload_list_image = upload_list_image;
 const delete_list_image = (req, media_id) => {
     return get_access_token(req)
         .then(access_token => {
-            console.log('@@@@@media_id: ', media_id);
             let options = {
                 method: 'POST',
                 uri: 'https://api.weixin.qq.com/cgi-bin/material/del_material',
@@ -468,7 +465,7 @@ const delete_list_image = (req, media_id) => {
                     if (res && res.errcode)
                         throw new errors.WeChatResError(res.errmsg);
 
-                    console.log('@@@@@@@delete list image completed');
+                    console.log('delete list image completed');
                 })
                 .catch(err => {
                     console.error(err);

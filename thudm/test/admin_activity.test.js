@@ -294,7 +294,7 @@ describe('GET /activity/:activity_id and GET /activity/detail', () => {
     });
 });
 
-describe.skip('POST /activity/upload/list', () => {
+describe('POST /activity/upload/list', () => {
     const src_path = 'public/images/list.png'; // dummy image
     const dest_path = consts.STORE_IMG_PATH
                       + '/' + admin_id + '_list.png';
@@ -439,7 +439,7 @@ describe('POST /activity/:activity_id/finish', () => {
 afterAll(() => {
     models.Activity.deleteOne({ title: title })
         .then(() => {});
-    app.get('redis').flushall(() => {
-        console.log('flushall redis');
+    app.get('redis').flushdb(() => {
+        console.log('flush redis');
     });
 });
