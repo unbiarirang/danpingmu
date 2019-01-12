@@ -12,10 +12,6 @@ html(lang="zh-CN")
           var _id = !{_id != null? JSON.stringify(_id): 'null'};
           options = JSON.parse(options);
           //pic_urls = JSON.parse(pic_urls);
-          console.log("options = ",options);
-          console.log("pic_urls = ",pic_urls);
-          console.log("title = ",title); 
-          console.log("vote_id = ", _id);
 
           $(document).ready(function(){
               var op_num = options.length;
@@ -27,7 +23,6 @@ html(lang="zh-CN")
                   for(var i = 0; i < line_num; i++){
                     $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
-                    console.log("ha");
                     candy_num++;
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
                     candy_num++;
@@ -35,7 +30,6 @@ html(lang="zh-CN")
               }
               else {
                   line_num = (op_num + 1) / 2;
-                  console.log(line_num);
                   for(var i = 0; i < line_num; i++){
                     $('div.total').append("<div class = 'line' id = line" + i + '>'+ '</div>');
                     $('#line' + i).append("<div class = 'candidate' id = candy" + candy_num + '>' + '</div>');
@@ -44,7 +38,6 @@ html(lang="zh-CN")
                     candy_num++;
                   }
               }
-             console.log(line_num - 1);
              $('#line' + (line_num - 1)).append('<input type = button action = vote class = voteit value = Vote>');
              for(var id = 0; id < op_num; id++){
                  $('#candy' + id).append("<div class = form  id = form" + id + '></div>');
@@ -65,7 +58,6 @@ html(lang="zh-CN")
                    $("#radio" + i).attr("checked",false);
                  }
                  else{
-                   console.log($(this).attr('id'),i);
                    $("#radio" + i).attr("checked",true);
                  }
                }
@@ -76,14 +68,12 @@ html(lang="zh-CN")
                for(var i = 0; i < $("input.cb").length; i++){
                  if($("#radio" + i).attr('checked') == true){
                     flag = 1;
-                    console.log("vote id = ",i);
                     $.ajax({
                       type:"POST",
                       data:{"vote": i},
                       datatype:"text",
                       url:"/vote/"+ _id +"/votefor/" + i + openid,
                       success: function(data){
-                        console.log('data:', data);
                         window.location = "/vote_warning.html";
                       },
                       error: function(e){

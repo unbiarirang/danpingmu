@@ -108,7 +108,6 @@ block script
         $('#M' + $('.content').attr('id')).attr('class','active');
         $('#bg').css('background-image','url(' + information.bg_img_url + ')');
         var colorlist = JSON.parse(information.bullet_colors);
-        console.log(information);
         colorlist.forEach((color) =>{ 
           $('.SetColor').each(function(){
              if($(this).css('background-color') == color){
@@ -133,7 +132,6 @@ block script
               contentType: false,
               processData: false,
               success: function(data){
-                 console.log(data);
                  $(document).ready(function(){
                    $.notify({
             	       icon: 'pe-7s-smile',
@@ -198,7 +196,6 @@ block script
               contentType: false,
               processData: false,
               success: function(data){
-                 console.log(data);
                  $(document).ready(function(){
                    $.notify({
             	       icon: 'pe-7s-smile',

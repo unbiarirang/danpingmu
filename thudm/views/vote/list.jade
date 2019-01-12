@@ -34,7 +34,6 @@ block script
      var socket = io();
      $(document).ready(function(){
         var cnt = 0;
-        console.log(activities);
         $('#M' + $('.content').attr('id')).attr('class','active');
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
@@ -51,7 +50,6 @@ block script
             $('#tr' + cnt).append('<td id = btn' + cnt + " style='padding:5px'><button class='display btn btn-info btn-fill' id=dis" + cnt + ">显示结果</button>&nbsp&nbsp&nbsp<button class='stop btn btn-danger btn-fill' id=" + cnt + '>结束</button></td>'); 
           else if (act.status == 'OVER')
             $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='result btn btn-info btn-fill' id=" + cnt + ">查看结果</button></td>");
-          console.log(act._id);
           if(act.status == 'ONGOING')
               $('#td' + cnt).css({'color':'green'});
           else if(act.status == 'READY')
@@ -83,7 +81,6 @@ block script
          $('#btn' + getid).empty();
          $('#btn' + getid).append('<td id = btn' + getid + "><button class='back btn btn-warning btn-fill' id=" + getid + ">返回</button></td>");
          activities[getid].type = 'vote';
-         console.log(activities[getid]);
          socket.emit('displayVote', activities[getid]); 
       });
       $(document).on('click', '.back',function(){

@@ -34,7 +34,6 @@ block script
      var socket = io();
      $(document).ready(function(){
         var cnt = 0;
-        console.log(activities);
         activities.forEach((act) =>{
           $('tbody').append("<tr id=tr" + cnt + "></tr>");
           $('#tr' + cnt).append($("<td style='width:5%'>").text(cnt));
@@ -44,7 +43,6 @@ block script
             $('#tr' + cnt).append("<td id=linktd" + cnt +  "><a href=" + act._id + " id = link" + cnt + " class=lottery_title >" + act.title + "</a></td>");
           $('#tr' + cnt).append($("<td>").text(act.sub_title));
           $('#tr' + cnt).append($("<td id = td" + cnt + '>').text(act.status));
-          console.log(act._id);
           if(act.status == 'OVER'){
               $('#td' + cnt).css({'color':'red'});
               $('#tr' + cnt).append("<td id = btn" + cnt + " style='padding:5px'><button class='result btn btn-info btn-fill' id=" + cnt + '>查看结果</button></td>');
@@ -67,7 +65,6 @@ block script
       $(document).on('click','.start',function(){
           $('#btn' + this.id).remove();
           $('#tr' + this.id).append("<td id = btn" + this.id + " ><button class='back btn btn-warning btn-fill' id=" + this.id + '>返回</button></td>')
-          console.log('ha');
           activities[this.id].type = 'lottery';
           socket.emit('drawWinner', activities[this.id]); 
       });

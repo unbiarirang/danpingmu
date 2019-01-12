@@ -74,11 +74,9 @@ block script
           $("#trW" + cntW).append("<td><button class='deleteW btn btn-danger btn-fill' style='float:right' id = W" + cntW + ">删除</button></td>");
           cntW++;
         })
-        console.log(wordlist);
       });
       $(document).on('click','#addword',function(){
         var word = $('#word').val();
-        console.log(word);
         if(word == ""){
           alert("过滤词不能为空！");
           return;
@@ -126,9 +124,7 @@ block script
           $('.checkU').each(function(){
             var getid = this.id.substr(1);
             if(this.checked == 1){
-               console.log(getid);
                var userid = userlist[getid].slice(0,userlist[getid].indexOf(','));
-               console.log(userlist);
                $.ajax({
                  type:"DELETE",
                  data:{'blocked_id':userid},
@@ -145,10 +141,7 @@ block script
         }
         else{
           var getid = this.id.substr(1);
-          console.log(getid);
-          console.log(userlist[getid]);
           var userid = userlist[getid].slice(0,userlist[getid].indexOf(','));
-          console.log(userid);
           
           $.ajax({
             type:"DELETE",
@@ -168,9 +161,7 @@ block script
           $('.checkW').each(function(){
             var getid = this.id;
             if(this.checked == 1){
-               console.log(getid);
                var wordcontent = $('#word' + getid).text();
-               console.log(wordcontent);
                $.ajax({
                  type:"DELETE",
                  data:{'blocked_word':wordcontent},
@@ -187,9 +178,7 @@ block script
         }
         else{
           var getid = this.id;
-          console.log(getid);
           var wordcontent = $('#word' + getid).text();
-          console.log(wordcontent);
           $.ajax({
             type:"DELETE",
             data:{'blocked_word':wordcontent},
