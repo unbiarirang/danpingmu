@@ -6,6 +6,8 @@ This is a screen, voting, sweepstakes, Interactive and other functions as one of
 Manager will be allowed to create an activity with the background image and color of comment which he likes.
 Audiences should scan the QRCODE to enter the activity, and send what want to say or some pictures. If the comment is approved,
 it will be displayed on the screen.
+![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/3.png)
+![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/1.png)
 
 ### 2.Lottery
 Manager will be allowed to create a lottery, he should set the number of winner and the time of lottery effect.
@@ -23,5 +25,4 @@ Manager will be allowed to add the audience to blacklist that ignore the comment
 ### 6.Playlist
 Manager will be allowed to upload the playlist image that let audiences know the contents of activities.
 
-![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/create.jpg)
-![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/1.jpg)
+![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/2.png)
