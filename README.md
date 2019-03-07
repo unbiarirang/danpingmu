@@ -22,3 +22,6 @@ Manager will be allowed to add the audience to blacklist that ignore the comment
 
 ### 6.Playlist
 Manager will be allowed to upload the playlist image that let audiences know the contents of activities.
+
+![Image text](danpingmu/pic/1.jpg)
+![Image text](danpingmu/pic/create.jpg)
