@@ -1,28 +1,51 @@
-# Introduction of danpingmu
-This is a screen, voting, sweepstakes, Interactive and other functions as one of the student Day party program, by the THUDM team development and Maintenance. 
+# Danpingmu - 弹屏目 👀
 
-# Specific functions
-### 1.Screen 
-Manager will be allowed to create an activity with the background image and color of comment which he likes.
-Audiences should scan the QRCODE to enter the activity, and send what want to say or some pictures. If the comment is approved,
-it will be displayed on the screen.
+**Danpingmu** is an wechat program containing **live commenting** (弹幕), **voting** and **lottery** activity that drawing participation and interaction of participants as one part of student party, developed and maintenanced by THUDM team. 
+
+## Features
+
+#### 1. Live commenting
+
+The admin user of an activity is allowed to set up the background image and color of comments. Participants who scan the activity's QRCODE can join the activity and start to send comments or images through wechat chat window. If the comment is approved by the manager (both manual review mode and no review mode are provided) and contains no banned words, it will be displayed on the screen.
+
+**Additional options:**
+
+- Manual review
+- Auto filtering - blacklist and banned words
+
 ![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/3.png)
 ![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/1.png)
 
-### 2.Lottery
-Manager will be allowed to create a lottery, he should set the number of winner and the time of lottery effect.
-Audiences will take part in the lottery automatically, when they scan the QRCODE of activity.
+#### 2. Lottery
 
-### 3.Vote
-Manager will be allowed to create a vote, and audiences will be allowed to vote for what they like.
+The admin user is allowed to create a lottery activity, determining the number of winners and duration of the lottery effect with ease. Audiences will automatically take part in the lottery activity if they've scanned the QRCODE.
 
-### 4.Audit
-Manager will be allowed to audit the comments sended by audiences. Only the comments approved by manager will be displayed on the screen.
+#### 3. Voting
 
-### 5.Blacklist
-Manager will be allowed to add the audience to blacklist that ignore the comments sended by blacklist.
+The administrator is able to create and publish vote activities at any time.
 
-### 6.Playlist
-Manager will be allowed to upload the playlist image that let audiences know the contents of activities.
+#### 4. Program list
 
-![Image text](https://github.com/unbiarirang/danpingmu/blob/master/pic/2.jpg)
+A program list of the party could be uploaded and users can check it by pressing the menu button below.
+
+<p align="center">
+<img src="https://github.com/unbiarirang/danpingmu/blob/master/pic/2.jpg" width="300">
+</p>
+
+## Getting Started
+
+- Run the server
+
+```shell
+$ cd ./danpingmu/thudm
+$ npm install
+$ sudo ./bin/www
+```
+
+- Deployment 
+
+```shell
+$ sudo docker build -t danpingmu .
+$ sudo docker run -p 0000:80 -d danpingmu
+```
+
