@@ -1,0 +1,13 @@
+{
+    "WECHAT_APPID": "",
+    "WECHAT_APPSECRET": "",
+    "WECHAT_TOKEN": "",
+    "DB_NAME": "",
+    "DB_HOST": "",
+    "DB_PORT": 0,
+    "REDIS_HOST": "",
+    "REDIS_PORT": 0,
+    "REDIS_SECRET": "",
+    "SESSION_SECRET": ""
+}
+
