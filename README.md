@@ -1,6 +1,6 @@
 # Danpingmu - 弹屏目 👀
 
-**Danpingmu** is an wechat program containing **live commenting** (弹幕), **voting** and **lottery** activity that drawing participation and interaction of participants as one part of student party, developed and maintenanced by THUDM team. 
+**Danpingmu** is a wechat program containing **live commenting** (弹幕), **voting** and **lottery** activity that drawing participation and interaction of participants as one part of student party, developed and maintenanced by THUDM team. 
 
 ## Features
 
